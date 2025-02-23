@@ -13,8 +13,6 @@ export default function NavBar() {
   const { user, logoutMutation } = useAuth();
   const [, setLocation] = useLocation();
 
-  if (!user) return null;
-
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
       onSuccess: () => {
@@ -23,16 +21,16 @@ export default function NavBar() {
     });
   };
 
+  if (!user) return null;
+
   return (
     <nav className="border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
-            <Link href="/">
-              <a className="flex items-center px-2 text-xl font-bold">
-                USDT Exchange
-              </a>
-            </Link>
+            <div className="flex items-center px-2 text-xl font-bold">
+              <Link href="/">USDT Exchange</Link>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
@@ -57,7 +55,7 @@ export default function NavBar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {user.role === "admin" && (
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem>
                     <Link href="/admin">Admin Panel</Link>
                   </DropdownMenuItem>
                 )}
