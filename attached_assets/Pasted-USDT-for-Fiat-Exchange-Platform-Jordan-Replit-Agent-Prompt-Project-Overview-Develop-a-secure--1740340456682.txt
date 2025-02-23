@@ -1,0 +1,115 @@
+USDT-for-Fiat Exchange Platform (Jordan) – Replit Agent Prompt
+Project Overview
+Develop a secure, professional, and user-friendly USDT-for-fiat exchange platform tailored for Jordanian users. The platform must support email & Google login, enforce Jordanian mobile number verification (OTP) before trading, and facilitate manual payment verification via CliQ, eFAWATEERcom, and local wallets (Zain Cash, Orange Money, Dinarak). Additionally, a customer loyalty system will reward frequent users with discounted fees, better exchange rates, and priority support.
+
+Core Functionalities
+1️⃣ User Registration & Authentication
+✅ Login Options
+Email & Password (via Firebase Authentication or similar).
+Google Login (OAuth 2.0).
+✅ Jordanian Mobile Verification (Mandatory)
+Users must verify their Jordanian mobile number via OTP (Firebase SMS).
+Verified numbers will be linked to user accounts for future logins.
+✅ KYC Verification (Manual Approval by Admin)
+Users must upload Jordanian ID or Passport for approval before trading.
+Admin manually reviews and approves documents via the Admin Panel.
+✅ User Dashboard
+Displays transaction history, loyalty points, account settings.
+
+2️⃣ USDT-to-Fiat Trading System
+✅ Buy/Sell USDT
+Users enter the amount of USDT to sell or JOD to buy.
+System calculates exchange rate + applicable fees.
+User confirms trade request.
+✅ Manual Payment Confirmation
+Users manually transfer JOD via CliQ, eFAWATEERcom, or local wallets.
+Users upload proof of payment (screenshot/receipt).
+Admin reviews & approves transactions before releasing USDT.
+✅ Exchange Rate & Fees
+Admin sets exchange rates manually.
+Fees vary based on loyalty tier (discounts for high-tier users).
+
+3️⃣ Payment Integration
+✅ Supported Payment Methods
+CliQ (Instant JOD transfers).
+eFAWATEERcom (Bill payment service).
+Local Wallets (Zain Cash, Orange Money, Dinarak).
+✅ Manual Payment Verification
+Users upload transaction receipts.
+Admin manually verifies and approves transactions.
+
+4️⃣ Loyalty & Rewards System
+✅ Points System
+Users earn points for each transaction.
+Points determine loyalty tier.
+✅ Tiers & Benefits
+Higher tiers unlock:
+Lower fees.
+Better exchange rates.
+Priority customer support.
+Exclusive discounts for high-value traders.
+
+5️⃣ Admin Panel for Manual Verifications
+✅ Admin Dashboard (Built with React Admin or Laravel Nova)
+View & approve transactions.
+Manage users & KYC verifications.
+Set & update exchange rates manually.
+Monitor fraud detection alerts.
+✅ Transaction Monitoring & Dispute Resolution
+Live Chat Support (via WhatsApp, Telegram, or in-app chat).
+Support Ticketing System for disputes.
+FAQs & Help Guides.
+
+6️⃣ Security & Compliance
+✅ Secure Authentication & Access Control
+2FA required for withdrawals and major account actions.
+Mobile verification required before trading.
+Encrypted data storage & SSL encryption for secure transactions.
+✅ Anti-Fraud & AML Compliance
+Monitor suspicious transactions.
+Blacklist fraudulent users & IPs.
+
+Technology Stack
+Frontend (User Interface)
+React.js (for performance & SEO).
+Tailwind CSS (for modern, responsive UI).
+Backend & Database
+Node.js (Express.js) for backend processing.
+PostgreSQL for user & transaction data.
+Firebase Authentication for login & OTP verification.
+Admin Panel
+React Admin for managing transactions & users.
+
+Development Workflow
+✅ 1. Setup & Environment
+Initialize Vite (React) for frontend.
+Set up backend with Node.js (Express.js).
+Integrate PostgreSQL for user & transaction data.
+✅ 2. Authentication & Mobile Verification
+Implement email & Google login.
+Require Jordanian mobile verification (OTP) before accessing services.
+✅ 3. Trading & Payments
+Develop USDT buy/sell interface with real-time exchange rates.
+Implement manual payment confirmation system (user uploads receipt → admin approves).
+✅ 4. Loyalty & Rewards
+Create a points system.
+Display user ranking & benefits.
+Set up discounted rates for high-tier users.
+✅ 5. Security & Compliance
+Enforce 2FA for withdrawals.
+Implement fraud monitoring & reporting system.
+✅ 6. Testing & Deployment
+Conduct unit and integration tests (Jest, Cypress).
+Optimize for performance & security.
+
+Success Metrics
+🎯 User Growth: Achieve X new verified users per month.
+🎯 Transaction Volume: Meet daily exchange volume targets.
+🎯 Customer Retention: Increase repeat transactions & loyalty engagement.
+
+Project Language Preferences
+✅ Replit Agent Interaction Language: English
+✅ Application Interface Language: English & Arabic (Bilingual UI)
+
+🚀 This USDT-for-Fiat Exchange Platform (Jordan) will be secure, efficient, and user-friendly, ensuring smooth transactions, robust compliance, and customer rewards. 🔥
+
