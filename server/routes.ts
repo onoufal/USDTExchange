@@ -91,7 +91,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin Routes
   app.get("/api/admin/users", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
     const users = await storage.getAllUsers();
@@ -143,6 +142,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Set proper headers for preview and download
       res.setHeader('Content-Type', contentType);
       res.setHeader('Content-Length', buffer.length);
+      res.setHeader('Accept-Ranges', 'bytes');
+      res.setHeader('Cache-Control', 'public, max-age=0');
 
       if (req.query.download) {
         res.setHeader('Content-Disposition', `attachment; filename="kyc-document-${user.username}${extension}"`);

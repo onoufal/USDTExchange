@@ -62,15 +62,11 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
 
   const PdfPreview = () => (
     <div className="w-full h-[60vh] relative">
-      <div className="w-full h-full">
-        <embed 
-          src={documentUrl!}
-          type="application/pdf"
-          width="100%"
-          height="100%"
-          className="border-0"
-        />
-      </div>
+      <iframe
+        src={documentUrl!}
+        className="w-full h-full border-0"
+        title={`KYC Document for ${username}`}
+      />
       <div className="absolute bottom-4 right-4">
         <Button onClick={handleDownload} variant="outline" size="sm">
           <Download className="h-4 w-4 mr-2" />
