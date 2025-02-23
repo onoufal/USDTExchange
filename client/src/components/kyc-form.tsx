@@ -37,6 +37,14 @@ export default function KYCForm() {
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  // Added placeholders for missing state variables from edited snippet.  These need proper implementation.
+  const [isOpen, setIsOpen] = useState(false); // Placeholder
+  const [userId, setUserId] = useState<string | null>(null); // Placeholder
+  const [isLoading, setIsLoading] = useState(false); // Placeholder
+  const [previewError, setPreviewError] = useState(false); // Placeholder
+  const [documentUrl, setDocumentUrl] = useState<string | null>(null); // Placeholder
+  const [isPdf, setIsPdf] = useState(false); // Placeholder
+
 
   const mobileForm = useForm({
     resolver: zodResolver(mobileSchema),
@@ -68,7 +76,25 @@ export default function KYCForm() {
 
   useEffect(() => {
     setUploadProgress(0);
-  }, [file]);
+    // Added the useEffect from the edited snippet.  Requires implementation of missing state variables.
+    if (isOpen && userId) {
+      setIsLoading(true);
+      setPreviewError(false);
+      setDocumentUrl(null);
+
+      fetch(`/api/admin/kyc-document/${userId}`)
+        .then(response => {
+          const contentType = response.headers.get('Content-Type');
+          setIsPdf(contentType === 'application/pdf');
+          setDocumentUrl(`/api/admin/kyc-document/${userId}`);
+          setIsLoading(false);
+        })
+        .catch(() => {
+          setPreviewError(true);
+          setIsLoading(false);
+        });
+    }
+  }, [file, isOpen, userId]);
 
   const kycDocumentMutation = useMutation({
     mutationFn: async (file: File) => {

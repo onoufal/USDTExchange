@@ -30,9 +30,8 @@ export default function AdminPage() {
       return res.json();
     },
     onSuccess: () => {
-      // Invalidate both admin users and user queries to ensure both panels update
+      // Only invalidate admin users to prevent infinite loop
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
         title: "KYC Approved",
         description: "User KYC has been approved successfully",
@@ -97,7 +96,7 @@ export default function AdminPage() {
                                 <Eye className="h-4 w-4 mr-1" />
                                 View Document
                               </Button>
-                              {user.kycStatus === 'pending' && (
+                              {user.kycDocument && (
                                 <Button
                                   size="sm"
                                   onClick={() => approveKYCMutation.mutate(user.id)}
