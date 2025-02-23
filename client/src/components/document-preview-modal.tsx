@@ -77,7 +77,7 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
                 >
                   <div className="py-8 text-center">
                     <p className="text-muted-foreground mb-4">
-                      PDF preview not available
+                      PDF preview not available. Please download to view.
                     </p>
                     <Button onClick={handleDownload} variant="outline">
                       <Download className="h-4 w-4 mr-2" />

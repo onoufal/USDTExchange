@@ -20,77 +20,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup auth first
   setupAuth(app);
 
-  // KYC Routes
-  app.post("/api/kyc/mobile", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-
-    try {
-      const schema = z.object({ 
-        mobileNumber: z.string().regex(/^07[789]\d{7}$/, {
-          message: "Invalid Jordanian mobile number format"
-        })
-      });
-
-      const { mobileNumber } = schema.parse(req.body);
-
-      // Check if mobile number is already used by another user
-      const users = await storage.getAllUsers();
-      const existingUser = users.find(u => 
-        u.id !== req.user.id && u.mobileNumber === mobileNumber
-      );
-
-      if (existingUser) {
-        return res.status(400).json({ 
-          message: "This mobile number is already registered" 
-        });
-      }
-
-      await storage.updateUserMobile(req.user.id, mobileNumber);
-      res.json({ success: true });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: error.errors[0].message 
-        });
-      }
-      console.error('Mobile verification error:', error);
-      res.status(500).json({ 
-        message: "Failed to verify mobile number" 
-      });
-    }
-  });
-
-  app.post("/api/kyc/document", upload.single("document"), async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    if (!req.file) return res.status(400).json({ message: "No document uploaded" });
-
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
-    if (req.file.size > maxSize) {
-      return res.status(400).json({ message: "File size must be less than 5MB" });
-    }
-
-    // Validate file type using both mimetype and original filename extension
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
-    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
-
-    const fileExtension = req.file.originalname.toLowerCase().match(/\.[^.]*$/)?.[0];
-
-    if (!allowedTypes.includes(req.file.mimetype) || !allowedExtensions.includes(fileExtension)) {
-      return res.status(400).json({ 
-        message: "Invalid file type. Please upload a JPG, PNG, or PDF file" 
-      });
-    }
-
-    try {
-      await storage.updateUserKYC(req.user.id, req.file.buffer.toString("base64"));
-      res.json({ success: true });
-    } catch (error) {
-      console.error('KYC document upload error:', error);
-      res.status(500).json({ message: "Failed to process document upload" });
-    }
-  });
-
   // Admin Routes
   app.get("/api/admin/users", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
@@ -140,9 +69,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         extension = '.jpg';
       }
 
-      // Set proper content type headers
+      // Set proper headers for preview and download
       res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Length', buffer.length);
       res.setHeader('Content-Disposition', `inline; filename="kyc-document-${user.username}${extension}"`);
+      res.setHeader('Cache-Control', 'public, max-age=0');
+      res.setHeader('Accept-Ranges', 'bytes');
 
       // Send the raw buffer data
       return res.send(buffer);
