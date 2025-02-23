@@ -12,15 +12,15 @@ import NavBar from "./components/nav-bar";
 
 function Router() {
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <NavBar />
       <Switch>
+        <Route path="/" component={HomePage} />
         <Route path="/auth" component={AuthPage} />
-        <ProtectedRoute path="/" component={HomePage} />
-        <ProtectedRoute path="/admin" component={AdminPage} adminOnly={true} />
+        <Route path="/admin" component={AdminPage} />
         <Route component={NotFound} />
       </Switch>
-    </>
+    </div>
   );
 }
 
