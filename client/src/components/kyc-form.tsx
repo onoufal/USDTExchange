@@ -33,7 +33,6 @@ const documentSchema = z.object({
 });
 
 export default function KYCForm() {
-  // All hooks at the top
   const { toast } = useToast();
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
@@ -67,14 +66,12 @@ export default function KYCForm() {
     },
   });
 
-  // Reset upload progress when file changes
   useEffect(() => {
     setUploadProgress(0);
   }, [file]);
 
   const kycDocumentMutation = useMutation({
     mutationFn: async (file: File) => {
-      // Validate file type before uploading
       if (!documentSchema.shape.document.parse(file)) {
         throw new Error("Invalid file type. Please upload a JPG, PNG, or PDF file");
       }
@@ -113,7 +110,6 @@ export default function KYCForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       setFile(null);
       setUploadProgress(0);
-      // Instead of resetting the entire form, we'll just clear the file input
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
       if (fileInput) {
         fileInput.value = '';
@@ -148,7 +144,7 @@ export default function KYCForm() {
           description: "Please upload a JPG, PNG, or PDF file",
           variant: "destructive",
         });
-        e.target.value = ''; // Reset the input
+        e.target.value = '';
         return;
       }
     }
@@ -157,7 +153,6 @@ export default function KYCForm() {
 
   return (
     <div className="space-y-6">
-      {/* Mobile Verification Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium">Mobile Verification</h3>
@@ -202,13 +197,12 @@ export default function KYCForm() {
         )}
       </div>
 
-      {/* KYC Document Upload Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium">KYC Verification</h3>
           <Badge variant={
             user?.kycStatus === "approved" ? "default" :
-            user?.kycStatus === "pending" ? "secondary" : "destructive"
+              user?.kycStatus === "pending" ? "secondary" : "destructive"
           }>
             {user?.kycStatus === "approved" ? (
               <CheckCircle2 className="w-4 h-4 mr-1" />
@@ -218,11 +212,17 @@ export default function KYCForm() {
               <XCircle className="w-4 h-4 mr-1" />
             )}
             {user?.kycStatus === "approved" ? "Approved" :
-             user?.kycStatus === "pending" ? "Pending Review" : "Not Submitted"}
+              user?.kycStatus === "pending" ? "Pending Review" : "Not Submitted"}
           </Badge>
         </div>
 
-        {user?.kycStatus !== "approved" && (
+        {user?.kycStatus === "approved" ? (
+          <Alert>
+            <AlertDescription className="text-sm">
+              Your KYC verification has been approved.
+            </AlertDescription>
+          </Alert>
+        ) : (
           <div className="space-y-4">
             {!user?.mobileVerified && (
               <Alert>
@@ -248,7 +248,7 @@ export default function KYCForm() {
                             onChange(e.target.files?.[0]);
                           }}
                           accept="image/jpeg,image/png,image/jpg,application/pdf"
-                          disabled={!user?.mobileVerified || isUploading}
+                          disabled={!user?.mobileVerified || isUploading || user?.kycStatus === "pending"}
                         />
                       </FormControl>
                       <FormDescription className="text-xs">
@@ -271,7 +271,7 @@ export default function KYCForm() {
                 <Button
                   type="button"
                   className="w-full"
-                  disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending}
+                  disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending || user?.kycStatus === "pending"}
                   onClick={() => {
                     if (file) {
                       documentForm.trigger("document").then((isValid) => {
