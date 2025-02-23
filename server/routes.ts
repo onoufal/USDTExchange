@@ -144,9 +144,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Type', contentType);
       res.setHeader('Content-Length', buffer.length);
 
-      // Set disposition based on request (preview vs download)
-      const disposition = req.query.download ? 'attachment' : 'inline';
-      res.setHeader('Content-Disposition', `${disposition}; filename="kyc-document-${user.username}${extension}"`);
+      // Ensure PDFs can be viewed inline
+      if (isPdf && !req.query.download) {
+        res.setHeader('Content-Disposition', 'inline');
+      } else {
+        res.setHeader('Content-Disposition', `${req.query.download ? 'attachment' : 'inline'}; filename="kyc-document-${user.username}${extension}"`);
+      }
 
       // Send the raw buffer data
       return res.send(buffer);
