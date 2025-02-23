@@ -1,4 +1,5 @@
 import { users, transactions, type User, type InsertUser, type Transaction } from "@shared/schema";
+import type { SessionData, Store } from "express-session";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 import { eq } from "drizzle-orm";
@@ -6,7 +7,7 @@ import { eq } from "drizzle-orm";
 const MemoryStore = createMemoryStore(session);
 
 export interface IStorage {
-  sessionStore: session.SessionStore;
+  sessionStore: Store;
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
@@ -23,7 +24,7 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private transactions: Map<number, Transaction>;
-  sessionStore: session.SessionStore;
+  sessionStore: Store;
   private currentUserId: number;
   private currentTransactionId: number;
 
@@ -35,6 +36,16 @@ export class MemStorage implements IStorage {
     });
     this.currentUserId = 1;
     this.currentTransactionId = 1;
+
+    // Create a default admin user
+    this.createUser({
+      username: "admin",
+      password: "admin123", // In real app, this would be hashed
+      fullName: "Admin User"
+    }).then(user => {
+      user.role = "admin";
+      this.users.set(user.id, user);
+    });
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -129,7 +140,7 @@ export class MemStorage implements IStorage {
       // Update loyalty points
       const user = this.users.get(transaction.userId);
       if (user) {
-        user.loyaltyPoints += Math.floor(Number(transaction.amount) / 100);
+        user.loyaltyPoints = (user.loyaltyPoints || 0) + Math.floor(Number(transaction.amount) / 100);
         this.users.set(user.id, user);
       }
     }

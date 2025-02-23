@@ -8,6 +8,7 @@ import { z } from "zod";
 const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup auth first, which includes session and passport middleware
   setupAuth(app);
 
   // KYC Routes
@@ -15,7 +16,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     const schema = z.object({ mobileNumber: z.string() });
     const { mobileNumber } = schema.parse(req.body);
-    
+
     // Mock OTP verification - always succeeds
     await storage.updateUserMobile(req.user.id, mobileNumber);
     res.json({ success: true });

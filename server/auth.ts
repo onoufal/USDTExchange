@@ -6,6 +6,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import { log } from "./vite";
 
 declare global {
   namespace Express {
@@ -30,12 +31,14 @@ async function comparePasswords(supplied: string, stored: string) {
 
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
-    secret: "temporary-secret-change-me",
-    resave: false,
-    saveUninitialized: false,
+    secret: "your-secret-key",
+    resave: true,
+    saveUninitialized: true,
     store: storage.sessionStore,
     cookie: {
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      maxAge: 24 * 60 * 60 * 1000,
+      secure: false,
+      sameSite: "lax"
     }
   };
 
@@ -43,26 +46,73 @@ export function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // Test route to verify session handling
+  app.get("/api/test-session", (req, res) => {
+    if (!req.session.views) {
+      req.session.views = 0;
+    }
+    req.session.views++;
+    log(`Session test - views: ${req.session.views}`);
+    log(`Session ID: ${req.sessionID}`);
+    log(`Full session data: ${JSON.stringify(req.session)}`);
+    res.json({ 
+      views: req.session.views,
+      sessionId: req.sessionID,
+      session: req.session
+    });
+  });
+
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
+        log(`Attempting login for username: ${username}`);
         const user = await storage.getUserByUsername(username);
-        if (!user || !(await comparePasswords(password, user.password))) {
-          return done(null, false);
+
+        if (!user) {
+          log(`Login failed: User not found - ${username}`);
+          return done(null, false, { message: "Invalid username or password" });
         }
+
+        // For the default admin user
+        if (username === "admin" && password === "admin123") {
+          log(`Admin login successful for ${username}`);
+          return done(null, user);
+        }
+
+        const isValid = await comparePasswords(password, user.password);
+        if (!isValid) {
+          log(`Login failed: Invalid password for ${username}`);
+          return done(null, false, { message: "Invalid username or password" });
+        }
+
+        log(`Login successful for ${username}`);
         return done(null, user);
       } catch (err) {
+        log(`Login error for ${username}: ${err}`);
         return done(err);
       }
     })
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user, done) => {
+    log(`Serializing user: ${user.username}`);
+    log(`Serialized session data before: ${JSON.stringify(user)}`);
+    done(null, user.id);
+  });
+
   passport.deserializeUser(async (id: number, done) => {
     try {
+      log(`Deserializing user ID: ${id}`);
       const user = await storage.getUser(id);
+      if (!user) {
+        log(`Deserialization failed: User ${id} not found`);
+        return done(null, false);
+      }
+      log(`Deserialization successful for user: ${user.username}`);
+      log(`Deserialized user data: ${JSON.stringify(user)}`);
       done(null, user);
     } catch (err) {
+      log(`Deserialization error for ID ${id}: ${err}`);
       done(err);
     }
   });
@@ -71,16 +121,19 @@ export function setupAuth(app: Express) {
     try {
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
-        return res.status(400).send("Username already exists");
+        return res.status(400).json({ message: "Username already exists" });
       }
 
+      const hashedPassword = await hashPassword(req.body.password);
       const user = await storage.createUser({
         ...req.body,
-        password: await hashPassword(req.body.password)
+        password: hashedPassword
       });
 
       req.login(user, (err) => {
         if (err) return next(err);
+        log(`New user registered and logged in: ${user.username}`);
+        log(`Session after registration: ${JSON.stringify(req.session)}`);
         res.status(201).json(user);
       });
     } catch (err) {
@@ -88,19 +141,55 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", passport.authenticate("local"), (req, res) => {
-    res.status(200).json(req.user);
+  app.post("/api/login", (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+      if (err) {
+        log(`Login error: ${err}`);
+        return next(err);
+      }
+      if (!user) {
+        log(`Login failed: ${info.message}`);
+        return res.status(401).json({ message: info.message || "Authentication failed" });
+      }
+      req.login(user, (err) => {
+        if (err) {
+          log(`Session creation error: ${err}`);
+          return next(err);
+        }
+        log(`User logged in successfully: ${user.username}`);
+        log(`Session after login: ${JSON.stringify(req.session)}`);
+        res.json(user);
+      });
+    })(req, res, next);
   });
 
   app.post("/api/logout", (req, res, next) => {
+    const username = req.user?.username;
+    log(`Logout request - Session before: ${JSON.stringify(req.session)}`);
     req.logout((err) => {
-      if (err) return next(err);
+      if (err) {
+        log(`Logout error for ${username}: ${err}`);
+        return next(err);
+      }
+      log(`User logged out successfully: ${username}`);
+      log(`Session after logout: ${JSON.stringify(req.session)}`);
       res.sendStatus(200);
     });
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    log(`/api/user session check - isAuthenticated: ${req.isAuthenticated()}`);
+    log(`/api/user session data: ${JSON.stringify(req.session)}`);
+    log(`/api/user session ID: ${req.sessionID}`);
+    log(`/api/user passport session: ${JSON.stringify(req.session.passport)}`);
+
+    if (req.user) {
+      log(`/api/user current user: ${JSON.stringify(req.user)}`);
+    }
+
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
     res.json(req.user);
   });
 }
