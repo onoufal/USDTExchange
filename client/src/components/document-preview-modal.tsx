@@ -1,9 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Loader2, Download, Camera } from "lucide-react"
-import html2canvas from 'html2canvas'
-import { useToast } from "@/hooks/use-toast"
+import { Loader2, Download } from "lucide-react"
 
 interface DocumentPreviewModalProps {
   isOpen: boolean
@@ -17,7 +15,6 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
   const [previewError, setPreviewError] = useState(false)
   const [documentUrl, setDocumentUrl] = useState<string | null>(null)
   const [isPdf, setIsPdf] = useState(false)
-  const { toast } = useToast()
 
   // Reset states and fetch document when modal opens
   useEffect(() => {
@@ -48,30 +45,6 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
     window.open(documentUrl, '_blank')
   }
 
-  const handleScreenshot = async () => {
-    try {
-      const previewElement = document.getElementById('document-preview')
-      if (!previewElement) return
-
-      const canvas = await html2canvas(previewElement)
-      const link = document.createElement('a')
-      link.download = `kyc-document-${username}-screenshot.png`
-      link.href = canvas.toDataURL('image/png')
-      link.click()
-
-      toast({
-        title: "Screenshot captured",
-        description: "The screenshot has been saved to your downloads",
-      })
-    } catch (error) {
-      toast({
-        title: "Screenshot failed",
-        description: "Failed to capture screenshot. Please try downloading instead.",
-        variant: "destructive"
-      })
-    }
-  }
-
   const ImagePreview = () => (
     <div className="flex flex-col items-center gap-4">
       <img 
@@ -80,16 +53,10 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
         className="max-h-[60vh] w-auto object-contain"
         onError={() => setPreviewError(true)}
       />
-      <div className="flex gap-2">
-        <Button onClick={handleDownload} variant="outline" size="sm">
-          <Download className="h-4 w-4 mr-2" />
-          Download Image
-        </Button>
-        <Button onClick={handleScreenshot} variant="outline" size="sm">
-          <Camera className="h-4 w-4 mr-2" />
-          Screenshot
-        </Button>
-      </div>
+      <Button onClick={handleDownload} variant="outline" size="sm">
+        <Download className="h-4 w-4 mr-2" />
+        Download Image
+      </Button>
     </div>
   )
 
@@ -110,10 +77,10 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
           </Button>
         </div>
       </iframe>
-      <div className="absolute bottom-4 right-4 flex gap-2">
-        <Button onClick={handleScreenshot} variant="outline" size="sm">
-          <Camera className="h-4 w-4 mr-2" />
-          Screenshot
+      <div className="absolute bottom-4 right-4">
+        <Button onClick={handleDownload} variant="outline" size="sm">
+          <Download className="h-4 w-4 mr-2" />
+          Download PDF
         </Button>
       </div>
     </div>
