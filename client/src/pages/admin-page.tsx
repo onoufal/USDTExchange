@@ -23,13 +23,24 @@ export default function AdminPage() {
 
   const approveKYCMutation = useMutation({
     mutationFn: async (userId: number) => {
-      await apiRequest("POST", `/api/admin/approve-kyc/${userId}`);
+      const res = await apiRequest("POST", `/api/admin/approve-kyc/${userId}`);
+      if (!res.ok) {
+        throw new Error("Failed to approve KYC");
+      }
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({
         title: "KYC Approved",
         description: "User KYC has been approved successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Approval failed",
+        description: error.message,
+        variant: "destructive",
       });
     },
   });
@@ -90,7 +101,7 @@ export default function AdminPage() {
                               onClick={() => approveKYCMutation.mutate(user.id)}
                               disabled={approveKYCMutation.isPending}
                             >
-                              Approve KYC
+                              {approveKYCMutation.isPending ? 'Approving...' : 'Approve KYC'}
                             </Button>
                           )}
                         </td>

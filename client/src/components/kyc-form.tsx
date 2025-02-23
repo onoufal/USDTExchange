@@ -219,7 +219,7 @@ export default function KYCForm() {
         {user?.kycStatus === "approved" ? (
           <Alert>
             <AlertDescription className="text-sm">
-              Your KYC verification has been approved.
+              Your KYC verification has been approved. You can now trade on the platform.
             </AlertDescription>
           </Alert>
         ) : (
