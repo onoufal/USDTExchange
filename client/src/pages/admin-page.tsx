@@ -70,32 +70,38 @@ export default function AdminPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-2">Username</th>
-                      <th className="text-left py-2">Full Name</th>
-                      <th className="text-left py-2">Mobile</th>
-                      <th className="text-left py-2">KYC Status</th>
-                      <th className="text-left py-2">Actions</th>
+                      <th className="text-left py-2 px-4">Username</th>
+                      <th className="text-left py-2 px-4">Full Name</th>
+                      <th className="text-left py-2 px-4">Mobile</th>
+                      <th className="text-left py-2 px-4">KYC Status</th>
+                      <th className="text-left py-2 px-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {users?.map((user) => (
-                      <tr key={user.id} className="border-b">
-                        <td className="py-2">{user.username}</td>
-                        <td className="py-2">{user.fullName}</td>
-                        <td className="py-2">{user.mobileNumber || 'Not verified'}</td>
-                        <td className="py-2 capitalize">{user.kycStatus}</td>
-                        <td className="py-2">
-                          <div className="flex space-x-2">
+                      <tr key={user.id} className="border-b hover:bg-muted/50">
+                        <td className="py-2 px-4">{user.username}</td>
+                        <td className="py-2 px-4">{user.fullName}</td>
+                        <td className="py-2 px-4">{user.mobileNumber || 'Not verified'}</td>
+                        <td className="py-2 px-4 capitalize">{user.kycStatus}</td>
+                        <td className="py-2 px-4">
+                          <div className="flex items-center gap-2">
+                            {/* Always show View Document button if there's a document */}
                             {user.kycDocument && (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => setSelectedUser({ id: user.id, username: user.username })}
+                                onClick={() => setSelectedUser({ 
+                                  id: user.id, 
+                                  username: user.username 
+                                })}
                               >
                                 <Eye className="h-4 w-4 mr-1" />
                                 View Document
                               </Button>
                             )}
+
+                            {/* Show Approve button only for pending KYC with document */}
                             {user.kycDocument && user.kycStatus === 'pending' && (
                               <Button
                                 size="sm"
@@ -126,23 +132,23 @@ export default function AdminPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-2">User</th>
-                      <th className="text-left py-2">Type</th>
-                      <th className="text-left py-2">Amount</th>
-                      <th className="text-left py-2">Status</th>
-                      <th className="text-left py-2">Actions</th>
+                      <th className="text-left py-2 px-4">User</th>
+                      <th className="text-left py-2 px-4">Type</th>
+                      <th className="text-left py-2 px-4">Amount</th>
+                      <th className="text-left py-2 px-4">Status</th>
+                      <th className="text-left py-2 px-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {transactions?.map((tx) => {
                       const user = users?.find(u => u.id === tx.userId);
                       return (
-                        <tr key={tx.id} className="border-b">
-                          <td className="py-2">{user?.username}</td>
-                          <td className="py-2 capitalize">{tx.type}</td>
-                          <td className="py-2">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
-                          <td className="py-2 capitalize">{tx.status}</td>
-                          <td className="py-2">
+                        <tr key={tx.id} className="border-b hover:bg-muted/50">
+                          <td className="py-2 px-4">{user?.username}</td>
+                          <td className="py-2 px-4 capitalize">{tx.type}</td>
+                          <td className="py-2 px-4">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
+                          <td className="py-2 px-4 capitalize">{tx.status}</td>
+                          <td className="py-2 px-4">
                             {tx.status === 'pending' && (
                               <Button
                                 size="sm"
