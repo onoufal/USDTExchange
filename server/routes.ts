@@ -143,9 +143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Set proper headers for preview and download
       res.setHeader('Content-Type', contentType);
       res.setHeader('Content-Length', buffer.length);
-      res.setHeader('Content-Disposition', `inline; filename="kyc-document-${user.username}${extension}"`);
-      res.setHeader('Cache-Control', 'public, max-age=0');
-      res.setHeader('Accept-Ranges', 'bytes');
+      res.setHeader('Content-Disposition', `attachment; filename="kyc-document-${user.username}${extension}"`);
 
       // Send the raw buffer data
       return res.send(buffer);
