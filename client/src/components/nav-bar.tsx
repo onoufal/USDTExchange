@@ -10,6 +10,7 @@ import {
 import { UserCircle, LogOut } from "lucide-react";
 
 export default function NavBar() {
+  // All hooks at the top of the component
   const { user, logoutMutation } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -21,9 +22,8 @@ export default function NavBar() {
     });
   };
 
-  if (!user) return null;
-
-  return (
+  // Render null at the return statement instead of early return
+  return user ? (
     <nav className="border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
@@ -65,5 +65,5 @@ export default function NavBar() {
         </div>
       </div>
     </nav>
-  );
+  ) : null;
 }
