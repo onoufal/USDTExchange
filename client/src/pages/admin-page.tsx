@@ -84,9 +84,9 @@ export default function AdminPage() {
                         <td className="py-2">{user.fullName}</td>
                         <td className="py-2">{user.mobileNumber || 'Not verified'}</td>
                         <td className="py-2 capitalize">{user.kycStatus}</td>
-                        <td className="py-2 flex gap-2">
-                          {user.kycDocument && (
-                            <>
+                        <td className="py-2">
+                          <div className="flex space-x-2">
+                            {user.kycDocument && (
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -95,17 +95,17 @@ export default function AdminPage() {
                                 <Eye className="h-4 w-4 mr-1" />
                                 View Document
                               </Button>
-                              {user.kycStatus === 'pending' && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => approveKYCMutation.mutate(user.id)}
-                                  disabled={approveKYCMutation.isPending}
-                                >
-                                  {approveKYCMutation.isPending ? 'Approving...' : 'Approve KYC'}
-                                </Button>
-                              )}
-                            </>
-                          )}
+                            )}
+                            {user.kycDocument && user.kycStatus === 'pending' && (
+                              <Button
+                                size="sm"
+                                onClick={() => approveKYCMutation.mutate(user.id)}
+                                disabled={approveKYCMutation.isPending}
+                              >
+                                {approveKYCMutation.isPending ? 'Approving...' : 'Approve KYC'}
+                              </Button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
