@@ -11,15 +11,17 @@ import { Transaction } from "@shared/schema";
 import { useLocation } from "wouter";
 
 export default function HomePage() {
+  // All hooks at the top
   const { user, logoutMutation } = useAuth();
   const [, setLocation] = useLocation();
-
   const { data: transactions } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions"],
   });
 
-  const showKYCWarning = !user?.mobileVerified || user?.kycStatus !== "approved";
+  // All derived state after hooks
+  const showKYCWarning = user && (!user.mobileVerified || user.kycStatus !== "approved");
 
+  // Event handlers
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
       onSuccess: () => {
@@ -28,10 +30,13 @@ export default function HomePage() {
     });
   };
 
+  // Return null or loading state if no user
+  if (!user) return null;
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Welcome, {user?.fullName}</h1>
+        <h1 className="text-2xl font-bold">Welcome, {user.fullName}</h1>
         <Button 
           variant="outline" 
           onClick={handleLogout}
