@@ -133,8 +133,10 @@ export default function AdminPage() {
                             {tx.status === 'pending' && (
                               <Button
                                 size="sm"
-                                onClick={() => approveKYCMutation.mutate(tx.id)}
-                                disabled={approveKYCMutation.isPending}
+                                onClick={() => {
+                                  // TODO: Implement transaction approval
+                                }}
+                                disabled={false}
                               >
                                 Approve
                               </Button>
