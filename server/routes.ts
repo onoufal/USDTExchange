@@ -12,7 +12,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use((req, res, next) => {
     res.setHeader(
       "Content-Security-Policy",
-      "default-src 'self'; img-src 'self' data: blob:; object-src 'self' data: blob:; frame-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src 'self' ws:;"
+      "default-src 'self'; img-src 'self' data: blob:; object-src 'self' data: blob:; frame-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src 'self' ws:;",
     );
     next();
   });
@@ -122,10 +122,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isPdf = user.kycDocument.includes('PDF') || user.kycDocument.includes('pdf');
       const contentType = isPdf ? 'application/pdf' : 'image/jpeg';
 
-      res.json({ 
-        document: `data:${contentType};base64,${user.kycDocument}`,
-        filename: `kyc-document-${user.username}${isPdf ? '.pdf' : '.jpg'}`
-      });
+      // Set proper content type headers
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', `inline; filename="kyc-document-${user.username}${isPdf ? '.pdf' : '.jpg'}"`);
+
+      // Send the raw buffer data
+      const buffer = Buffer.from(user.kycDocument, 'base64');
+      return res.send(buffer);
     } catch (error) {
       console.error('Error fetching KYC document:', error);
       res.status(500).json({ message: "Failed to fetch document" });

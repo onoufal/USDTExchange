@@ -6,41 +6,62 @@ import { Loader2, Download } from "lucide-react"
 interface DocumentPreviewModalProps {
   isOpen: boolean
   onClose: () => void
-  documentBase64: string | null
+  userId: number | null
   username: string
 }
 
-export function DocumentPreviewModal({ isOpen, onClose, documentBase64, username }: DocumentPreviewModalProps) {
+export function DocumentPreviewModal({ isOpen, onClose, userId, username }: DocumentPreviewModalProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [previewError, setPreviewError] = useState(false)
-  const isPdf = documentBase64?.startsWith('data:application/pdf')
+  const [documentUrl, setDocumentUrl] = useState<string | null>(null)
+  const [isPdf, setIsPdf] = useState(false)
 
-  // Reset states when modal opens or document changes
+  // Reset states and fetch document when modal opens
   useEffect(() => {
-    if (isOpen && documentBase64) {
+    if (isOpen && userId) {
       setIsLoading(true)
       setPreviewError(false)
-    }
-  }, [isOpen, documentBase64])
+      setDocumentUrl(`/api/admin/kyc-document/${userId}`)
 
-  const handlePreviewError = () => {
-    setPreviewError(true)
-    setIsLoading(false)
-  }
+      // Detect if PDF by checking the Content-Type header
+      fetch(`/api/admin/kyc-document/${userId}`, { method: 'HEAD' })
+        .then(response => {
+          setIsPdf(response.headers.get('Content-Type') === 'application/pdf')
+        })
+        .catch(() => {
+          setPreviewError(true)
+          setIsLoading(false)
+        })
+    } else {
+      setDocumentUrl(null)
+    }
+  }, [isOpen, userId])
+
+  // Add a loading timeout
+  useEffect(() => {
+    if (isLoading) {
+      const timer = setTimeout(() => {
+        if (isLoading) {
+          setPreviewError(true)
+          setIsLoading(false)
+        }
+      }, 10000) // 10 second timeout
+      return () => clearTimeout(timer)
+    }
+  }, [isLoading])
 
   const handleLoad = () => {
     setIsLoading(false)
   }
 
-  const handleDownload = () => {
-    if (!documentBase64) return
+  const handleError = () => {
+    setPreviewError(true)
+    setIsLoading(false)
+  }
 
-    const link = document.createElement('a')
-    link.href = documentBase64
-    link.download = `kyc-document-${username}${isPdf ? '.pdf' : '.jpg'}`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  const handleDownload = () => {
+    if (!documentUrl) return
+    window.open(documentUrl, '_blank')
   }
 
   return (
@@ -50,7 +71,7 @@ export function DocumentPreviewModal({ isOpen, onClose, documentBase64, username
           <DialogTitle>KYC Document - {username}</DialogTitle>
         </DialogHeader>
 
-        {documentBase64 ? (
+        {documentUrl ? (
           <div className="relative min-h-[60vh]">
             {previewError ? (
               <div className="py-8 text-center space-y-4">
@@ -65,14 +86,14 @@ export function DocumentPreviewModal({ isOpen, onClose, documentBase64, username
             ) : isPdf ? (
               <>
                 <object
-                  data={documentBase64}
+                  data={documentUrl}
                   type="application/pdf"
                   className="w-full h-[60vh]"
                   onLoad={handleLoad}
-                  onError={handlePreviewError}
+                  onError={handleError}
                 >
                   <embed 
-                    src={documentBase64} 
+                    src={documentUrl} 
                     type="application/pdf"
                     className="w-full h-[60vh]"
                   />
@@ -86,11 +107,11 @@ export function DocumentPreviewModal({ isOpen, onClose, documentBase64, username
             ) : (
               <>
                 <img 
-                  src={documentBase64} 
+                  src={documentUrl}
                   alt={`KYC Document for ${username}`}
                   className="max-h-[60vh] mx-auto"
                   onLoad={handleLoad}
-                  onError={handlePreviewError}
+                  onError={handleError}
                 />
                 {isLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/80">

@@ -21,16 +21,6 @@ export default function AdminPage() {
     queryKey: ["/api/admin/transactions"],
   });
 
-  const { data: documentData, isLoading: isLoadingDocument } = useQuery({
-    queryKey: ["/api/admin/kyc-document", selectedUser?.id],
-    queryFn: async () => {
-      if (!selectedUser) return null;
-      const res = await apiRequest("GET", `/api/admin/kyc-document/${selectedUser.id}`);
-      return res.json();
-    },
-    enabled: !!selectedUser,
-  });
-
   const approveKYCMutation = useMutation({
     mutationFn: async (userId: number) => {
       await apiRequest("POST", `/api/admin/approve-kyc/${userId}`);
@@ -44,25 +34,12 @@ export default function AdminPage() {
     },
   });
 
-  const approveTransactionMutation = useMutation({
-    mutationFn: async (transactionId: number) => {
-      await apiRequest("POST", `/api/admin/approve-transaction/${transactionId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/transactions"] });
-      toast({
-        title: "Transaction Approved",
-        description: "Transaction has been approved successfully",
-      });
-    },
-  });
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <DocumentPreviewModal 
         isOpen={!!selectedUser}
         onClose={() => setSelectedUser(null)}
-        documentBase64={documentData?.document || null}
+        userId={selectedUser?.id || null}
         username={selectedUser?.username || ''}
       />
 
@@ -139,7 +116,6 @@ export default function AdminPage() {
                       <th className="text-left py-2">User</th>
                       <th className="text-left py-2">Type</th>
                       <th className="text-left py-2">Amount</th>
-                      <th className="text-left py-2">Rate</th>
                       <th className="text-left py-2">Status</th>
                       <th className="text-left py-2">Actions</th>
                     </tr>
@@ -152,14 +128,13 @@ export default function AdminPage() {
                           <td className="py-2">{user?.username}</td>
                           <td className="py-2 capitalize">{tx.type}</td>
                           <td className="py-2">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
-                          <td className="py-2">{tx.rate}</td>
                           <td className="py-2 capitalize">{tx.status}</td>
                           <td className="py-2">
-                            {tx.status === 'pending' && tx.proofOfPayment && (
+                            {tx.status === 'pending' && (
                               <Button
                                 size="sm"
-                                onClick={() => approveTransactionMutation.mutate(tx.id)}
-                                disabled={approveTransactionMutation.isPending}
+                                onClick={() => approveKYCMutation.mutate(tx.id)}
+                                disabled={approveKYCMutation.isPending}
                               >
                                 Approve
                               </Button>
