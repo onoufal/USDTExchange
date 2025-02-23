@@ -12,7 +12,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use((req, res, next) => {
     res.setHeader(
       "Content-Security-Policy",
-      "default-src 'self'; img-src 'self' data: blob:; object-src 'self' blob:; frame-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src 'self' ws:; plugin-types application/pdf;",
+      "default-src 'self'; img-src 'self' data: blob:; object-src 'self' blob:; frame-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src 'self' ws:; plugin-types application/pdf;"
     );
     next();
   });
@@ -153,7 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Send the raw buffer data
-      return res.send(buffer);
+      res.send(buffer);
     } catch (error) {
       console.error('Error fetching KYC document:', error);
       res.status(500).json({ message: "Failed to fetch document" });

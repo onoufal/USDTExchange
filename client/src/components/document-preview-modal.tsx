@@ -16,19 +16,17 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
   const [documentUrl, setDocumentUrl] = useState<string | null>(null)
   const [isPdf, setIsPdf] = useState(false)
 
-  // Reset states and fetch document when modal opens
   useEffect(() => {
     if (isOpen && userId) {
       setIsLoading(true)
       setPreviewError(false)
       setDocumentUrl(`/api/admin/kyc-document/${userId}`)
 
-      // Detect if PDF by checking the Content-Type header
       fetch(`/api/admin/kyc-document/${userId}`, { method: 'HEAD' })
         .then(response => {
-          const contentType = response.headers.get('Content-Type');
-          setIsPdf(contentType === 'application/pdf');
-          setIsLoading(false);
+          const contentType = response.headers.get('Content-Type')
+          setIsPdf(contentType === 'application/pdf')
+          setIsLoading(false)
         })
         .catch(() => {
           setPreviewError(true)
@@ -61,12 +59,14 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
   )
 
   const PdfPreview = () => (
-    <div className="w-full h-[60vh] relative flex flex-col">
-      <div className="flex-1 w-full">
-        <iframe
+    <div className="flex flex-col h-[60vh]">
+      <div className="flex-1 relative">
+        <embed
           src={documentUrl!}
-          className="w-full h-full border-0"
-          title={`KYC Document for ${username}`}
+          type="application/pdf"
+          width="100%"
+          height="100%"
+          className="absolute inset-0"
         />
       </div>
       <div className="p-4 flex justify-end">
@@ -85,9 +85,9 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
           <DialogTitle>KYC Document - {username}</DialogTitle>
         </DialogHeader>
 
-        <div id="document-preview">
+        <div>
           {documentUrl ? (
-            <div className="relative min-h-[60vh]">
+            <div className="relative">
               {previewError ? (
                 <div className="py-8 text-center space-y-4">
                   <p className="text-muted-foreground">
