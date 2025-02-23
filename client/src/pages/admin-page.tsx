@@ -84,7 +84,7 @@ export default function AdminPage() {
                         <td className="py-2">{user.fullName}</td>
                         <td className="py-2">{user.mobileNumber || 'Not verified'}</td>
                         <td className="py-2 capitalize">{user.kycStatus}</td>
-                        <td className="py-2 space-x-2">
+                        <td className="py-2 flex gap-2">
                           {user.kycDocument && (
                             <>
                               <Button
