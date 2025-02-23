@@ -15,9 +15,9 @@ function Router() {
     <>
       <NavBar />
       <Switch>
+        <Route path="/auth" component={AuthPage} />
         <ProtectedRoute path="/" component={HomePage} />
         <ProtectedRoute path="/admin" component={AdminPage} adminOnly={true} />
-        <Route path="/auth" component={AuthPage} />
         <Route component={NotFound} />
       </Switch>
     </>

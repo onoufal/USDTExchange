@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
-import { Route } from "wouter";
+import { Route, useLocation } from "wouter";
+import { useEffect } from "react";
 
 export function ProtectedRoute({
   path,
@@ -12,6 +13,13 @@ export function ProtectedRoute({
   adminOnly?: boolean;
 }) {
   const { user, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!isLoading && (!user || (adminOnly && user.role !== "admin"))) {
+      setLocation("/auth");
+    }
+  }, [user, isLoading, adminOnly, setLocation]);
 
   if (isLoading) {
     return (
@@ -24,11 +32,7 @@ export function ProtectedRoute({
   }
 
   if (!user || (adminOnly && user.role !== "admin")) {
-    return <Route path={path}>
-      <div className="flex items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold">Unauthorized Access</h1>
-      </div>
-    </Route>;
+    return null;
   }
 
   return <Route path={path} component={Component} />;
