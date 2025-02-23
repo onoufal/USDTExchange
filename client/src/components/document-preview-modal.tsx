@@ -16,25 +16,25 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
   const [documentUrl, setDocumentUrl] = useState<string | null>(null)
   const [isPdf, setIsPdf] = useState(false)
 
+  // Reset states and fetch document when modal opens
   useEffect(() => {
     if (isOpen && userId) {
       setIsLoading(true)
       setPreviewError(false)
-      setDocumentUrl(`/api/admin/kyc-document/${userId}`)
+      setDocumentUrl(null)
 
+      // Detect if PDF by checking the Content-Type header
       fetch(`/api/admin/kyc-document/${userId}`, { method: 'HEAD' })
         .then(response => {
           const contentType = response.headers.get('Content-Type')
           setIsPdf(contentType === 'application/pdf')
+          setDocumentUrl(`/api/admin/kyc-document/${userId}`)
           setIsLoading(false)
         })
         .catch(() => {
           setPreviewError(true)
           setIsLoading(false)
         })
-    } else {
-      setDocumentUrl(null)
-      setIsLoading(false)
     }
   }, [isOpen, userId])
 
@@ -61,15 +61,13 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
   const PdfPreview = () => (
     <div className="flex flex-col h-[60vh]">
       <div className="flex-1 relative">
-        <embed
+        <iframe
           src={documentUrl!}
-          type="application/pdf"
-          width="100%"
-          height="100%"
-          className="absolute inset-0"
+          className="absolute inset-0 w-full h-full border-0"
+          title={`KYC Document for ${username}`}
         />
       </div>
-      <div className="p-4 flex justify-end">
+      <div className="flex justify-end p-4 bg-background">
         <Button onClick={handleDownload} variant="outline" size="sm">
           <Download className="h-4 w-4 mr-2" />
           Download PDF
