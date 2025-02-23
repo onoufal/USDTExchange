@@ -222,12 +222,6 @@ export default function KYCForm() {
               Your KYC verification has been approved. You can now trade on the platform.
             </AlertDescription>
           </Alert>
-        ) : user?.kycStatus === "pending" ? (
-          <Alert>
-            <AlertDescription className="text-sm">
-              Your document is under review. We'll notify you once it's approved.
-            </AlertDescription>
-          </Alert>
         ) : (
           <div className="space-y-4">
             {!user?.mobileVerified && (
@@ -254,7 +248,7 @@ export default function KYCForm() {
                             onChange(e.target.files?.[0]);
                           }}
                           accept="image/jpeg,image/png,image/jpg,application/pdf"
-                          disabled={!user?.mobileVerified || isUploading}
+                          disabled={!user?.mobileVerified || isUploading || user?.kycStatus === "approved"}
                         />
                       </FormControl>
                       <FormDescription className="text-xs">
@@ -277,7 +271,7 @@ export default function KYCForm() {
                 <Button
                   type="button"
                   className="w-full"
-                  disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending}
+                  disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending || user?.kycStatus === "approved"}
                   onClick={() => {
                     if (file) {
                       documentForm.trigger("document").then((isValid) => {
@@ -295,6 +289,14 @@ export default function KYCForm() {
                 </Button>
               </form>
             </Form>
+
+            {user?.kycStatus === "pending" && (
+              <Alert>
+                <AlertDescription className="text-sm">
+                  Your document is under review. We'll notify you once it's approved.
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
         )}
       </div>
