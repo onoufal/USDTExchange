@@ -42,7 +42,7 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
 
   const handleDownload = () => {
     if (!documentUrl) return
-    window.open(documentUrl, '_blank')
+    window.open(`${documentUrl}?download=true`, '_blank')
   }
 
   const ImagePreview = () => (
@@ -63,20 +63,10 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
   const PdfPreview = () => (
     <div className="w-full h-[60vh] relative">
       <iframe
-        src={`${documentUrl}#toolbar=0`}
+        src={documentUrl!}
         className="w-full h-full border-0"
         title={`KYC Document for ${username}`}
-      >
-        <div className="py-8 text-center">
-          <p className="text-muted-foreground mb-4">
-            PDF preview not available. Please download to view.
-          </p>
-          <Button onClick={handleDownload} variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Download PDF
-          </Button>
-        </div>
-      </iframe>
+      />
       <div className="absolute bottom-4 right-4">
         <Button onClick={handleDownload} variant="outline" size="sm">
           <Download className="h-4 w-4 mr-2" />
