@@ -8,15 +8,16 @@ import { z } from "zod";
 const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Add security headers middleware
   app.use((req, res, next) => {
     res.setHeader(
       "Content-Security-Policy",
-      "default-src 'self'; img-src 'self' data: blob:; object-src 'self' blob:; frame-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src 'self' ws: *;"
+      "default-src 'self'; img-src 'self' data: blob:; object-src 'self' blob:; frame-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src 'self' ws:; plugin-types application/pdf;"
     );
-    res.setHeader('X-Content-Type-Options', 'nosniff');
     next();
   });
 
+  // Setup auth first
   setupAuth(app);
 
   // KYC Routes
@@ -31,6 +32,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const { mobileNumber } = schema.parse(req.body);
+
+      // Check if mobile number is already used by another user
       const users = await storage.getAllUsers();
       const existingUser = users.find(u => 
         u.id !== req.user.id && u.mobileNumber === mobileNumber
@@ -61,13 +64,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     if (!req.file) return res.status(400).json({ message: "No document uploaded" });
 
-    const maxSize = 5 * 1024 * 1024;
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
     if (req.file.size > maxSize) {
       return res.status(400).json({ message: "File size must be less than 5MB" });
     }
 
+    // Validate file type using both mimetype and original filename extension
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
     const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
+
     const fileExtension = req.file.originalname.toLowerCase().match(/\.[^.]*$/)?.[0];
 
     if (!allowedTypes.includes(req.file.mimetype) || !allowedExtensions.includes(fileExtension)) {
@@ -99,14 +105,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/approve-kyc/:userId", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
-
-    try {
-      await storage.approveKYC(parseInt(req.params.userId));
-      res.json({ success: true });
-    } catch (error) {
-      console.error('KYC approval error:', error);
-      res.status(500).json({ message: "Failed to approve KYC" });
-    }
+    await storage.approveKYC(parseInt(req.params.userId));
+    res.json({ success: true });
   });
 
   app.get("/api/admin/kyc-document/:userId", async (req, res) => {
@@ -139,10 +139,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         extension = '.jpg';
       }
 
+      // Set proper headers for preview and download
       res.setHeader('Content-Type', contentType);
       res.setHeader('Content-Length', buffer.length);
       res.setHeader('Accept-Ranges', 'bytes');
       res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
 
       if (req.query.download) {
         res.setHeader('Content-Disposition', `attachment; filename="kyc-document-${user.username}${extension}"`);
@@ -150,6 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.setHeader('Content-Disposition', 'inline');
       }
 
+      // Send the raw buffer data
       res.send(buffer);
     } catch (error) {
       console.error('Error fetching KYC document:', error);
