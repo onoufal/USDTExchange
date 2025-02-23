@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,12 +7,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserCircle } from "lucide-react";
+import { UserCircle, LogOut } from "lucide-react";
 
 export default function NavBar() {
   const { user, logoutMutation } = useAuth();
+  const [, setLocation] = useLocation();
 
   if (!user) return null;
+
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        setLocation('/auth');
+      }
+    });
+  };
 
   return (
     <nav className="border-b">
@@ -26,11 +35,20 @@ export default function NavBar() {
             </Link>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             <span className="mr-4">
               Points: {user.loyaltyPoints}
             </span>
-            
+
+            <Button 
+              variant="outline"
+              onClick={handleLogout}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -43,11 +61,6 @@ export default function NavBar() {
                     <Link href="/admin">Admin Panel</Link>
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem 
-                  onClick={() => logoutMutation.mutate()}
-                >
-                  Logout
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
