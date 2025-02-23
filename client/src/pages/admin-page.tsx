@@ -86,23 +86,20 @@ export default function AdminPage() {
                         <td className="py-2 px-4 capitalize">{user.kycStatus}</td>
                         <td className="py-2 px-4">
                           <div className="flex items-center gap-2">
-                            {/* Always show View Document button if there's a document */}
-                            {user.kycDocument && (
+                            {Boolean(user.kycDocument) && (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => setSelectedUser({ 
-                                  id: user.id, 
-                                  username: user.username 
+                                onClick={() => setSelectedUser({
+                                  id: user.id,
+                                  username: user.username
                                 })}
                               >
                                 <Eye className="h-4 w-4 mr-1" />
                                 View Document
                               </Button>
                             )}
-
-                            {/* Show Approve button only for pending KYC with document */}
-                            {user.kycDocument && user.kycStatus === 'pending' && (
+                            {Boolean(user.kycDocument) && user.kycStatus === "pending" && (
                               <Button
                                 size="sm"
                                 onClick={() => approveKYCMutation.mutate(user.id)}
