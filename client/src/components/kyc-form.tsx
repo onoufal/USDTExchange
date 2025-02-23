@@ -23,7 +23,7 @@ const mobileSchema = z.object({
 });
 
 const documentSchema = z.object({
-  document: z.any().refine((file) => {
+  document: z.instanceof(File).refine((file) => {
     if (!file) return false;
     const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
     const validExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
@@ -67,8 +67,18 @@ export default function KYCForm() {
     },
   });
 
+  // Reset upload progress when file changes
+  useEffect(() => {
+    setUploadProgress(0);
+  }, [file]);
+
   const kycDocumentMutation = useMutation({
     mutationFn: async (file: File) => {
+      // Validate file type before uploading
+      if (!documentSchema.shape.document.parse(file)) {
+        throw new Error("Invalid file type. Please upload a JPG, PNG, or PDF file");
+      }
+
       const formData = new FormData();
       formData.append("document", file);
 
@@ -103,6 +113,7 @@ export default function KYCForm() {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       setFile(null);
       setUploadProgress(0);
+      documentForm.reset();
       toast({
         title: "Document uploaded",
         description: "Your KYC document has been submitted for review",
@@ -118,16 +129,11 @@ export default function KYCForm() {
     },
   });
 
-  // Reset upload progress when file changes
-  useEffect(() => {
-    setUploadProgress(0);
-  }, [file]);
-
   const isUploading = kycDocumentMutation.isPending && uploadProgress > 0;
 
   return (
     <div className="space-y-6">
-      {/* Mobile Verification */}
+      {/* Mobile Verification Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium">Mobile Verification</h3>
@@ -172,7 +178,7 @@ export default function KYCForm() {
         )}
       </div>
 
-      {/* KYC Document Upload */}
+      {/* KYC Document Upload Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium">KYC Verification</h3>
@@ -207,30 +213,52 @@ export default function KYCForm() {
                 <FormField
                   control={documentForm.control}
                   name="document"
-                  render={({ field }) => (
+                  render={({ field: { onChange, ...field }, fieldState }) => (
                     <FormItem>
                       <FormLabel>Identity Document</FormLabel>
                       <FormControl>
                         <Input
                           type="file"
                           onChange={(e) => {
-                            setFile(e.target.files?.[0] || null);
-                            field.onChange(e.target.files?.[0]);
+                            const selectedFile = e.target.files?.[0] || null;
+                            setFile(selectedFile);
+                            onChange(selectedFile);
                           }}
                           accept="image/jpeg,image/png,image/jpg,application/pdf"
                           disabled={!user?.mobileVerified || isUploading}
+                          {...field}
                         />
                       </FormControl>
                       <FormDescription className="text-xs">
                         Upload a clear photo or scan of your ID card or passport (JPG, PNG, or PDF format)
                       </FormDescription>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                {isUploading && (
+                  <div className="space-y-2">
+                    <Progress value={uploadProgress} />
+                    <p className="text-xs text-center text-muted-foreground">
+                      Uploading... {uploadProgress}%
+                    </p>
+                  </div>
+                )}
+
                 <Button
+                  type="button"
                   className="w-full"
                   disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending}
-                  onClick={() => file && kycDocumentMutation.mutate(file)}
+                  onClick={() => {
+                    if (file) {
+                      documentForm.trigger("document").then((isValid) => {
+                        if (isValid) {
+                          kycDocumentMutation.mutate(file);
+                        }
+                      });
+                    }
+                  }}
                 >
                   {kycDocumentMutation.isPending ? (
                     <Upload className="w-4 h-4 mr-2 animate-bounce" />
