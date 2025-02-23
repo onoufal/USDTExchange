@@ -232,41 +232,63 @@ export default function KYCForm() {
               </Alert>
             )}
 
-            <FormItem>
-              <FormLabel>Identity Document</FormLabel>
-              <FormControl>
-                <Input
-                  type="file"
-                  onChange={handleFileChange}
-                  accept="image/jpeg,image/png,image/jpg,application/pdf"
-                  disabled={!user?.mobileVerified || isUploading}
+            <Form {...documentForm}>
+              <form className="space-y-4">
+                <FormField
+                  control={documentForm.control}
+                  name="document"
+                  render={({ field: { onChange, ...field } }) => (
+                    <FormItem>
+                      <FormLabel>Identity Document</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          onChange={(e) => {
+                            handleFileChange(e);
+                            onChange(e.target.files?.[0]);
+                          }}
+                          accept="image/jpeg,image/png,image/jpg,application/pdf"
+                          disabled={!user?.mobileVerified || isUploading}
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        Upload a clear photo or scan of your ID card or passport (JPG, PNG, or PDF format)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </FormControl>
-              <FormDescription className="text-xs">
-                Upload a clear photo or scan of your ID card or passport (JPG, PNG, or PDF format)
-              </FormDescription>
-            </FormItem>
 
-            {isUploading && (
-              <div className="space-y-2">
-                <Progress value={uploadProgress} />
-                <p className="text-xs text-center text-muted-foreground">
-                  Uploading... {uploadProgress}%
-                </p>
-              </div>
-            )}
+                {isUploading && (
+                  <div className="space-y-2">
+                    <Progress value={uploadProgress} />
+                    <p className="text-xs text-center text-muted-foreground">
+                      Uploading... {uploadProgress}%
+                    </p>
+                  </div>
+                )}
 
-            <Button
-              type="button"
-              className="w-full"
-              disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending}
-              onClick={() => file && kycDocumentMutation.mutate(file)}
-            >
-              {kycDocumentMutation.isPending ? (
-                <Upload className="w-4 h-4 mr-2 animate-bounce" />
-              ) : null}
-              {kycDocumentMutation.isPending ? "Uploading..." : "Upload Document"}
-            </Button>
+                <Button
+                  type="button"
+                  className="w-full"
+                  disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending}
+                  onClick={() => {
+                    if (file) {
+                      documentForm.trigger("document").then((isValid) => {
+                        if (isValid) {
+                          kycDocumentMutation.mutate(file);
+                        }
+                      });
+                    }
+                  }}
+                >
+                  {kycDocumentMutation.isPending ? (
+                    <Upload className="w-4 h-4 mr-2 animate-bounce" />
+                  ) : null}
+                  {kycDocumentMutation.isPending ? "Uploading..." : "Upload Document"}
+                </Button>
+              </form>
+            </Form>
 
             {user?.kycStatus === "pending" && (
               <Alert>
