@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -23,6 +23,7 @@ const mobileSchema = z.object({
 });
 
 export default function KYCForm() {
+  // All hooks at the top
   const { toast } = useToast();
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
@@ -99,6 +100,11 @@ export default function KYCForm() {
       });
     },
   });
+
+  // Reset upload progress when file changes
+  useEffect(() => {
+    setUploadProgress(0);
+  }, [file]);
 
   const isUploading = kycDocumentMutation.isPending && uploadProgress > 0;
 
