@@ -45,6 +45,41 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
     window.open(documentUrl, '_blank')
   }
 
+  const ImagePreview = () => (
+    <div className="flex flex-col items-center gap-4">
+      <img 
+        src={documentUrl!}
+        alt={`KYC Document for ${username}`}
+        className="max-h-[60vh] w-auto object-contain"
+        onError={() => setPreviewError(true)}
+      />
+      <Button onClick={handleDownload} variant="outline" size="sm">
+        <Download className="h-4 w-4 mr-2" />
+        Download Image
+      </Button>
+    </div>
+  )
+
+  const PdfPreview = () => (
+    <div className="w-full h-[60vh] relative">
+      <iframe
+        src={`${documentUrl}#toolbar=0`}
+        className="w-full h-full border-0"
+        title={`KYC Document for ${username}`}
+      >
+        <div className="py-8 text-center">
+          <p className="text-muted-foreground mb-4">
+            PDF preview not available. Please download to view.
+          </p>
+          <Button onClick={handleDownload} variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Download PDF
+          </Button>
+        </div>
+      </iframe>
+    </div>
+  )
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl">
@@ -69,36 +104,9 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
                 <Loader2 className="h-8 w-8 animate-spin" />
               </div>
             ) : isPdf ? (
-              <div className="w-full h-[60vh] relative">
-                <object
-                  data={documentUrl}
-                  type="application/pdf"
-                  className="w-full h-full"
-                >
-                  <div className="py-8 text-center">
-                    <p className="text-muted-foreground mb-4">
-                      PDF preview not available. Please download to view.
-                    </p>
-                    <Button onClick={handleDownload} variant="outline">
-                      <Download className="h-4 w-4 mr-2" />
-                      Download PDF
-                    </Button>
-                  </div>
-                </object>
-              </div>
+              <PdfPreview />
             ) : (
-              <div className="flex flex-col items-center gap-4">
-                <img 
-                  src={documentUrl}
-                  alt={`KYC Document for ${username}`}
-                  className="max-h-[60vh] w-auto object-contain"
-                  onError={() => setPreviewError(true)}
-                />
-                <Button onClick={handleDownload} variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Download
-                </Button>
-              </div>
+              <ImagePreview />
             )}
           </div>
         ) : (
