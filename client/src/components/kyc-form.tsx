@@ -248,7 +248,7 @@ export default function KYCForm() {
                             onChange(e.target.files?.[0]);
                           }}
                           accept="image/jpeg,image/png,image/jpg,application/pdf"
-                          disabled={!user?.mobileVerified || isUploading || user?.kycStatus === "pending"}
+                          disabled={!user?.mobileVerified || isUploading || user?.kycStatus === "approved"}
                         />
                       </FormControl>
                       <FormDescription className="text-xs">
@@ -271,7 +271,7 @@ export default function KYCForm() {
                 <Button
                   type="button"
                   className="w-full"
-                  disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending || user?.kycStatus === "pending"}
+                  disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending || user?.kycStatus === "approved"}
                   onClick={() => {
                     if (file) {
                       documentForm.trigger("document").then((isValid) => {

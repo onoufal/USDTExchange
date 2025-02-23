@@ -86,23 +86,25 @@ export default function AdminPage() {
                         <td className="py-2 capitalize">{user.kycStatus}</td>
                         <td className="py-2 space-x-2">
                           {user.kycDocument && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setSelectedUser({ id: user.id, username: user.username })}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View Document
-                            </Button>
-                          )}
-                          {user.kycDocument && user.kycStatus === 'pending' && (
-                            <Button
-                              size="sm"
-                              onClick={() => approveKYCMutation.mutate(user.id)}
-                              disabled={approveKYCMutation.isPending}
-                            >
-                              {approveKYCMutation.isPending ? 'Approving...' : 'Approve KYC'}
-                            </Button>
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setSelectedUser({ id: user.id, username: user.username })}
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                View Document
+                              </Button>
+                              {user.kycStatus === 'pending' && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => approveKYCMutation.mutate(user.id)}
+                                  disabled={approveKYCMutation.isPending}
+                                >
+                                  {approveKYCMutation.isPending ? 'Approving...' : 'Approve KYC'}
+                                </Button>
+                              )}
+                            </>
                           )}
                         </td>
                       </tr>
