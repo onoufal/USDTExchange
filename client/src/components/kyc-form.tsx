@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
@@ -10,16 +10,23 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Clock } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Upload } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
 
 const mobileSchema = z.object({
-  mobileNumber: z.string().regex(/^07[789]\d{7}$/, "Invalid Jordanian mobile number"),
+  mobileNumber: z
+    .string()
+    .regex(/^07[789]\d{7}$/, {
+      message: "Please enter a valid Jordanian mobile number starting with 077, 078, or 079",
+    }),
 });
 
 export default function KYCForm() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const form = useForm({
     resolver: zodResolver(mobileSchema),
@@ -46,23 +53,54 @@ export default function KYCForm() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("document", file);
-      const res = await fetch("/api/kyc/document", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
+
+      const xhr = new XMLHttpRequest();
+
+      const promise = new Promise((resolve, reject) => {
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded * 100) / event.total);
+            setUploadProgress(progress);
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            reject(new Error(xhr.responseText || "Upload failed"));
+          }
+        });
+
+        xhr.addEventListener("error", () => reject(new Error("Upload failed")));
       });
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
+
+      xhr.open("POST", "/api/kyc/document");
+      xhr.withCredentials = true;
+      xhr.send(formData);
+
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       setFile(null);
+      setUploadProgress(0);
       toast({
         title: "Document uploaded",
         description: "Your KYC document has been submitted for review",
       });
     },
+    onError: (error: Error) => {
+      setUploadProgress(0);
+      toast({
+        title: "Upload failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
+
+  const isUploading = kycDocumentMutation.isPending && uploadProgress > 0;
 
   return (
     <div className="space-y-6">
@@ -92,6 +130,9 @@ export default function KYCForm() {
                     <FormControl>
                       <Input placeholder="07xxxxxxxx" {...field} />
                     </FormControl>
+                    <FormDescription className="text-xs">
+                      Enter your Jordanian mobile number starting with 077, 078, or 079
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -124,24 +165,62 @@ export default function KYCForm() {
               <XCircle className="w-4 h-4 mr-1" />
             )}
             {user?.kycStatus === "approved" ? "Approved" :
-             user?.kycStatus === "pending" ? "Pending" : "Not Submitted"}
+             user?.kycStatus === "pending" ? "Pending Review" : "Not Submitted"}
           </Badge>
         </div>
 
         {user?.kycStatus !== "approved" && (
           <div className="space-y-4">
-            <Input
-              type="file"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              accept="image/*,.pdf"
-            />
+            {!user?.mobileVerified && (
+              <Alert>
+                <AlertDescription className="text-sm">
+                  Please verify your mobile number before uploading KYC documents
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <FormItem>
+              <FormLabel>Identity Document</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  accept="image/jpeg,image/png,image/jpg,application/pdf"
+                  disabled={!user?.mobileVerified || isUploading}
+                />
+              </FormControl>
+              <FormDescription className="text-xs">
+                Upload a clear photo or scan of your ID card or passport (JPG, PNG, or PDF format)
+              </FormDescription>
+            </FormItem>
+
+            {isUploading && (
+              <div className="space-y-2">
+                <Progress value={uploadProgress} />
+                <p className="text-xs text-center text-muted-foreground">
+                  Uploading... {uploadProgress}%
+                </p>
+              </div>
+            )}
+
             <Button
               className="w-full"
-              disabled={!file || kycDocumentMutation.isPending}
+              disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending}
               onClick={() => file && kycDocumentMutation.mutate(file)}
             >
+              {kycDocumentMutation.isPending ? (
+                <Upload className="w-4 h-4 mr-2 animate-bounce" />
+              ) : null}
               {kycDocumentMutation.isPending ? "Uploading..." : "Upload Document"}
             </Button>
+
+            {user?.kycStatus === "pending" && (
+              <Alert>
+                <AlertDescription className="text-sm">
+                  Your document is under review. We'll notify you once it's approved.
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
         )}
       </div>
