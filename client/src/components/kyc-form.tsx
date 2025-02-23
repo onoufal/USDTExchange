@@ -23,7 +23,13 @@ const mobileSchema = z.object({
 });
 
 const documentSchema = z.object({
-  document: z.any()
+  document: z.any().refine((file) => {
+    if (!file) return false;
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    const validExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
+    const extension = file.name.toLowerCase().match(/\.[^.]*$/)?.[0];
+    return validTypes.includes(file.type) && validExtensions.includes(extension);
+  }, "Please upload a valid JPG, PNG, or PDF file")
 });
 
 export default function KYCForm() {
