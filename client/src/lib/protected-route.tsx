@@ -12,6 +12,7 @@ export function ProtectedRoute({
   component: () => React.JSX.Element;
   adminOnly?: boolean;
 }) {
+  // All hooks at the top
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 

@@ -16,13 +16,9 @@ const loginSchema = insertUserSchema.pick({
 });
 
 export default function AuthPage() {
+  // All hooks at the top
   const { loginMutation, registerMutation, user } = useAuth();
   const [, setLocation] = useLocation();
-
-  if (user) {
-    setLocation("/");
-    return null;
-  }
 
   const loginForm = useForm({
     resolver: zodResolver(loginSchema),
@@ -40,6 +36,12 @@ export default function AuthPage() {
       fullName: "",
     },
   });
+
+  // Handle navigation after all hooks
+  if (user) {
+    setLocation("/");
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex">
