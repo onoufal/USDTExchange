@@ -5,16 +5,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { DocumentPreviewModal } from "@/components/document-preview-modal";
+import { useState } from "react";
+import { Eye } from "lucide-react";
 
 export default function AdminPage() {
   const { toast } = useToast();
-  
+  const [selectedUser, setSelectedUser] = useState<{ id: number; username: string } | null>(null);
+
   const { data: users } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
   });
 
   const { data: transactions } = useQuery<Transaction[]>({
     queryKey: ["/api/admin/transactions"],
+  });
+
+  const { data: documentData, isLoading: isLoadingDocument } = useQuery({
+    queryKey: ["/api/admin/kyc-document", selectedUser?.id],
+    queryFn: async () => {
+      if (!selectedUser) return null;
+      const res = await apiRequest("GET", `/api/admin/kyc-document/${selectedUser.id}`);
+      return res.json();
+    },
+    enabled: !!selectedUser,
   });
 
   const approveKYCMutation = useMutation({
@@ -45,6 +59,13 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <DocumentPreviewModal 
+        isOpen={!!selectedUser}
+        onClose={() => setSelectedUser(null)}
+        documentBase64={documentData?.document || null}
+        username={selectedUser?.username || ''}
+      />
+
       <Tabs defaultValue="users">
         <TabsList>
           <TabsTrigger value="users">Users & KYC</TabsTrigger>
@@ -75,7 +96,17 @@ export default function AdminPage() {
                         <td className="py-2">{user.fullName}</td>
                         <td className="py-2">{user.mobileNumber || 'Not verified'}</td>
                         <td className="py-2 capitalize">{user.kycStatus}</td>
-                        <td className="py-2">
+                        <td className="py-2 space-x-2">
+                          {user.kycDocument && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setSelectedUser({ id: user.id, username: user.username })}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View Document
+                            </Button>
+                          )}
                           {user.kycStatus === 'pending' && user.kycDocument && (
                             <Button
                               size="sm"

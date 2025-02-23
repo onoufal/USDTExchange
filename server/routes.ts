@@ -128,6 +128,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   });
 
+  // Add this endpoint after the existing admin routes
+  app.get("/api/admin/kyc-document/:userId", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+
+    try {
+      const user = await storage.getUser(parseInt(req.params.userId));
+      if (!user || !user.kycDocument) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+
+      res.json({ 
+        document: `data:${user.kycDocument.includes('PDF') ? 'application/pdf' : 'image/jpeg'};base64,${user.kycDocument}` 
+      });
+    } catch (error) {
+      console.error('Error fetching KYC document:', error);
+      res.status(500).json({ message: "Failed to fetch document" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
