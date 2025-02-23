@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Loader2, Download } from "lucide-react"
 
@@ -11,12 +11,25 @@ interface DocumentPreviewModalProps {
 }
 
 export function DocumentPreviewModal({ isOpen, onClose, documentBase64, username }: DocumentPreviewModalProps) {
-  const [isPdfLoading, setIsPdfLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
   const [previewError, setPreviewError] = useState(false)
   const isPdf = documentBase64?.startsWith('data:application/pdf')
 
+  // Reset states when modal opens or document changes
+  useEffect(() => {
+    if (isOpen && documentBase64) {
+      setIsLoading(true)
+      setPreviewError(false)
+    }
+  }, [isOpen, documentBase64])
+
   const handlePreviewError = () => {
     setPreviewError(true)
+    setIsLoading(false)
+  }
+
+  const handleLoad = () => {
+    setIsLoading(false)
   }
 
   const handleDownload = () => {
@@ -55,7 +68,7 @@ export function DocumentPreviewModal({ isOpen, onClose, documentBase64, username
                   data={documentBase64}
                   type="application/pdf"
                   className="w-full h-[60vh]"
-                  onLoad={() => setIsPdfLoading(false)}
+                  onLoad={handleLoad}
                   onError={handlePreviewError}
                 >
                   <embed 
@@ -64,19 +77,27 @@ export function DocumentPreviewModal({ isOpen, onClose, documentBase64, username
                     className="w-full h-[60vh]"
                   />
                 </object>
-                {isPdfLoading && (
+                {isLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/80">
                     <Loader2 className="h-8 w-8 animate-spin" />
                   </div>
                 )}
               </>
             ) : (
-              <img 
-                src={documentBase64} 
-                alt={`KYC Document for ${username}`}
-                className="max-h-[60vh] mx-auto"
-                onError={handlePreviewError}
-              />
+              <>
+                <img 
+                  src={documentBase64} 
+                  alt={`KYC Document for ${username}`}
+                  className="max-h-[60vh] mx-auto"
+                  onLoad={handleLoad}
+                  onError={handlePreviewError}
+                />
+                {isLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                  </div>
+                )}
+              </>
             )}
 
             {!previewError && (
