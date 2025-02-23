@@ -12,15 +12,12 @@ import NavBar from "./components/nav-bar";
 
 function Router() {
   return (
-    <div className="min-h-screen bg-background">
-      <NavBar />
-      <Switch>
-        <Route path="/" component={HomePage} />
-        <Route path="/auth" component={AuthPage} />
-        <Route path="/admin" component={AdminPage} />
-        <Route component={NotFound} />
-      </Switch>
-    </div>
+    <Switch>
+      <ProtectedRoute path="/" component={HomePage} />
+      <Route path="/auth" component={AuthPage} />
+      <ProtectedRoute path="/admin" component={AdminPage} adminOnly />
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 
@@ -28,8 +25,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router />
-        <Toaster />
+        <div className="min-h-screen bg-background">
+          <NavBar />
+          <Router />
+          <Toaster />
+        </div>
       </AuthProvider>
     </QueryClientProvider>
   );
