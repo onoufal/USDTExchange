@@ -22,6 +22,10 @@ const mobileSchema = z.object({
     }),
 });
 
+const documentSchema = z.object({
+  document: z.any()
+});
+
 export default function KYCForm() {
   // All hooks at the top
   const { toast } = useToast();
@@ -29,10 +33,17 @@ export default function KYCForm() {
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const form = useForm({
+  const mobileForm = useForm({
     resolver: zodResolver(mobileSchema),
     defaultValues: {
       mobileNumber: user?.mobileNumber || "",
+    },
+  });
+
+  const documentForm = useForm({
+    resolver: zodResolver(documentSchema),
+    defaultValues: {
+      document: undefined,
     },
   });
 
@@ -125,10 +136,10 @@ export default function KYCForm() {
         </div>
 
         {!user?.mobileVerified && (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit((data) => mobileVerificationMutation.mutate(data))} className="space-y-4">
+          <Form {...mobileForm}>
+            <form onSubmit={mobileForm.handleSubmit((data) => mobileVerificationMutation.mutate(data))} className="space-y-4">
               <FormField
-                control={form.control}
+                control={mobileForm.control}
                 name="mobileNumber"
                 render={({ field }) => (
                   <FormItem>
@@ -185,40 +196,43 @@ export default function KYCForm() {
               </Alert>
             )}
 
-            <FormItem>
-              <FormLabel>Identity Document</FormLabel>
-              <FormControl>
-                <Input
-                  type="file"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
-                  accept="image/jpeg,image/png,image/jpg,application/pdf"
-                  disabled={!user?.mobileVerified || isUploading}
+            <Form {...documentForm}>
+              <form className="space-y-4">
+                <FormField
+                  control={documentForm.control}
+                  name="document"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Identity Document</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          onChange={(e) => {
+                            setFile(e.target.files?.[0] || null);
+                            field.onChange(e.target.files?.[0]);
+                          }}
+                          accept="image/jpeg,image/png,image/jpg,application/pdf"
+                          disabled={!user?.mobileVerified || isUploading}
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        Upload a clear photo or scan of your ID card or passport (JPG, PNG, or PDF format)
+                      </FormDescription>
+                    </FormItem>
+                  )}
                 />
-              </FormControl>
-              <FormDescription className="text-xs">
-                Upload a clear photo or scan of your ID card or passport (JPG, PNG, or PDF format)
-              </FormDescription>
-            </FormItem>
-
-            {isUploading && (
-              <div className="space-y-2">
-                <Progress value={uploadProgress} />
-                <p className="text-xs text-center text-muted-foreground">
-                  Uploading... {uploadProgress}%
-                </p>
-              </div>
-            )}
-
-            <Button
-              className="w-full"
-              disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending}
-              onClick={() => file && kycDocumentMutation.mutate(file)}
-            >
-              {kycDocumentMutation.isPending ? (
-                <Upload className="w-4 h-4 mr-2 animate-bounce" />
-              ) : null}
-              {kycDocumentMutation.isPending ? "Uploading..." : "Upload Document"}
-            </Button>
+                <Button
+                  className="w-full"
+                  disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending}
+                  onClick={() => file && kycDocumentMutation.mutate(file)}
+                >
+                  {kycDocumentMutation.isPending ? (
+                    <Upload className="w-4 h-4 mr-2 animate-bounce" />
+                  ) : null}
+                  {kycDocumentMutation.isPending ? "Uploading..." : "Upload Document"}
+                </Button>
+              </form>
+            </Form>
 
             {user?.kycStatus === "pending" && (
               <Alert>
