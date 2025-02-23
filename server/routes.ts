@@ -14,20 +14,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // KYC Routes
   app.post("/api/kyc/mobile", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    const schema = z.object({ mobileNumber: z.string() });
-    const { mobileNumber } = schema.parse(req.body);
 
-    // Mock OTP verification - always succeeds
-    await storage.updateUserMobile(req.user.id, mobileNumber);
-    res.json({ success: true });
+    try {
+      const schema = z.object({ 
+        mobileNumber: z.string().regex(/^07[789]\d{7}$/, {
+          message: "Invalid Jordanian mobile number format"
+        })
+      });
+
+      const { mobileNumber } = schema.parse(req.body);
+
+      // Check if mobile number is already used by another user
+      const users = await storage.getAllUsers();
+      const existingUser = users.find(u => 
+        u.id !== req.user.id && u.mobileNumber === mobileNumber
+      );
+
+      if (existingUser) {
+        return res.status(400).json({ 
+          message: "This mobile number is already registered" 
+        });
+      }
+
+      await storage.updateUserMobile(req.user.id, mobileNumber);
+      res.json({ success: true });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: error.errors[0].message 
+        });
+      }
+      console.error('Mobile verification error:', error);
+      res.status(500).json({ 
+        message: "Failed to verify mobile number" 
+      });
+    }
   });
 
   app.post("/api/kyc/document", upload.single("document"), async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    if (!req.file) return res.status(400).send("No document uploaded");
+    if (!req.file) return res.status(400).json({ message: "No document uploaded" });
 
-    await storage.updateUserKYC(req.user.id, req.file.buffer.toString("base64"));
-    res.json({ success: true });
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (req.file.size > maxSize) {
+      return res.status(400).json({ message: "File size must be less than 5MB" });
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({ 
+        message: "Invalid file type. Please upload a JPG, PNG, or PDF file" 
+      });
+    }
+
+    try {
+      await storage.updateUserKYC(req.user.id, req.file.buffer.toString("base64"));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('KYC document upload error:', error);
+      res.status(500).json({ message: "Failed to process document upload" });
+    }
   });
 
   // Trading Routes
