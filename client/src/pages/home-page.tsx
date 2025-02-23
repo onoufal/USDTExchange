@@ -22,22 +22,22 @@ export default function HomePage() {
   if (!user) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold mb-6">Welcome, {user.fullName}</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Welcome, {user.fullName}</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Trading Section */}
-        <div className="md:col-span-2">
+        <div className="lg:col-span-2 space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Trade USDT</CardTitle>
-              <CardDescription>Buy or sell USDT for Jordanian Dinar (JOD)</CardDescription>
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-lg sm:text-xl">Trade USDT</CardTitle>
+              <CardDescription className="text-sm">Buy or sell USDT for Jordanian Dinar (JOD)</CardDescription>
             </CardHeader>
             <CardContent>
               {showKYCWarning ? (
                 <Alert className="mb-4">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
+                  <AlertDescription className="text-sm">
                     Please complete mobile verification and KYC before trading
                   </AlertDescription>
                 </Alert>
@@ -52,7 +52,7 @@ export default function HomePage() {
         <div>
           <Card>
             <CardHeader>
-              <CardTitle>Verification Status</CardTitle>
+              <CardTitle className="text-lg sm:text-xl">Verification Status</CardTitle>
             </CardHeader>
             <CardContent>
               <KYCForm />
@@ -62,34 +62,38 @@ export default function HomePage() {
       </div>
 
       {/* Transaction History */}
-      <Card className="mt-8">
+      <Card className="mt-4 sm:mt-8">
         <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Transaction History</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2">Type</th>
-                  <th className="text-left py-2">Amount</th>
-                  <th className="text-left py-2">Rate</th>
-                  <th className="text-left py-2">Status</th>
-                  <th className="text-left py-2">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions?.map((tx) => (
-                  <tr key={tx.id} className="border-b">
-                    <td className="py-2 capitalize">{tx.type}</td>
-                    <td className="py-2">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
-                    <td className="py-2">{tx.rate}</td>
-                    <td className="py-2 capitalize">{tx.status}</td>
-                    <td className="py-2">{new Date(tx.createdAt).toLocaleDateString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <div className="min-w-full inline-block align-middle">
+              <div className="overflow-hidden">
+                <table className="min-w-full divide-y divide-border">
+                  <thead>
+                    <tr className="bg-muted/50">
+                      <th className="px-4 py-2 text-left text-xs sm:text-sm font-medium">Type</th>
+                      <th className="px-4 py-2 text-left text-xs sm:text-sm font-medium">Amount</th>
+                      <th className="px-4 py-2 text-left text-xs sm:text-sm font-medium">Rate</th>
+                      <th className="px-4 py-2 text-left text-xs sm:text-sm font-medium">Status</th>
+                      <th className="px-4 py-2 text-left text-xs sm:text-sm font-medium">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {transactions?.map((tx) => (
+                      <tr key={tx.id} className="hover:bg-muted/50">
+                        <td className="px-4 py-2 text-xs sm:text-sm capitalize">{tx.type}</td>
+                        <td className="px-4 py-2 text-xs sm:text-sm">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
+                        <td className="px-4 py-2 text-xs sm:text-sm">{tx.rate}</td>
+                        <td className="px-4 py-2 text-xs sm:text-sm capitalize">{tx.status}</td>
+                        <td className="px-4 py-2 text-xs sm:text-sm">{new Date(tx.createdAt).toLocaleDateString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
