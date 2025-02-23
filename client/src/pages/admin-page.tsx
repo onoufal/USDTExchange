@@ -30,7 +30,9 @@ export default function AdminPage() {
       return res.json();
     },
     onSuccess: () => {
+      // Invalidate both admin users and user queries to ensure both panels update
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
         title: "KYC Approved",
         description: "User KYC has been approved successfully",
