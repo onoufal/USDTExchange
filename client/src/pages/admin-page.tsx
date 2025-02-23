@@ -84,7 +84,7 @@ export default function AdminPage() {
                               View Document
                             </Button>
                           )}
-                          {user.kycStatus === 'pending' && user.kycDocument && (
+                          {user.kycDocument && user.kycStatus === 'pending' && (
                             <Button
                               size="sm"
                               onClick={() => approveKYCMutation.mutate(user.id)}
