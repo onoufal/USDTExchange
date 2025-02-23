@@ -23,10 +23,20 @@ async function hashPassword(password: string) {
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
+  // For admin user with unhashed password
+  if (supplied === stored) {
+    return true;
+  }
+
+  // For other users with hashed passwords
+  try {
+    const [hashed, salt] = stored.split(".");
+    const hashedBuf = Buffer.from(hashed, "hex");
+    const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+    return timingSafeEqual(hashedBuf, suppliedBuf);
+  } catch (err) {
+    return false;
+  }
 }
 
 export function setupAuth(app: Express) {
@@ -73,7 +83,7 @@ export function setupAuth(app: Express) {
           return done(null, false, { message: "Invalid username or password" });
         }
 
-        // For the default admin user
+        // For the default admin user, do a direct comparison
         if (username === "admin" && password === "admin123") {
           log(`Admin login successful for ${username}`);
           return done(null, user);
@@ -96,7 +106,6 @@ export function setupAuth(app: Express) {
 
   passport.serializeUser((user, done) => {
     log(`Serializing user: ${user.username}`);
-    log(`Serialized session data before: ${JSON.stringify(user)}`);
     done(null, user.id);
   });
 
@@ -109,7 +118,6 @@ export function setupAuth(app: Express) {
         return done(null, false);
       }
       log(`Deserialization successful for user: ${user.username}`);
-      log(`Deserialized user data: ${JSON.stringify(user)}`);
       done(null, user);
     } catch (err) {
       log(`Deserialization error for ID ${id}: ${err}`);
@@ -133,7 +141,6 @@ export function setupAuth(app: Express) {
       req.login(user, (err) => {
         if (err) return next(err);
         log(`New user registered and logged in: ${user.username}`);
-        log(`Session after registration: ${JSON.stringify(req.session)}`);
         res.status(201).json(user);
       });
     } catch (err) {
@@ -148,8 +155,8 @@ export function setupAuth(app: Express) {
         return next(err);
       }
       if (!user) {
-        log(`Login failed: ${info.message}`);
-        return res.status(401).json({ message: info.message || "Authentication failed" });
+        log(`Login failed: ${info?.message}`);
+        return res.status(401).json({ message: info?.message || "Authentication failed" });
       }
       req.login(user, (err) => {
         if (err) {
@@ -157,7 +164,6 @@ export function setupAuth(app: Express) {
           return next(err);
         }
         log(`User logged in successfully: ${user.username}`);
-        log(`Session after login: ${JSON.stringify(req.session)}`);
         res.json(user);
       });
     })(req, res, next);
@@ -165,28 +171,18 @@ export function setupAuth(app: Express) {
 
   app.post("/api/logout", (req, res, next) => {
     const username = req.user?.username;
-    log(`Logout request - Session before: ${JSON.stringify(req.session)}`);
+    log(`Logout request received for user: ${username}`);
     req.logout((err) => {
       if (err) {
         log(`Logout error for ${username}: ${err}`);
         return next(err);
       }
       log(`User logged out successfully: ${username}`);
-      log(`Session after logout: ${JSON.stringify(req.session)}`);
       res.sendStatus(200);
     });
   });
 
   app.get("/api/user", (req, res) => {
-    log(`/api/user session check - isAuthenticated: ${req.isAuthenticated()}`);
-    log(`/api/user session data: ${JSON.stringify(req.session)}`);
-    log(`/api/user session ID: ${req.sessionID}`);
-    log(`/api/user passport session: ${JSON.stringify(req.session.passport)}`);
-
-    if (req.user) {
-      log(`/api/user current user: ${JSON.stringify(req.user)}`);
-    }
-
     if (!req.isAuthenticated()) {
       return res.sendStatus(401);
     }
