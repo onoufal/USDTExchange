@@ -26,7 +26,9 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
       // Detect if PDF by checking the Content-Type header
       fetch(`/api/admin/kyc-document/${userId}`, { method: 'HEAD' })
         .then(response => {
-          setIsPdf(response.headers.get('Content-Type') === 'application/pdf')
+          const contentType = response.headers.get('Content-Type');
+          setIsPdf(contentType === 'application/pdf');
+          setIsLoading(false);
         })
         .catch(() => {
           setPreviewError(true)
@@ -34,30 +36,9 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
         })
     } else {
       setDocumentUrl(null)
+      setIsLoading(false)
     }
   }, [isOpen, userId])
-
-  // Add a loading timeout
-  useEffect(() => {
-    if (isLoading) {
-      const timer = setTimeout(() => {
-        if (isLoading) {
-          setPreviewError(true)
-          setIsLoading(false)
-        }
-      }, 10000) // 10 second timeout
-      return () => clearTimeout(timer)
-    }
-  }, [isLoading])
-
-  const handleLoad = () => {
-    setIsLoading(false)
-  }
-
-  const handleError = () => {
-    setPreviewError(true)
-    setIsLoading(false)
-  }
 
   const handleDownload = () => {
     if (!documentUrl) return
@@ -83,46 +64,36 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
                   Download Document
                 </Button>
               </div>
+            ) : isLoading ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/80">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
             ) : isPdf ? (
-              <>
+              <div className="w-full h-[60vh] relative">
                 <object
                   data={documentUrl}
                   type="application/pdf"
-                  className="w-full h-[60vh]"
-                  onLoad={handleLoad}
-                  onError={handleError}
+                  className="w-full h-full"
                 >
-                  <embed 
-                    src={documentUrl} 
-                    type="application/pdf"
-                    className="w-full h-[60vh]"
-                  />
-                </object>
-                {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-                    <Loader2 className="h-8 w-8 animate-spin" />
+                  <div className="py-8 text-center">
+                    <p className="text-muted-foreground mb-4">
+                      PDF preview not available
+                    </p>
+                    <Button onClick={handleDownload} variant="outline">
+                      <Download className="h-4 w-4 mr-2" />
+                      Download PDF
+                    </Button>
                   </div>
-                )}
-              </>
+                </object>
+              </div>
             ) : (
-              <>
+              <div className="flex flex-col items-center gap-4">
                 <img 
                   src={documentUrl}
                   alt={`KYC Document for ${username}`}
-                  className="max-h-[60vh] mx-auto"
-                  onLoad={handleLoad}
-                  onError={handleError}
+                  className="max-h-[60vh] w-auto object-contain"
+                  onError={() => setPreviewError(true)}
                 />
-                {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                  </div>
-                )}
-              </>
-            )}
-
-            {!previewError && (
-              <div className="mt-4 flex justify-end">
                 <Button onClick={handleDownload} variant="outline" size="sm">
                   <Download className="h-4 w-4 mr-2" />
                   Download
