@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserCircle, LogOut } from "lucide-react";
+import { UserCircle, LogOut, Shield } from "lucide-react";
 
 export default function NavBar() {
   // All hooks at the top of the component, no conditional calls
@@ -43,6 +43,17 @@ export default function NavBar() {
               Points: {user.loyaltyPoints}
             </span>
 
+            {user.role === "admin" && (
+              <Button 
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => setLocation('/admin')}
+              >
+                <Shield className="h-4 w-4" />
+                Admin Panel
+              </Button>
+            )}
+
             <Button 
               variant="outline"
               onClick={handleLogout}
@@ -59,11 +70,9 @@ export default function NavBar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {user.role === "admin" && (
-                  <DropdownMenuItem>
-                    <Link href="/admin">Admin Panel</Link>
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem>
+                  <Link href="/profile">Profile</Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
