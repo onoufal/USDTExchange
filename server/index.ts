@@ -63,7 +63,8 @@ app.use((req, res, next) => {
     res.status(status).json({ message });
   });
 
-  if (app.get("env") === "development") {
+  // Ensure Vite middleware is set up before static serving
+  if (process.env.NODE_ENV !== "production") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
