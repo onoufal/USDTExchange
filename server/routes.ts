@@ -61,9 +61,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ message: "File size must be less than 5MB" });
     }
 
-    // Validate file type
+    // Validate file type using both mimetype and original filename extension
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
-    if (!allowedTypes.includes(req.file.mimetype)) {
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
+
+    const fileExtension = req.file.originalname.toLowerCase().match(/\.[^.]*$/)?.[0];
+
+    if (!allowedTypes.includes(req.file.mimetype) || !allowedExtensions.includes(fileExtension)) {
       return res.status(400).json({ 
         message: "Invalid file type. Please upload a JPG, PNG, or PDF file" 
       });
