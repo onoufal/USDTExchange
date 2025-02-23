@@ -119,15 +119,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Document not found" });
       }
 
-      const isPdf = user.kycDocument.includes('PDF') || user.kycDocument.includes('pdf');
-      const contentType = isPdf ? 'application/pdf' : 'image/jpeg';
+      const buffer = Buffer.from(user.kycDocument, 'base64');
+
+      // Check the file signature to determine the actual file type
+      const isPdf = buffer.toString('ascii', 0, 5) === '%PDF-';
+      const isPng = buffer.toString('hex', 0, 8) === '89504e470d0a1a0a';
+      const isJpg = buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[buffer.length - 2] === 0xFF && buffer[buffer.length - 1] === 0xD9;
+
+      let contentType = 'application/octet-stream';
+      let extension = '.bin';
+
+      if (isPdf) {
+        contentType = 'application/pdf';
+        extension = '.pdf';
+      } else if (isPng) {
+        contentType = 'image/png';
+        extension = '.png';
+      } else if (isJpg) {
+        contentType = 'image/jpeg';
+        extension = '.jpg';
+      }
 
       // Set proper content type headers
       res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Disposition', `inline; filename="kyc-document-${user.username}${isPdf ? '.pdf' : '.jpg'}"`);
+      res.setHeader('Content-Disposition', `inline; filename="kyc-document-${user.username}${extension}"`);
 
       // Send the raw buffer data
-      const buffer = Buffer.from(user.kycDocument, 'base64');
       return res.send(buffer);
     } catch (error) {
       console.error('Error fetching KYC document:', error);
