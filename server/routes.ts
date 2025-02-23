@@ -8,7 +8,16 @@ import { z } from "zod";
 const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup auth first, which includes session and passport middleware
+  // Add security headers middleware
+  app.use((req, res, next) => {
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'self'; img-src 'self' data: blob:; object-src 'self' data: blob:; frame-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; connect-src 'self' ws:;"
+    );
+    next();
+  });
+
+  // Setup auth first
   setupAuth(app);
 
   // KYC Routes
@@ -82,27 +91,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Trading Routes
-  app.post("/api/trade", upload.single("proofOfPayment"), async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    if (!req.user.mobileVerified) return res.status(403).send("Mobile verification required");
-    if (req.user.kycStatus !== "approved") return res.status(403).send("KYC approval required");
-
-    const transaction = await storage.createTransaction({
-      userId: req.user.id,
-      ...req.body,
-      proofOfPayment: req.file?.buffer.toString("base64")
-    });
-
-    res.json(transaction);
-  });
-
-  app.get("/api/transactions", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    const transactions = await storage.getUserTransactions(req.user.id);
-    res.json(transactions);
-  });
-
   // Admin Routes
   app.get("/api/admin/users", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
@@ -122,13 +110,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   });
 
-  app.post("/api/admin/approve-transaction/:transactionId", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
-    await storage.approveTransaction(parseInt(req.params.transactionId));
-    res.json({ success: true });
-  });
-
-  // Add this endpoint after the existing admin routes
   app.get("/api/admin/kyc-document/:userId", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
 
@@ -138,8 +119,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Document not found" });
       }
 
+      const isPdf = user.kycDocument.includes('PDF') || user.kycDocument.includes('pdf');
+      const contentType = isPdf ? 'application/pdf' : 'image/jpeg';
+
       res.json({ 
-        document: `data:${user.kycDocument.includes('PDF') ? 'application/pdf' : 'image/jpeg'};base64,${user.kycDocument}` 
+        document: `data:${contentType};base64,${user.kycDocument}`,
+        filename: `kyc-document-${user.username}${isPdf ? '.pdf' : '.jpg'}`
       });
     } catch (error) {
       console.error('Error fetching KYC document:', error);
