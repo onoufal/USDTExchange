@@ -86,7 +86,7 @@ export default function AdminPage() {
                         <td className="py-2 capitalize">{user.kycStatus}</td>
                         <td className="py-2 space-x-2">
                           {user.kycDocument && (
-                            <>
+                            <div className="flex gap-2">
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -104,7 +104,7 @@ export default function AdminPage() {
                                   {approveKYCMutation.isPending ? 'Approving...' : 'Approve KYC'}
                                 </Button>
                               )}
-                            </>
+                            </div>
                           )}
                         </td>
                       </tr>
