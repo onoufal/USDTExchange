@@ -19,6 +19,7 @@ export interface IStorage {
   getUserTransactions(userId: number): Promise<Transaction[]>;
   getAllTransactions(): Promise<Transaction[]>;
   approveTransaction(id: number): Promise<void>;
+  getTransaction(id: number): Promise<Transaction | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -105,9 +106,6 @@ export class MemStorage implements IStorage {
     };
 
     this.users.set(id, updatedUser);
-
-    // Log the update for debugging
-    console.log('KYC approved for user:', id, 'New status:', updatedUser.kycStatus);
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -138,6 +136,10 @@ export class MemStorage implements IStorage {
 
   async getAllTransactions(): Promise<Transaction[]> {
     return Array.from(this.transactions.values());
+  }
+
+  async getTransaction(id: number): Promise<Transaction | undefined> {
+    return this.transactions.get(id);
   }
 
   async approveTransaction(id: number): Promise<void> {

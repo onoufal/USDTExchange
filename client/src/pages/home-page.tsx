@@ -1,7 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertCircle } from "lucide-react";
 import TradeForm from "@/components/trade-form";
 import KYCForm from "@/components/kyc-form";
@@ -90,6 +89,13 @@ export default function HomePage() {
                         <td className="px-4 py-2 text-xs sm:text-sm">{new Date(tx.createdAt).toLocaleDateString()}</td>
                       </tr>
                     ))}
+                    {(!transactions || transactions.length === 0) && (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-4 text-center text-sm text-muted-foreground">
+                          No transactions yet
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
