@@ -230,7 +230,7 @@ export default function TradeForm() {
     } else {
       // For sell, always show commission in JOD
       // Calculate the JOD equivalent first
-      const jodAmount = isForeignCurrency 
+      const jodAmount = isForeignCurrency
         ? num * MOCK_RATE  // If amount is in JOD, convert to USDT first
         : num * MOCK_RATE; // If amount is in USDT, convert to JOD
       return (jodAmount * COMMISSION_RATE).toFixed(2) + " JOD";
@@ -252,15 +252,15 @@ export default function TradeForm() {
         return (num / MOCK_RATE * (1 - COMMISSION_RATE)).toFixed(2);
       }
     } else {
+      // For sell operations
       if (isForeignCurrency) {
-        // Entering JOD, convert to USDT and add commission
+        // Entering JOD, show final USDT amount
         const usdtAmount = num / MOCK_RATE;
         return (usdtAmount * (1 + COMMISSION_RATE)).toFixed(2);
       } else {
-        // Entering USDT, convert to JOD, subtract commission, then back to USDT
+        // Entering USDT, show final JOD amount
         const jodAmount = num * MOCK_RATE;
-        const jodAfterCommission = jodAmount * (1 - COMMISSION_RATE);
-        return (jodAfterCommission / MOCK_RATE).toFixed(2);
+        return (jodAmount * (1 - COMMISSION_RATE)).toFixed(2);
       }
     }
   };
