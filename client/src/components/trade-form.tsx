@@ -329,7 +329,7 @@ export default function TradeForm() {
                     </FormControl>
                   </div>
                   <FormDescription className="text-xs">
-                    Enter the amount you want to {type} in {getCurrentCurrencyLabel()}
+                    Enter the amount you want to {form.watch("type")} in {getCurrentCurrencyLabel()}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -371,7 +371,7 @@ export default function TradeForm() {
 
             <Alert>
               <AlertDescription className="text-xs sm:text-sm">
-                {type === "buy" ? (
+                {form.watch("type") === "buy" ? (
                   <>
                     <p className="mb-2">Choose your preferred payment method:</p>
                     <RadioGroup defaultValue="cliq" className="mb-4 space-y-3">
@@ -407,57 +407,59 @@ export default function TradeForm() {
                       )}
                     </RadioGroup>
                     <p className="text-xs text-muted-foreground">
-                      Please send {amount} JOD using your selected payment method and upload the proof below.
+                      Please send {form.watch("amount")} JOD using your selected payment method and upload the proof below.
                       <br />
-                      You will receive {calculateFinalAmount(amount)} USDT after approval.
+                      You will receive {calculateFinalAmount(form.watch("amount"))} USDT after approval.
                     </p>
                   </>
                 ) : (
                   <>
                     <p className="mb-2">Select USDT network for payment:</p>
-                    <FormField
-                      control={form.control}
-                      name="network"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <RadioGroup
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              className="mb-4 space-y-3"
-                            >
-                              {paymentSettings?.usdtAddressTRC20 && (
-                                <div className="space-y-2">
-                                  <div className="flex items-center space-x-3">
-                                    <RadioGroupItem value="trc20" id="trc20" />
-                                    <FormLabel htmlFor="trc20" className="font-medium">TRC20 Network</FormLabel>
+                    <div className="space-y-4 mb-4">
+                      <FormField
+                        control={form.control}
+                        name="network"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <RadioGroup
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                className="space-y-3"
+                              >
+                                {paymentSettings?.usdtAddressTRC20 && (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center space-x-3">
+                                      <RadioGroupItem value="trc20" id="trc20" />
+                                      <FormLabel htmlFor="trc20" className="font-medium">TRC20 Network</FormLabel>
+                                    </div>
+                                    <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                                      <p className="font-mono break-all">{paymentSettings.usdtAddressTRC20}</p>
+                                    </div>
                                   </div>
-                                  <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                                    <p className="font-mono break-all">{paymentSettings.usdtAddressTRC20}</p>
+                                )}
+                                {paymentSettings?.usdtAddressBEP20 && (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center space-x-3">
+                                      <RadioGroupItem value="bep20" id="bep20" />
+                                      <FormLabel htmlFor="bep20" className="font-medium">BEP20 Network</FormLabel>
+                                    </div>
+                                    <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                                      <p className="font-mono break-all">{paymentSettings.usdtAddressBEP20}</p>
+                                    </div>
                                   </div>
-                                </div>
-                              )}
-                              {paymentSettings?.usdtAddressBEP20 && (
-                                <div className="space-y-2">
-                                  <div className="flex items-center space-x-3">
-                                    <RadioGroupItem value="bep20" id="bep20" />
-                                    <FormLabel htmlFor="bep20" className="font-medium">BEP20 Network</FormLabel>
-                                  </div>
-                                  <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                                    <p className="font-mono break-all">{paymentSettings.usdtAddressBEP20}</p>
-                                  </div>
-                                </div>
-                              )}
-                            </RadioGroup>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <p className="text-xs text-muted-foreground mt-4">
-                      Please send {amount} USDT to the selected network address and upload the transaction proof below.
+                                )}
+                              </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Please send {form.watch("amount")} USDT to the selected network address and upload the transaction proof below.
                       <br />
-                      You will receive {calculateFinalAmount(amount)} JOD after approval.
+                      You will receive {calculateFinalAmount(form.watch("amount"))} JOD after approval.
                     </p>
                   </>
                 )}
@@ -491,8 +493,8 @@ export default function TradeForm() {
               type="submit"
               className="w-full mt-6"
               disabled={tradeMutation.isPending ||
-                (type === "buy" && !user?.usdtAddress) ||
-                (type === "sell" && !(user?.cliqAlias || user?.cliqNumber))}
+                (form.watch("type") === "buy" && !user?.usdtAddress) ||
+                (form.watch("type") === "sell" && !(user?.cliqAlias || user?.cliqNumber))}
             >
               {tradeMutation.isPending ? (
                 <>
