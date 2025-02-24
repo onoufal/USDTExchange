@@ -28,8 +28,19 @@ export default function TradeForm() {
   const [copyingTRC20, setCopyingTRC20] = useState(false);
   const [copyingBEP20, setCopyingBEP20] = useState(false);
 
-  const { data: paymentSettings } = useQuery<{ cliqAlias: string; mobileWallet: string; cliqBankName: string; cliqAccountHolder: string; walletType: string; walletHolderName: string; usdtAddressTRC20: string; usdtAddressBEP20: string }>({
+  const { data: paymentSettings } = useQuery<{ 
+    cliqAlias: string; 
+    mobileWallet: string; 
+    cliqBankName: string; 
+    cliqAccountHolder: string; 
+    walletType: string; 
+    walletHolderName: string; 
+    usdtAddressTRC20: string; 
+    usdtAddressBEP20: string 
+  }>({
     queryKey: ["/api/settings/payment"],
+    staleTime: 5000,
+    retry: 3
   });
 
   const form = useForm({
@@ -412,7 +423,7 @@ export default function TradeForm() {
                             <FormLabel className="font-medium">CliQ Payment</FormLabel>
                           </FormItem>
                           <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                            <p><span className="text-muted-foreground">CliQ Alias:</span> {paymentSettings.cliqAlias}</p>
+                            <p><span className="text-muted-foreground">Cliq Alias:</span> {paymentSettings.cliqAlias}</p>
                             <p><span className="text-muted-foreground">Bank:</span> {paymentSettings.cliqBankName}</p>
                             <p><span className="text-muted-foreground">Account Holder:</span> {paymentSettings.cliqAccountHolder}</p>
                           </div>
@@ -461,23 +472,29 @@ export default function TradeForm() {
                                     <RadioGroupItem value="trc20" id="trc20" />
                                     <FormLabel htmlFor="trc20" className="font-medium">TRC20 Network</FormLabel>
                                   </div>
-                                  <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
-                                    <div className="flex items-center justify-between">
-                                      <p className="font-mono break-all mr-2">{paymentSettings?.usdtAddressTRC20}</p>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-6 w-6 shrink-0"
-                                        onClick={() => copyToClipboard(paymentSettings?.usdtAddressTRC20 || '', "trc20")}
-                                      >
-                                        {copyingTRC20 ? (
-                                          <Check className="h-4 w-4" />
-                                        ) : (
-                                          <Copy className="h-4 w-4" />
-                                        )}
-                                      </Button>
+                                  {paymentSettings?.usdtAddressTRC20 ? (
+                                    <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                      <div className="flex items-center justify-between">
+                                        <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressTRC20}</p>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-6 w-6 shrink-0"
+                                          onClick={() => copyToClipboard(paymentSettings.usdtAddressTRC20, "trc20")}
+                                        >
+                                          {copyingTRC20 ? (
+                                            <Check className="h-4 w-4" />
+                                          ) : (
+                                            <Copy className="h-4 w-4" />
+                                          )}
+                                        </Button>
+                                      </div>
                                     </div>
-                                  </div>
+                                  ) : (
+                                    <div className="ml-7 text-xs text-muted-foreground">
+                                      TRC20 address not set in admin settings
+                                    </div>
+                                  )}
                                 </div>
 
                                 {/* BEP20 Network Option */}
@@ -486,23 +503,29 @@ export default function TradeForm() {
                                     <RadioGroupItem value="bep20" id="bep20" />
                                     <FormLabel htmlFor="bep20" className="font-medium">BEP20 Network</FormLabel>
                                   </div>
-                                  <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
-                                    <div className="flex items-center justify-between">
-                                      <p className="font-mono break-all mr-2">{paymentSettings?.usdtAddressBEP20}</p>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-6 w-6 shrink-0"
-                                        onClick={() => copyToClipboard(paymentSettings?.usdtAddressBEP20 || '', "bep20")}
-                                      >
-                                        {copyingBEP20 ? (
-                                          <Check className="h-4 w-4" />
-                                        ) : (
-                                          <Copy className="h-4 w-4" />
-                                        )}
-                                      </Button>
+                                  {paymentSettings?.usdtAddressBEP20 ? (
+                                    <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                      <div className="flex items-center justify-between">
+                                        <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressBEP20}</p>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-6 w-6 shrink-0"
+                                          onClick={() => copyToClipboard(paymentSettings.usdtAddressBEP20, "bep20")}
+                                        >
+                                          {copyingBEP20 ? (
+                                            <Check className="h-4 w-4" />
+                                          ) : (
+                                            <Copy className="h-4 w-4" />
+                                          )}
+                                        </Button>
+                                      </div>
                                     </div>
-                                  </div>
+                                  ) : (
+                                    <div className="ml-7 text-xs text-muted-foreground">
+                                      BEP20 address not set in admin settings
+                                    </div>
+                                  )}
                                 </div>
                               </RadioGroup>
                             </FormControl>
