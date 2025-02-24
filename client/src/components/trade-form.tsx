@@ -197,8 +197,11 @@ export default function TradeForm() {
         : (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2); // USDT to receive
     } else {
       // When selling USDT:
-      // For both native and foreign currency basis, show final amount with commission deducted
-      return (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2);
+      // If entering JOD (foreign), show USDT needed with commission added
+      // If entering USDT (native), show JOD to receive with commission deducted
+      return currencyBasis === "foreign"
+        ? (equivalentNum * (1 + COMMISSION_RATE)).toFixed(2)  // USDT to pay to get desired JOD
+        : (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2); // JOD to receive
     }
   };
 
