@@ -172,6 +172,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/transactions", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    try {
+      const transactions = await storage.getUserTransactions(req.user.id);
+      res.json(transactions);
+    } catch (error) {
+      console.error('Error fetching user transactions:', error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
   app.post("/api/trade", upload.single("proofOfPayment"), async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     if (!req.file) return res.status(400).json({ message: "No payment proof uploaded" });
@@ -179,8 +190,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const schema = z.object({
         type: z.enum(["buy", "sell"]),
-        amount: z.string().transform(Number),
-        rate: z.string().transform(Number),
+        amount: z.string()
+          .min(1, "Amount is required")
+          .regex(/^\d+(\.\d{1,2})?$/, "Amount must be a valid number with up to 2 decimal places")
+          .transform(Number),
+        rate: z.string()
+          .regex(/^\d+(\.\d{1,2})?$/, "Rate must be a valid number with up to 2 decimal places")
+          .transform(Number),
       });
 
       const data = schema.parse(req.body);
@@ -206,7 +222,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add this route after existing admin routes
   app.get("/api/admin/payment-proof/:transactionId", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
 
