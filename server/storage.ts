@@ -63,6 +63,8 @@ export class MemStorage implements IStorage {
     // Set default payment settings
     this.settings.set("cliqAlias", "your-cliq-alias");
     this.settings.set("mobileWallet", "07XXXXXXXX");
+    this.settings.set("usdtAddress", "");
+    this.settings.set("usdtNetwork", "TRC20");
   }
 
   async getUser(id: number): Promise<User | undefined> {

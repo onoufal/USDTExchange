@@ -13,7 +13,9 @@ const paymentSettingsSchema = z.object({
   cliqAlias: z.string().min(1, "CliQ alias is required"),
   mobileWallet: z.string().regex(/^07[789]\d{7}$/, {
     message: "Invalid Jordanian mobile number format"
-  })
+  }),
+  usdtAddress: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
+  usdtNetwork: z.string().min(1, "USDT network is required")
 });
 
 type PaymentSettings = z.infer<typeof paymentSettingsSchema>;
@@ -29,7 +31,9 @@ export default function AdminPaymentSettings() {
     resolver: zodResolver(paymentSettingsSchema),
     defaultValues: settings || {
       cliqAlias: "",
-      mobileWallet: ""
+      mobileWallet: "",
+      usdtAddress: "",
+      usdtNetwork: "TRC20"
     },
     values: settings
   });
@@ -64,7 +68,7 @@ export default function AdminPaymentSettings() {
       <CardHeader>
         <CardTitle>Payment Settings</CardTitle>
         <CardDescription>
-          Configure the platform's payment receiving options for JOD transactions
+          Configure the platform's payment receiving options for JOD and USDT transactions
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -98,6 +102,40 @@ export default function AdminPaymentSettings() {
                   </FormControl>
                   <FormDescription>
                     Alternative payment option for mobile wallet transfers
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="usdtAddress"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Platform USDT Wallet Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your USDT wallet address" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Users will send USDT to this address when selling
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="usdtNetwork"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>USDT Network</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. TRC20" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Specify the USDT network type (e.g. TRC20, ERC20)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

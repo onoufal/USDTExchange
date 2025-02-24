@@ -15,6 +15,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import AdminPaymentSettings from "@/components/admin-payment-settings";
 
 export default function AdminPage() {
   const { toast } = useToast();
@@ -144,6 +145,7 @@ export default function AdminPage() {
         <TabsList className="w-full sm:w-auto">
           <TabsTrigger value="users" className="flex-1 sm:flex-none">Users & KYC</TabsTrigger>
           <TabsTrigger value="transactions" className="flex-1 sm:flex-none">Transactions</TabsTrigger>
+          <TabsTrigger value="settings" className="flex-1 sm:flex-none">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -367,6 +369,10 @@ export default function AdminPage() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <AdminPaymentSettings />
         </TabsContent>
       </Tabs>
     </div>
