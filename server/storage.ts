@@ -95,10 +95,19 @@ export class MemStorage implements IStorage {
 
   async approveKYC(id: number): Promise<void> {
     const user = this.users.get(id);
-    if (user) {
-      user.kycStatus = "approved";
-      this.users.set(id, { ...user }); // Create a new object to ensure updates are detected
+    if (!user) {
+      throw new Error("User not found");
     }
+
+    const updatedUser = {
+      ...user,
+      kycStatus: "approved"
+    };
+
+    this.users.set(id, updatedUser);
+
+    // Log the update for debugging
+    console.log('KYC approved for user:', id, 'New status:', updatedUser.kycStatus);
   }
 
   async getAllUsers(): Promise<User[]> {

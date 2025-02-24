@@ -33,12 +33,14 @@ export default function AdminPage() {
         }
         return res.json();
       } catch (error) {
+        console.error('KYC approval error:', error);
         setProcessingKycId(null);
         throw error;
       }
     },
     onSuccess: (_, userId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       setProcessingKycId(null);
       toast({
         title: "KYC Approved",
