@@ -222,29 +222,45 @@ export default function TradeForm() {
   const calculateCommission = (amount: string) => {
     const num = Number(amount) || 0;
     const type = form.watch("type");
-    return type === "buy"
-      ? (num * COMMISSION_RATE).toFixed(2) + " JOD"
-      : (num * COMMISSION_RATE).toFixed(2) + " USDT";
+    const isForeignCurrency = currencyBasis === "foreign";
+
+    if (type === "buy") {
+      // For buy, commission is always in JOD based on JOD amount
+      return (num * COMMISSION_RATE).toFixed(2) + " JOD";
+    } else {
+      // For sell, always show commission in JOD
+      // Calculate the JOD equivalent first
+      const jodAmount = isForeignCurrency 
+        ? num * MOCK_RATE  // If amount is in JOD, convert to USDT first
+        : num * MOCK_RATE; // If amount is in USDT, convert to JOD
+      return (jodAmount * COMMISSION_RATE).toFixed(2) + " JOD";
+    }
   };
 
   const calculateFinalAmount = (amount: string) => {
     const num = Number(amount) || 0;
     const type = form.watch("type");
+    const isForeignCurrency = currencyBasis === "foreign";
 
     if (type === "buy") {
-      if (currencyBasis === "foreign") {
+      if (isForeignCurrency) {
+        // Entering USDT, show final JOD amount
         const jodAmount = num * MOCK_RATE;
         return (jodAmount * (1 + COMMISSION_RATE)).toFixed(2);
       } else {
+        // Entering JOD, show final USDT amount
         return (num / MOCK_RATE * (1 - COMMISSION_RATE)).toFixed(2);
       }
     } else {
-      if (currencyBasis === "foreign") {
+      if (isForeignCurrency) {
+        // Entering JOD, convert to USDT and add commission
         const usdtAmount = num / MOCK_RATE;
         return (usdtAmount * (1 + COMMISSION_RATE)).toFixed(2);
       } else {
+        // Entering USDT, convert to JOD, subtract commission, then back to USDT
         const jodAmount = num * MOCK_RATE;
-        return (jodAmount * (1 - COMMISSION_RATE)).toFixed(2);
+        const jodAfterCommission = jodAmount * (1 - COMMISSION_RATE);
+        return (jodAfterCommission / MOCK_RATE).toFixed(2);
       }
     }
   };
