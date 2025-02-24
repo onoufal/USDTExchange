@@ -110,6 +110,7 @@ export default function WalletSettings() {
 
             <Button 
               type="submit" 
+              className="w-full"
               disabled={updateWalletMutation.isPending}
             >
               {updateWalletMutation.isPending ? "Saving..." : "Save Settings"}
