@@ -37,6 +37,7 @@ export default function TradeForm() {
   const [copyingBEP20, setCopyingBEP20] = useState(false);
   const [copyingCliqAlias, setCopyingCliqAlias] = useState(false);
   const [copyingMobileWallet, setCopyingMobileWallet] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"cliq" | "wallet">("cliq");
 
   const { data: paymentSettings, isLoading: isLoadingSettings } = useQuery<{
     cliqAlias: string;
@@ -475,7 +476,12 @@ export default function TradeForm() {
                     {form.watch("type") === "buy" ? (
                       <>
                         <p className="mb-2">Choose your preferred payment method:</p>
-                        <RadioGroup defaultValue="cliq" className="mb-4 space-y-3">
+                        <RadioGroup
+                          defaultValue="cliq"
+                          className="mb-4 space-y-3"
+                          value={paymentMethod}
+                          onValueChange={(value: "cliq" | "wallet") => setPaymentMethod(value)}
+                        >
                           {paymentSettings?.cliqAlias && (
                             <div className="space-y-2">
                               <FormItem className="flex items-center space-x-3">
@@ -486,45 +492,47 @@ export default function TradeForm() {
                                   CliQ Payment
                                 </FormLabel>
                               </FormItem>
-                              <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 sm:p-3 rounded-md">
-                                <div className="flex items-center justify-between">
-                                  <p className="truncate mr-2">
+                              {paymentMethod === "cliq" && (
+                                <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 sm:p-3 rounded-md">
+                                  <div className="flex items-center justify-between">
+                                    <p className="truncate mr-2">
+                                      <span className="text-muted-foreground">
+                                        Cliq Alias:
+                                      </span>{" "}
+                                      {paymentSettings.cliqAlias}
+                                    </p>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6 shrink-0"
+                                      onClick={() =>
+                                        copyToClipboard(
+                                          paymentSettings.cliqAlias,
+                                          "cliqAlias"
+                                        )
+                                      }
+                                    >
+                                      {copyingCliqAlias ? (
+                                        <Check className="h-4 w-4" />
+                                      ) : (
+                                        <Copy className="h-4 w-4" />
+                                      )}
+                                    </Button>
+                                  </div>
+                                  <p>
                                     <span className="text-muted-foreground">
-                                      Cliq Alias:
+                                      Bank:
                                     </span>{" "}
-                                    {paymentSettings.cliqAlias}
+                                    {paymentSettings.cliqBankName}
                                   </p>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 shrink-0"
-                                    onClick={() =>
-                                      copyToClipboard(
-                                        paymentSettings.cliqAlias,
-                                        "cliqAlias"
-                                      )
-                                    }
-                                  >
-                                    {copyingCliqAlias ? (
-                                      <Check className="h-4 w-4" />
-                                    ) : (
-                                      <Copy className="h-4 w-4" />
-                                    )}
-                                  </Button>
+                                  <p>
+                                    <span className="text-muted-foreground">
+                                      Account Holder:
+                                    </span>{" "}
+                                    {paymentSettings.cliqAccountHolder}
+                                  </p>
                                 </div>
-                                <p>
-                                  <span className="text-muted-foreground">
-                                    Bank:
-                                  </span>{" "}
-                                  {paymentSettings.cliqBankName}
-                                </p>
-                                <p>
-                                  <span className="text-muted-foreground">
-                                    Account Holder:
-                                  </span>{" "}
-                                  {paymentSettings.cliqAccountHolder}
-                                </p>
-                              </div>
+                              )}
                             </div>
                           )}
                           {paymentSettings?.mobileWallet && (
@@ -537,45 +545,47 @@ export default function TradeForm() {
                                   Mobile Wallet
                                 </FormLabel>
                               </FormItem>
-                              <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 sm:p-3 rounded-md">
-                                <div className="flex items-center justify-between">
+                              {paymentMethod === "wallet" && (
+                                <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 sm:p-3 rounded-md">
+                                  <div className="flex items-center justify-between">
+                                    <p>
+                                      <span className="text-muted-foreground">
+                                        Number:
+                                      </span>{" "}
+                                      {paymentSettings.mobileWallet}
+                                    </p>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6 shrink-0"
+                                      onClick={() =>
+                                        copyToClipboard(
+                                          paymentSettings.mobileWallet,
+                                          "mobileWallet"
+                                        )
+                                      }
+                                    >
+                                      {copyingMobileWallet ? (
+                                        <Check className="h-4 w-4" />
+                                      ) : (
+                                        <Copy className="h-4 w-4" />
+                                      )}
+                                    </Button>
+                                  </div>
                                   <p>
                                     <span className="text-muted-foreground">
-                                      Number:
+                                      Wallet Type:
                                     </span>{" "}
-                                    {paymentSettings.mobileWallet}
+                                    {paymentSettings.walletType}
                                   </p>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 shrink-0"
-                                    onClick={() =>
-                                      copyToClipboard(
-                                        paymentSettings.mobileWallet,
-                                        "mobileWallet"
-                                      )
-                                    }
-                                  >
-                                    {copyingMobileWallet ? (
-                                      <Check className="h-4 w-4" />
-                                    ) : (
-                                      <Copy className="h-4 w-4" />
-                                    )}
-                                  </Button>
+                                  <p>
+                                    <span className="text-muted-foreground">
+                                      Holder Name:
+                                    </span>{" "}
+                                    {paymentSettings.walletHolderName}
+                                  </p>
                                 </div>
-                                <p>
-                                  <span className="text-muted-foreground">
-                                    Wallet Type:
-                                  </span>{" "}
-                                  {paymentSettings.walletType}
-                                </p>
-                                <p>
-                                  <span className="text-muted-foreground">
-                                    Holder Name:
-                                  </span>{" "}
-                                  {paymentSettings.walletHolderName}
-                                </p>
-                              </div>
+                              )}
                             </div>
                           )}
                         </RadioGroup>
