@@ -10,9 +10,14 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { JORDANIAN_BANKS } from "@shared/schema";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const paymentSettingsSchema = z.object({
+  // USDT Settings
+  usdtAddressTRC20: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
+  usdtAddressBEP20: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
+
   // CliQ Settings
   cliqAlias: z.string().min(1, "CliQ alias is required"),
   cliqBankName: z.string().min(1, "Bank name is required"),
@@ -29,10 +34,6 @@ const paymentSettingsSchema = z.object({
   }),
   walletType: z.string().min(1, "Wallet type is required"),
   walletHolderName: z.string().min(1, "Wallet holder name is required"),
-
-  // USDT Settings
-  usdtAddressTRC20: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
-  usdtAddressBEP20: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
 });
 
 type PaymentSettings = z.infer<typeof paymentSettingsSchema>;
@@ -42,15 +43,17 @@ const WALLET_TYPES = ["Orange Money", "Zain Cash", "U Wallet"];
 export default function AdminPaymentSettings() {
   const { toast } = useToast();
 
-  const { data: settings, isLoading } = useQuery<PaymentSettings>({
+  const { data: settings, isLoading, isError } = useQuery<PaymentSettings>({
     queryKey: ["/api/settings/payment"],
-    staleTime: 5000,
+    staleTime: 1000,
     retry: 3
   });
 
   const form = useForm<PaymentSettings>({
     resolver: zodResolver(paymentSettingsSchema),
     defaultValues: settings || {
+      usdtAddressTRC20: "",
+      usdtAddressBEP20: "",
       cliqAlias: "",
       cliqBankName: JORDANIAN_BANKS[0],
       cliqAccountHolder: "",
@@ -60,8 +63,6 @@ export default function AdminPaymentSettings() {
       mobileWallet: "",
       walletType: WALLET_TYPES[0],
       walletHolderName: "",
-      usdtAddressTRC20: "",
-      usdtAddressBEP20: "",
     },
     values: settings
   });
@@ -78,13 +79,13 @@ export default function AdminPaymentSettings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/settings/payment"] });
       toast({
-        title: "Settings updated",
-        description: "Platform payment settings have been saved successfully"
+        title: "Settings updated successfully",
+        description: "Payment settings have been saved and are now active",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Update failed",
+        title: "Failed to update settings",
         description: error.message,
         variant: "destructive"
       });
@@ -92,7 +93,21 @@ export default function AdminPaymentSettings() {
   });
 
   if (isLoading) {
-    return <div>Loading settings...</div>;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Alert variant="destructive" className="mb-4">
+        <AlertDescription>
+          Failed to load payment settings. Please try refreshing the page.
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   return (
@@ -121,9 +136,9 @@ export default function AdminPaymentSettings() {
                   </FormDescription>
                   <FormMessage />
                   {settings?.usdtAddressTRC20 && (
-                    <div className="mt-2 text-sm flex items-center gap-2 text-muted-foreground">
+                    <div className="mt-2 text-sm flex items-center gap-2 text-green-600">
                       <Check className="h-4 w-4" />
-                      <span>TRC20 address is set and active</span>
+                      <span>TRC20 address is active</span>
                     </div>
                   )}
                 </FormItem>
@@ -144,9 +159,9 @@ export default function AdminPaymentSettings() {
                   </FormDescription>
                   <FormMessage />
                   {settings?.usdtAddressBEP20 && (
-                    <div className="mt-2 text-sm flex items-center gap-2 text-muted-foreground">
+                    <div className="mt-2 text-sm flex items-center gap-2 text-green-600">
                       <Check className="h-4 w-4" />
-                      <span>BEP20 address is set and active</span>
+                      <span>BEP20 address is active</span>
                     </div>
                   )}
                 </FormItem>
@@ -349,7 +364,14 @@ export default function AdminPaymentSettings() {
           className="w-full"
           disabled={updateSettingsMutation.isPending}
         >
-          {updateSettingsMutation.isPending ? "Saving..." : "Save All Settings"}
+          {updateSettingsMutation.isPending ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Saving Settings...
+            </>
+          ) : (
+            "Save All Settings"
+          )}
         </Button>
       </form>
     </Form>
