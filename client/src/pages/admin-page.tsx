@@ -9,6 +9,8 @@ import { DocumentPreviewModal } from "@/components/document-preview-modal";
 import { PaymentProofModal } from "@/components/payment-proof-modal";
 import { useState } from "react";
 import { Eye } from "lucide-react";
+import { Copy } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function AdminPage() {
   const { toast } = useToast();
@@ -16,6 +18,24 @@ export default function AdminPage() {
   const [processingKycId, setProcessingKycId] = useState<number | null>(null);
   const [processingTxId, setProcessingTxId] = useState<number | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<{ id: number; username: string } | null>(null);
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedAddress(text);
+      setTimeout(() => setCopiedAddress(null), 2000);
+      toast({
+        description: "USDT address copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
 
   const { data: users, isLoading: isLoadingUsers } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
@@ -200,6 +220,7 @@ export default function AdminPage() {
                             <th className="px-4 py-3 text-left text-sm font-medium">Type</th>
                             <th className="px-4 py-3 text-left text-sm font-medium">Amount</th>
                             <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">USDT Address</th>
                             <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
                           </tr>
                         </thead>
@@ -212,6 +233,32 @@ export default function AdminPage() {
                                 <td className="px-4 py-3 text-sm capitalize">{tx.type}</td>
                                 <td className="px-4 py-3 text-sm">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
                                 <td className="px-4 py-3 text-sm capitalize">{tx.status}</td>
+                                <td className="px-4 py-3 text-sm">
+                                  {tx.type === 'buy' && user?.usdtAddress && (
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-mono">
+                                        {user.usdtAddress.slice(0, 6)}...{user.usdtAddress.slice(-4)}
+                                      </span>
+                                      <TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Button
+                                              variant="ghost"
+                                              size="icon"
+                                              className="h-8 w-8"
+                                              onClick={() => copyToClipboard(user.usdtAddress!)}
+                                            >
+                                              <Copy className="h-4 w-4" />
+                                            </Button>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            <p>Copy USDT address</p>
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    </div>
+                                  )}
+                                </td>
                                 <td className="px-4 py-3">
                                   {tx.status === 'pending' && (
                                     <div className="flex flex-col sm:flex-row gap-2">
