@@ -229,13 +229,13 @@ export default function TradeForm() {
       return (jodAmount * COMMISSION_RATE).toFixed(2) + " JOD";
     } else {
       if (currencyBasis === "foreign") {
-        // If entering JOD (e.g. 1000 JOD), show commission in USDT
+        // If entering JOD (e.g. 1000 JOD), calculate base USDT first
         const baseUsdtAmount = num / MOCK_RATE;  // 1000/0.71 = 1408.45 USDT
         return (baseUsdtAmount * COMMISSION_RATE).toFixed(2) + " USDT";  // 28.17 USDT
       } else {
-        // If entering USDT directly, show commission in JOD
-        const baseJodAmount = num * MOCK_RATE;  // Convert USDT to JOD first
-        return (baseJodAmount * COMMISSION_RATE).toFixed(2) + " JOD";
+        // If entering USDT directly, calculate commission in JOD
+        const baseJodAmount = num * MOCK_RATE;  // Convert USDT to JOD
+        return (baseJodAmount * COMMISSION_RATE).toFixed(2) + " JOD";  // Show commission in JOD
       }
     }
   };
