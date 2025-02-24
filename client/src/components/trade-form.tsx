@@ -217,22 +217,32 @@ export default function TradeForm() {
 
   const calculateCommission = (amount: string) => {
     const num = Number(amount) || 0;
-    return (num * COMMISSION_RATE).toFixed(2);
+    const type = form.watch("type");
+
+    if (type === "buy") {
+      // For buy, commission is in JOD based on the JOD amount
+      return (num * COMMISSION_RATE).toFixed(2);
+    } else {
+      // For sell, commission is in JOD based on the equivalent JOD amount
+      const jodAmount = num * Number(form.watch("rate"));
+      return (jodAmount * COMMISSION_RATE).toFixed(2);
+    }
   };
 
   const calculateFinalAmount = (amount: string) => {
     const num = Number(amount) || 0;
-    const equivalentNum = Number(calculateEquivalentAmount(amount)) || 0;
     const type = form.watch("type");
 
     if (type === "buy") {
+      // For buy, user pays more JOD to cover commission
       return currencyBasis === "foreign"
-        ? (equivalentNum * (1 + COMMISSION_RATE)).toFixed(2)
-        : (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2);
+        ? (num * MOCK_RATE * (1 + COMMISSION_RATE)).toFixed(2)
+        : (num * (1 - COMMISSION_RATE)).toFixed(2);
     } else {
+      // For sell, user receives less JOD due to commission
       return currencyBasis === "foreign"
-        ? (equivalentNum * (1 + COMMISSION_RATE)).toFixed(2)
-        : (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2);
+        ? (num * MOCK_RATE * (1 - COMMISSION_RATE)).toFixed(2)
+        : (num * (1 - COMMISSION_RATE)).toFixed(2);
     }
   };
 
@@ -391,7 +401,7 @@ export default function TradeForm() {
                   <div className="flex justify-between mb-2 text-xs sm:text-sm text-muted-foreground">
                     <span>Commission (2%)</span>
                     <span className="font-mono">
-                      {calculateCommission(currencyBasis === "foreign" ? calculateEquivalentAmount(amount) : amount)} {getCurrentCurrencyLabel()}
+                      {calculateCommission(currencyBasis === "foreign" ? calculateEquivalentAmount(amount) : amount)} JOD
                     </span>
                   </div>
                   <div className="flex justify-between font-medium pt-2 border-t text-sm">
