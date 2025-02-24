@@ -16,30 +16,22 @@ export default function SettingsPage() {
 
       <div className="space-y-6">
         {/* USDT Wallet Settings */}
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>USDT Wallet Settings</CardTitle>
-              <CardDescription>Set your USDT receiving address for buy orders</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <WalletSettings />
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <WalletSettings />
+          </CardContent>
+        </Card>
 
         {/* CliQ Account Settings */}
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>CliQ Account Settings</CardTitle>
-              <CardDescription>Set your CliQ details for receiving payments</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CliqSettings />
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>CliQ Account Settings</CardTitle>
+            <CardDescription>Set your CliQ details for receiving payments</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CliqSettings />
+          </CardContent>
+        </Card>
 
         {/* Show alerts if settings are missing */}
         {(!user.usdtAddress || !user.cliqAlias && !user.cliqNumber) && (
