@@ -168,8 +168,12 @@ export default function TradeForm() {
     const isForeignCurrency = currencyBasis === "foreign";
 
     if (type === "buy") {
+      // For buy: if entering USDT, multiply by rate to get JOD cost
+      // if entering JOD, divide by rate to get USDT received
       return isForeignCurrency ? (num * MOCK_RATE).toFixed(2) : (num / MOCK_RATE).toFixed(2);
     } else {
+      // For sell: if entering USDT, multiply by rate to get JOD received
+      // if entering JOD, divide by rate to get USDT needed
       return isForeignCurrency ? (num / MOCK_RATE).toFixed(2) : (num * MOCK_RATE).toFixed(2);
     }
   };
@@ -177,6 +181,26 @@ export default function TradeForm() {
   const calculateCommission = (amount: string) => {
     const num = Number(amount) || 0;
     return (num * COMMISSION_RATE).toFixed(2);
+  };
+
+  const calculateFinalAmount = (amount: string) => {
+    const num = Number(amount) || 0;
+    const equivalentNum = Number(calculateEquivalentAmount(amount)) || 0;
+    const type = form.watch("type");
+
+    if (type === "buy") {
+      // When buying USDT:
+      // If entering USDT (foreign), show JOD cost with commission added
+      // If entering JOD (native), show USDT received with commission subtracted
+      return currencyBasis === "foreign"
+        ? (equivalentNum * (1 + COMMISSION_RATE)).toFixed(2)  // JOD to pay
+        : (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2); // USDT to receive
+    } else {
+      // When selling USDT:
+      // If entering USDT (native), show JOD to receive with commission added
+      // If entering JOD (foreign), show USDT needed with commission added
+      return (equivalentNum * (1 + COMMISSION_RATE)).toFixed(2);
+    }
   };
 
   const getCurrentCurrencyLabel = () => {
@@ -211,8 +235,8 @@ export default function TradeForm() {
     formData.append("type", values.type);
 
     // Convert amount if needed based on currency basis
-    const amount = currencyBasis === "foreign" ? 
-      calculateEquivalentAmount(values.amount) : 
+    const amount = currencyBasis === "foreign" ?
+      calculateEquivalentAmount(values.amount) :
       values.amount;
 
     formData.append("amount", amount);
@@ -266,10 +290,10 @@ export default function TradeForm() {
                       </FormItem>
                     </RadioGroup>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.01" 
-                        {...field} 
+                      <Input
+                        type="number"
+                        step="0.01"
+                        {...field}
                         placeholder={`Enter amount in ${getCurrentCurrencyLabel()}`}
                       />
                     </FormControl>
@@ -298,13 +322,17 @@ export default function TradeForm() {
                   <div className="flex justify-between mb-2 text-sm text-muted-foreground">
                     <span>Commission (2%)</span>
                     <span>
-                      {calculateCommission(amount)} {getCurrentCurrencyLabel()}
+                      {calculateCommission(currencyBasis === "foreign" ? calculateEquivalentAmount(amount) : amount)} {getCurrentCurrencyLabel()}
                     </span>
                   </div>
                   <div className="flex justify-between font-medium pt-2 border-t">
-                    <span>Final {type === "buy" ? "Receive" : "Pay"} Amount</span>
                     <span>
-                      {(Number(calculateEquivalentAmount(amount)) * (1 - COMMISSION_RATE)).toFixed(2)} {getEquivalentCurrencyLabel()}
+                      {type === "buy"
+                        ? (currencyBasis === "foreign" ? "Total to Pay" : "Total to Receive")
+                        : (currencyBasis === "foreign" ? "Total to Receive" : "Total to Pay")}
+                    </span>
+                    <span>
+                      {calculateFinalAmount(amount)} {getEquivalentCurrencyLabel()}
                     </span>
                   </div>
                 </>
@@ -315,21 +343,37 @@ export default function TradeForm() {
               <AlertDescription className="text-sm">
                 {type === "buy" ? (
                   <>
-                    Please send {currencyBasis === "native" ? amount : calculateEquivalentAmount(amount)} JOD 
-                    to our CliQ/mobile wallet and upload the payment proof below.
-                    <br/>
-                    <span className="text-xs text-muted-foreground mt-1 block">
-                      You will receive {(Number(calculateEquivalentAmount(amount)) * (1 - COMMISSION_RATE)).toFixed(2)} USDT after approval
-                    </span>
+                    {currencyBasis === "foreign" ? (
+                      <>
+                        To receive {amount} USDT, please send {calculateFinalAmount(amount)} JOD
+                        to our CliQ/mobile wallet and upload the payment proof below.
+                      </>
+                    ) : (
+                      <>
+                        Please send {amount} JOD to our CliQ/mobile wallet and upload the payment proof below.
+                        <br />
+                        <span className="text-xs text-muted-foreground mt-1 block">
+                          You will receive {calculateFinalAmount(amount)} USDT after approval
+                        </span>
+                      </>
+                    )}
                   </>
                 ) : (
                   <>
-                    Please send {currencyBasis === "native" ? amount : calculateEquivalentAmount(amount)} USDT
-                    to our wallet address and upload the transaction proof below.
-                    <br/>
-                    <span className="text-xs text-muted-foreground mt-1 block">
-                      You will receive {(Number(calculateEquivalentAmount(amount)) * (1 - COMMISSION_RATE)).toFixed(2)} JOD after approval
-                    </span>
+                    {currencyBasis === "foreign" ? (
+                      <>
+                        To receive {amount} JOD, please send {calculateFinalAmount(amount)} USDT
+                        to our wallet address and upload the transaction proof below.
+                      </>
+                    ) : (
+                      <>
+                        Please send {amount} USDT to our wallet address and upload the transaction proof below.
+                        <br />
+                        <span className="text-xs text-muted-foreground mt-1 block">
+                          You will receive {calculateFinalAmount(amount)} JOD after approval
+                        </span>
+                      </>
+                    )}
                   </>
                 )}
               </AlertDescription>
