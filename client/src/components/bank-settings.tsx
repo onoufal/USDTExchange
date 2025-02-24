@@ -18,7 +18,7 @@ export default function BankSettings() {
   const form = useForm<UpdateUserBank>({
     resolver: zodResolver(updateUserBankSchema),
     defaultValues: {
-      bankName: user?.bankName || "",
+      bankName: user?.bankName as typeof JORDANIAN_BANKS[number] || JORDANIAN_BANKS[0],
       bankBranch: user?.bankBranch || "",
       bankAccountNumber: user?.bankAccountNumber || "",
       bankIban: user?.bankIban || ""
