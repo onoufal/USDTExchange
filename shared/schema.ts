@@ -91,8 +91,11 @@ export const updateUserCliqSchema = z.object({
   }),
   cliqAlias: z.string()
     .optional()
-    .refine(val => !val || /^[a-zA-Z]{1,10}$/.test(val), {
-      message: "CliQ alias must contain only letters and not exceed 10 characters"
+    .refine(val => !val || /^[A-Z0-9]{1,10}$/.test(val), {
+      message: "CliQ alias must not exceed 10 characters and use uppercase letters/numbers"
+    })
+    .refine(val => !val || /.*[A-Z].*/.test(val), {
+      message: "CliQ alias must contain at least one letter"
     }),
   cliqNumber: z.string()
     .optional()
