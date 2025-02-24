@@ -236,7 +236,32 @@ export default function AdminPage() {
                               <tr key={tx.id}>
                                 <td className="px-4 py-3 text-sm">{user?.username}</td>
                                 <td className="px-4 py-3 text-sm capitalize">{tx.type}</td>
-                                <td className="px-4 py-3 text-sm whitespace-nowrap">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
+                                <td className="px-4 py-3 text-sm">
+                                  <div className="space-y-1">
+                                    <p className="whitespace-nowrap">
+                                      {tx.type === 'buy' ? (
+                                        <>
+                                          <span className="text-muted-foreground">Pay:</span> {tx.amount} JOD
+                                        </>
+                                      ) : (
+                                        <>
+                                          <span className="text-muted-foreground">Send:</span> {tx.amount} USDT
+                                        </>
+                                      )}
+                                    </p>
+                                    <p className="whitespace-nowrap text-xs">
+                                      {tx.type === 'buy' ? (
+                                        <>
+                                          <span className="text-muted-foreground">Send:</span> {(Number(tx.amount) / Number(tx.rate)).toFixed(2)} USDT
+                                        </>
+                                      ) : (
+                                        <>
+                                          <span className="text-muted-foreground">Receive:</span> {(Number(tx.amount) * Number(tx.rate)).toFixed(2)} JOD
+                                        </>
+                                      )}
+                                    </p>
+                                  </div>
+                                </td>
                                 <td className="px-4 py-3 text-sm capitalize">{tx.status}</td>
                                 <td className="px-4 py-3 text-sm">
                                   {tx.type === 'buy' && user?.usdtAddress && (
