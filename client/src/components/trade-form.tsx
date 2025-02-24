@@ -222,19 +222,19 @@ export default function TradeForm() {
   const calculateCommission = (amount: string) => {
     const num = Number(amount) || 0;
     const type = form.watch("type");
-    const isForeignCurrency = currencyBasis === "foreign";
 
     if (type === "buy") {
-      // For buy, commission is always in JOD based on JOD amount
-      const jodAmount = isForeignCurrency ? num : num / MOCK_RATE;
+      // For buy, commission is always in JOD
+      const jodAmount = currencyBasis === "foreign" ? (num * MOCK_RATE) : num;
       return (jodAmount * COMMISSION_RATE).toFixed(2) + " JOD";
     } else {
-      if (isForeignCurrency) {
-        // If entering JOD, convert to USDT first then calculate commission
-        const usdtAmount = num / MOCK_RATE;
-        return (usdtAmount * COMMISSION_RATE).toFixed(2) + " USDT";
+      // For sell operations
+      if (currencyBasis === "foreign") {
+        // If entering JOD, first convert to USDT then calculate commission
+        const baseUsdtAmount = num / MOCK_RATE;
+        return (baseUsdtAmount * COMMISSION_RATE).toFixed(2) + " USDT";
       } else {
-        // If entering USDT directly, calculate commission in JOD
+        // If entering USDT directly, show commission in JOD
         const jodAmount = num * MOCK_RATE;
         return (jodAmount * COMMISSION_RATE).toFixed(2) + " JOD";
       }
@@ -244,26 +244,23 @@ export default function TradeForm() {
   const calculateFinalAmount = (amount: string) => {
     const num = Number(amount) || 0;
     const type = form.watch("type");
-    const isForeignCurrency = currencyBasis === "foreign";
 
     if (type === "buy") {
-      if (isForeignCurrency) {
+      if (currencyBasis === "foreign") {
         // Entering USDT, show final JOD amount
         const jodAmount = num * MOCK_RATE;
         return (jodAmount * (1 + COMMISSION_RATE)).toFixed(2);
       } else {
         // Entering JOD, show final USDT amount
-        const usdtAmount = num / MOCK_RATE;
-        return (usdtAmount * (1 - COMMISSION_RATE)).toFixed(2);
+        return (num / MOCK_RATE * (1 - COMMISSION_RATE)).toFixed(2);
       }
     } else {
-      if (isForeignCurrency) {
-        // Entering JOD, calculate base USDT amount
-        const usdtAmount = num / MOCK_RATE;
-        // Add commission to USDT amount
-        return (usdtAmount * (1 + COMMISSION_RATE)).toFixed(2);
+      if (currencyBasis === "foreign") {
+        // Entering JOD, calculate base USDT amount and add commission
+        const baseUsdtAmount = num / MOCK_RATE;
+        return (baseUsdtAmount * (1 + COMMISSION_RATE)).toFixed(2);
       } else {
-        // Entering USDT, show final JOD amount
+        // Entering USDT, calculate final JOD amount
         const jodAmount = num * MOCK_RATE;
         return (jodAmount * (1 - COMMISSION_RATE)).toFixed(2);
       }
