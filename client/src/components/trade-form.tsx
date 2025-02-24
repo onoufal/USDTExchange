@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTransactionSchema } from "@shared/schema";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,12 +24,45 @@ export default function TradeForm() {
     defaultValues: {
       type: "buy",
       amount: "",
-      rate: MOCK_RATE,
+      rate: MOCK_RATE.toString(),
     },
   });
 
+  useEffect(() => {
+    setUploadProgress(0);
+  }, [file]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0] || null;
+    if (selectedFile) {
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!validTypes.includes(selectedFile.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a JPG or PNG image",
+          variant: "destructive",
+        });
+        e.target.value = '';
+        return;
+      }
+
+      // Check file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024;
+      if (selectedFile.size > maxSize) {
+        toast({
+          title: "File too large",
+          description: "Please upload an image smaller than 5MB",
+          variant: "destructive",
+        });
+        e.target.value = '';
+        return;
+      }
+    }
+    setFile(selectedFile);
+  };
+
   const tradeMutation = useMutation({
-    mutationFn: async (data: FormData) => {
+    mutationFn: async (formData: FormData) => {
       const xhr = new XMLHttpRequest();
 
       const promise = new Promise((resolve, reject) => {
@@ -53,7 +86,7 @@ export default function TradeForm() {
 
       xhr.open("POST", "/api/trade");
       xhr.withCredentials = true;
-      xhr.send(data);
+      xhr.send(formData);
 
       return promise;
     },
@@ -84,7 +117,7 @@ export default function TradeForm() {
   const onSubmit = (values: any) => {
     if (!file) {
       toast({
-        title: "Missing proof of payment",
+        title: "Missing payment proof",
         description: "Please upload your payment proof",
         variant: "destructive",
       });
@@ -92,9 +125,9 @@ export default function TradeForm() {
     }
 
     const formData = new FormData();
-    Object.entries(values).forEach(([key, value]) => {
-      formData.append(key, value as string);
-    });
+    formData.append("type", values.type);
+    formData.append("amount", values.amount.toString());
+    formData.append("rate", values.rate.toString());
     formData.append("proofOfPayment", file);
 
     tradeMutation.mutate(formData);
@@ -120,6 +153,9 @@ export default function TradeForm() {
                 <FormControl>
                   <Input type="number" step="0.01" {...field} />
                 </FormControl>
+                <FormDescription className="text-xs">
+                  Enter the amount you want to {form.watch("type")}
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -133,7 +169,7 @@ export default function TradeForm() {
             <div className="flex justify-between font-medium">
               <span>You will {form.watch("type") === "buy" ? "receive" : "pay"}</span>
               <span>
-                {Number(form.watch("amount") || 0) * (form.watch("type") === "buy" ? (1/MOCK_RATE) : MOCK_RATE)} {form.watch("type") === "buy" ? "USDT" : "JOD"}
+                {(Number(form.watch("amount") || 0) * (form.watch("type") === "buy" ? (1/MOCK_RATE) : MOCK_RATE)).toFixed(2)} {form.watch("type") === "buy" ? "USDT" : "JOD"}
               </span>
             </div>
           </div>
@@ -142,10 +178,13 @@ export default function TradeForm() {
             <FormLabel>Payment Proof</FormLabel>
             <Input
               type="file"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              onChange={handleFileChange}
               accept="image/*"
               className="mt-2"
             />
+            <FormDescription className="text-xs mt-1">
+              Upload a screenshot of your payment (JPG or PNG, max 5MB)
+            </FormDescription>
           </div>
 
           {isUploading && (

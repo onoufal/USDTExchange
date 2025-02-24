@@ -41,12 +41,22 @@ export const insertUserSchema = createInsertSchema(users).pick({
   fullName: true
 });
 
-export const insertTransactionSchema = createInsertSchema(transactions).pick({
-  type: true,
-  amount: true,
-  rate: true,
-  proofOfPayment: true
-});
+export const insertTransactionSchema = createInsertSchema(transactions)
+  .pick({
+    type: true,
+    amount: true,
+    rate: true
+  })
+  .extend({
+    type: z.enum(["buy", "sell"]),
+    amount: z.string()
+      .min(1, "Amount is required")
+      .regex(/^\d+(\.\d{1,2})?$/, "Amount must be a valid number with up to 2 decimal places")
+      .transform(Number),
+    rate: z.string()
+      .regex(/^\d+(\.\d{1,2})?$/, "Rate must be a valid number with up to 2 decimal places")
+      .transform(Number),
+  });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
