@@ -12,9 +12,11 @@ import { Eye } from "lucide-react";
 export default function AdminPage() {
   const { toast } = useToast();
   const [selectedUser, setSelectedUser] = useState<{ id: number; username: string } | null>(null);
+  const [processingKycId, setProcessingKycId] = useState<number | null>(null);
 
   const { data: users, isLoading: isLoadingUsers } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
+    refetchInterval: 5000 // Refresh every 5 seconds to keep status updated
   });
 
   const { data: transactions } = useQuery<Transaction[]>({
@@ -23,20 +25,28 @@ export default function AdminPage() {
 
   const approveKYCMutation = useMutation({
     mutationFn: async (userId: number) => {
-      const res = await apiRequest("POST", `/api/admin/approve-kyc/${userId}`);
-      if (!res.ok) {
-        throw new Error("Failed to approve KYC");
+      setProcessingKycId(userId);
+      try {
+        const res = await apiRequest("POST", `/api/admin/approve-kyc/${userId}`);
+        if (!res.ok) {
+          throw new Error("Failed to approve KYC");
+        }
+        return res.json();
+      } catch (error) {
+        setProcessingKycId(null);
+        throw error;
       }
-      return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (_, userId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setProcessingKycId(null);
       toast({
         title: "KYC Approved",
         description: "User KYC has been approved successfully",
       });
     },
     onError: (error: Error) => {
+      setProcessingKycId(null);
       toast({
         title: "Approval failed",
         description: error.message,
@@ -103,9 +113,9 @@ export default function AdminPage() {
                                 <Button
                                   size="sm"
                                   onClick={() => approveKYCMutation.mutate(user.id)}
-                                  disabled={approveKYCMutation.isPending}
+                                  disabled={processingKycId === user.id}
                                 >
-                                  {approveKYCMutation.isPending ? 'Approving...' : 'Approve KYC'}
+                                  {processingKycId === user.id ? 'Approving...' : 'Approve KYC'}
                                 </Button>
                               )}
                             </div>
@@ -147,17 +157,7 @@ export default function AdminPage() {
                           <td className="py-2">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
                           <td className="py-2 capitalize">{tx.status}</td>
                           <td className="py-2">
-                            {tx.status === 'pending' && (
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  // TODO: Implement transaction approval
-                                }}
-                                disabled={false}
-                              >
-                                Approve
-                              </Button>
-                            )}
+                            {/* Transaction approval will be implemented later */}
                           </td>
                         </tr>
                       );

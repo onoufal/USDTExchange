@@ -89,7 +89,7 @@ export class MemStorage implements IStorage {
     if (user) {
       user.kycDocument = document;
       user.kycStatus = "pending";
-      this.users.set(id, user);
+      this.users.set(id, { ...user }); // Create a new object to ensure updates are detected
     }
   }
 
@@ -97,7 +97,7 @@ export class MemStorage implements IStorage {
     const user = this.users.get(id);
     if (user) {
       user.kycStatus = "approved";
-      this.users.set(id, user);
+      this.users.set(id, { ...user }); // Create a new object to ensure updates are detected
     }
   }
 
@@ -135,13 +135,13 @@ export class MemStorage implements IStorage {
     const transaction = this.transactions.get(id);
     if (transaction) {
       transaction.status = "approved";
-      this.transactions.set(id, transaction);
+      this.transactions.set(id, { ...transaction }); // Create a new object to ensure updates are detected
 
       // Update loyalty points
       const user = this.users.get(transaction.userId);
       if (user) {
         user.loyaltyPoints = (user.loyaltyPoints || 0) + Math.floor(Number(transaction.amount) / 100);
-        this.users.set(user.id, user);
+        this.users.set(user.id, { ...user }); // Create a new object to ensure updates are detected
       }
     }
   }
