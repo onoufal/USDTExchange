@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { DocumentPreviewModal } from "@/components/document-preview-modal";
 import { PaymentProofModal } from "@/components/payment-proof-modal";
 import { useState } from "react";
-import { Eye, Copy, ChevronDown, ChevronUp } from "lucide-react";
+import { Eye, Copy, ChevronDown, ChevronUp, Check, Loader2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Collapsible,
@@ -25,6 +25,10 @@ export default function AdminPage() {
   const [selectedTransaction, setSelectedTransaction] = useState<{ id: number; username: string } | null>(null);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [openPaymentDetails, setOpenPaymentDetails] = useState<number | null>(null);
+
+  // Add new states for tracking approval success
+  const [approvedKycIds, setApprovedKycIds] = useState<number[]>([]);
+  const [approvedTxIds, setApprovedTxIds] = useState<number[]>([]);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -73,13 +77,13 @@ export default function AdminPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       setProcessingTxId(null);
-      // Reset openPaymentDetails if it matches the approved transaction
+      setApprovedTxIds(prev => [...prev, txId]);
       if (openPaymentDetails === txId) {
         setOpenPaymentDetails(null);
       }
       toast({
         title: "Transaction Approved",
-        description: "Transaction has been approved and loyalty points awarded",
+        description: "Transaction has been approved successfully",
       });
     },
     onError: (error: Error) => {
@@ -111,6 +115,7 @@ export default function AdminPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       setProcessingKycId(null);
+      setApprovedKycIds(prev => [...prev, userId]);
       toast({
         title: "KYC Approved",
         description: "User KYC has been approved successfully",
@@ -155,7 +160,9 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
               {isLoadingUsers ? (
-                <div className="text-center py-4">Loading users...</div>
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
               ) : (
                 <div className="overflow-x-auto -mx-4 sm:mx-0">
                   <div className="min-w-full inline-block align-middle">
@@ -172,11 +179,16 @@ export default function AdminPage() {
                         </thead>
                         <tbody className="divide-y divide-border">
                           {users?.map((user) => (
-                            <tr key={user.id}>
+                            <tr key={user.id} className="transition-colors hover:bg-muted/50">
                               <td className="px-4 py-3 text-sm">{user.username}</td>
                               <td className="px-4 py-3 text-sm hidden sm:table-cell">{user.fullName}</td>
                               <td className="px-4 py-3 text-sm hidden sm:table-cell">{user.mobileNumber || 'Not verified'}</td>
-                              <td className="px-4 py-3 text-sm capitalize">{user.kycStatus}</td>
+                              <td className="px-4 py-3 text-sm capitalize">
+                                <span className={`inline-flex items-center gap-1.5 ${user.kycStatus === 'approved' ? 'text-green-600' : ''}`}>
+                                  {user.kycStatus}
+                                  {user.kycStatus === 'approved' && <Check className="h-4 w-4" />}
+                                </span>
+                              </td>
                               <td className="px-4 py-3">
                                 <div className="flex flex-col sm:flex-row gap-2">
                                   {user.kycDocument && (
@@ -192,10 +204,24 @@ export default function AdminPage() {
                                   {user.kycDocument && user.kycStatus === 'pending' && (
                                     <Button
                                       size="sm"
+                                      variant={approvedKycIds.includes(user.id) ? "outline" : "default"}
                                       onClick={() => approveKYCMutation.mutate(user.id)}
-                                      disabled={processingKycId === user.id}
+                                      disabled={processingKycId === user.id || approvedKycIds.includes(user.id)}
+                                      className="transition-all duration-200"
                                     >
-                                      {processingKycId === user.id ? 'Approving...' : 'Approve'}
+                                      {processingKycId === user.id ? (
+                                        <>
+                                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                          Processing...
+                                        </>
+                                      ) : approvedKycIds.includes(user.id) ? (
+                                        <>
+                                          <Check className="h-4 w-4 mr-2" />
+                                          Approved
+                                        </>
+                                      ) : (
+                                        "Approve"
+                                      )}
                                     </Button>
                                   )}
                                 </div>
@@ -219,7 +245,9 @@ export default function AdminPage() {
             </CardHeader>
             <CardContent>
               {isLoadingTransactions ? (
-                <div className="text-center py-4">Loading transactions...</div>
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
               ) : (
                 <div className="overflow-x-auto -mx-4 sm:mx-0">
                   <div className="min-w-full inline-block align-middle">
@@ -239,7 +267,7 @@ export default function AdminPage() {
                           {transactions?.map((tx) => {
                             const user = users?.find(u => u.id === tx.userId);
                             return (
-                              <tr key={tx.id}>
+                              <tr key={tx.id} className="transition-colors hover:bg-muted/50">
                                 <td className="px-4 py-3 text-sm">{user?.username}</td>
                                 <td className="px-4 py-3 text-sm capitalize">{tx.type}</td>
                                 <td className="px-4 py-3 text-sm">
@@ -258,7 +286,7 @@ export default function AdminPage() {
                                     <p className="whitespace-nowrap text-xs">
                                       {tx.type === 'buy' ? (
                                         <>
-                                          <span className="text-muted-foreground">Send:</span> {(Number(tx.amount) / Number(tx.rate)).toFixed(2)} USDT
+                                          <span className="text-muted-foreground">Receive:</span> {(Number(tx.amount) / Number(tx.rate)).toFixed(2)} USDT
                                         </>
                                       ) : (
                                         <>
@@ -268,7 +296,12 @@ export default function AdminPage() {
                                     </p>
                                   </div>
                                 </td>
-                                <td className="px-4 py-3 text-sm capitalize">{tx.status}</td>
+                                <td className="px-4 py-3 text-sm">
+                                  <span className={`inline-flex items-center gap-1.5 capitalize ${tx.status === 'approved' ? 'text-green-600' : ''}`}>
+                                    {tx.status}
+                                    {tx.status === 'approved' && <Check className="h-4 w-4" />}
+                                  </span>
+                                </td>
                                 <td className="px-4 py-3 text-sm">
                                   {tx.type === 'buy' && user?.usdtAddress && (
                                     <div className="flex items-center gap-2">
@@ -301,7 +334,7 @@ export default function AdminPage() {
                                     >
                                       <CollapsibleTrigger asChild>
                                         <Button variant="ghost" size="sm" className="flex items-center gap-1 text-xs sm:text-sm">
-                                          View CliQ Details
+                                          View Payment Details
                                           {openPaymentDetails === tx.id ? (
                                             <ChevronUp className="h-4 w-4" />
                                           ) : (
@@ -313,22 +346,13 @@ export default function AdminPage() {
                                         <div className="text-xs sm:text-sm space-y-1 bg-muted/50 p-2 rounded-md">
                                           <p><span className="font-medium">Bank:</span> {user.bankName}</p>
                                           <p className="flex items-center gap-1">
-                                            <span className="font-medium whitespace-nowrap">CliQ {user.cliqType === 'alias' ? 'Alias' : 'Number'}:</span>
-                                            <span className="font-mono">
-                                              {user.cliqType === 'alias' ? user.cliqAlias : user.cliqNumber}
-                                            </span>
-                                            {user.cliqType === 'alias' && user.cliqAlias && (
-                                              <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-6 w-6"
-                                                onClick={() => copyToClipboard(user.cliqAlias!)}
-                                              >
-                                                <Copy className="h-3 w-3" />
-                                              </Button>
-                                            )}
+                                            <span className="font-medium whitespace-nowrap">Account Holder:</span>
+                                            <span>{user.accountHolderName}</span>
                                           </p>
-                                          <p className="break-words"><span className="font-medium">Account Holder:</span> {user.accountHolderName}</p>
+                                          <p className="flex items-center gap-1">
+                                            <span className="font-medium whitespace-nowrap">IBAN:</span>
+                                            <span className="font-mono">{user.bankIban}</span>
+                                          </p>
                                         </div>
                                       </CollapsibleContent>
                                     </Collapsible>
@@ -350,10 +374,24 @@ export default function AdminPage() {
                                       </Button>
                                       <Button
                                         size="sm"
+                                        variant={approvedTxIds.includes(tx.id) ? "outline" : "default"}
                                         onClick={() => approveTransactionMutation.mutate(tx.id)}
-                                        disabled={processingTxId === tx.id}
+                                        disabled={processingTxId === tx.id || approvedTxIds.includes(tx.id)}
+                                        className="transition-all duration-200"
                                       >
-                                        {processingTxId === tx.id ? 'Approving...' : 'Approve'}
+                                        {processingTxId === tx.id ? (
+                                          <>
+                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                            Processing...
+                                          </>
+                                        ) : approvedTxIds.includes(tx.id) ? (
+                                          <>
+                                            <Check className="h-4 w-4 mr-2" />
+                                            Approved
+                                          </>
+                                        ) : (
+                                          "Approve"
+                                        )}
                                       </Button>
                                     </div>
                                   )}
