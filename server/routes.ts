@@ -7,7 +7,6 @@ import { z } from "zod";
 import { updateUserWalletSchema } from "@shared/schema"; // Fixed import path
 import { updateUserCliqSchema } from "@shared/schema"; // Added import for CliQ schema
 
-
 const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -324,13 +323,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const schema = z.object({
+        // USDT Addresses
+        usdtAddressTRC20: z.string().min(30, "TRC20 address is too short").max(50, "TRC20 address is too long"),
+        usdtAddressBEP20: z.string().min(30, "BEP20 address is too short").max(50, "BEP20 address is too long"),
+        // CliQ Settings
         cliqAlias: z.string().min(1, "CliQ alias is required"),
+        cliqBankName: z.string().min(1, "Bank name is required"),
+        cliqAccountHolder: z.string().min(1, "Account holder name is required"),
+        // Mobile Wallet Settings
         mobileWallet: z.string().regex(/^07[789]\d{7}$/, {
           message: "Invalid Jordanian mobile number format"
-        })
+        }),
+        walletType: z.string().min(1, "Wallet type is required"),
+        walletHolderName: z.string().min(1, "Wallet holder name is required")
       });
 
       const settings = schema.parse(req.body);
+      console.log('Saving payment settings:', settings); // Debug log
       await storage.updatePaymentSettings(settings);
       res.json({ success: true });
     } catch (error) {
