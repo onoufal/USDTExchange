@@ -15,7 +15,7 @@ export interface IStorage {
   updateUserKYC(id: number, document: string): Promise<void>;
   approveKYC(id: number): Promise<void>;
   getAllUsers(): Promise<User[]>;
-  createTransaction(transaction: any): Promise<Transaction>;
+  createTransaction(transaction: Transaction): Promise<Transaction>;
   getUserTransactions(userId: number): Promise<Transaction[]>;
   getAllTransactions(): Promise<Transaction[]>;
   approveTransaction(id: number): Promise<void>;
@@ -56,16 +56,19 @@ export class MemStorage implements IStorage {
       password: "admin123", // In real app, this would be hashed
       fullName: "Admin User"
     }).then(user => {
-      user.role = "admin";
-      this.users.set(user.id, user);
+      const updatedUser = {
+        ...user,
+        role: "admin"
+      };
+      this.users.set(user.id, updatedUser);
     });
 
     // Set default payment settings
     this.settings.set("cliqAlias", "");
-    this.settings.set("cliqBankName", "Arab Bank"); // Assuming JORDANIAN_BANKS[0] = "Arab Bank"
+    this.settings.set("cliqBankName", "Arab Bank");
     this.settings.set("cliqAccountHolder", "");
     this.settings.set("cliqNumber", "");
-    this.settings.set("cliqBankNameForNumber", "Arab Bank"); // Assuming JORDANIAN_BANKS[0] = "Arab Bank"
+    this.settings.set("cliqBankNameForNumber", "Arab Bank");
     this.settings.set("cliqNumberAccountHolder", "");
     this.settings.set("mobileWallet", "");
     this.settings.set("walletType", "Orange Money");
@@ -87,8 +90,8 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
     const user: User = {
-      ...insertUser,
       id,
+      ...insertUser,
       mobileNumber: null,
       mobileVerified: false,
       kycStatus: "pending",
@@ -101,7 +104,7 @@ export class MemStorage implements IStorage {
       cliqType: null,
       cliqAlias: null,
       cliqNumber: null,
-      accountHolderName: insertUser.fullName, // Pre-fill with user's full name
+      accountHolderName: insertUser.fullName,
       bankName: null,
       bankBranch: null,
       bankAccountNumber: null,
@@ -114,27 +117,36 @@ export class MemStorage implements IStorage {
   async updateUserMobile(id: number, mobile: string): Promise<void> {
     const user = this.users.get(id);
     if (user) {
-      user.mobileNumber = mobile;
-      user.mobileVerified = true;
-      this.users.set(id, user);
+      const updatedUser = {
+        ...user,
+        mobileNumber: mobile,
+        mobileVerified: true
+      };
+      this.users.set(id, updatedUser);
     }
   }
 
   async updateUserKYC(id: number, document: string): Promise<void> {
     const user = this.users.get(id);
     if (user) {
-      user.kycDocument = document;
-      user.kycStatus = "pending";
-      this.users.set(id, { ...user }); // Create a new object to ensure updates are detected
+      const updatedUser = {
+        ...user,
+        kycDocument: document,
+        kycStatus: "pending"
+      };
+      this.users.set(id, updatedUser);
     }
   }
 
   async updateUserWallet(id: number, usdtAddress: string, usdtNetwork: string): Promise<void> {
     const user = this.users.get(id);
     if (user) {
-      user.usdtAddress = usdtAddress;
-      user.usdtNetwork = usdtNetwork;
-      this.users.set(id, { ...user });
+      const updatedUser = {
+        ...user,
+        usdtAddress,
+        usdtNetwork
+      };
+      this.users.set(id, updatedUser);
     }
   }
 
@@ -147,12 +159,15 @@ export class MemStorage implements IStorage {
   }): Promise<void> {
     const user = this.users.get(id);
     if (user) {
-      user.bankName = cliqDetails.bankName;
-      user.cliqType = cliqDetails.cliqType;
-      user.cliqAlias = cliqDetails.cliqAlias || null;
-      user.cliqNumber = cliqDetails.cliqNumber || null;
-      user.accountHolderName = cliqDetails.accountHolderName;
-      this.users.set(id, { ...user });
+      const updatedUser = {
+        ...user,
+        bankName: cliqDetails.bankName,
+        cliqType: cliqDetails.cliqType,
+        cliqAlias: cliqDetails.cliqAlias || null,
+        cliqNumber: cliqDetails.cliqNumber || null,
+        accountHolderName: cliqDetails.accountHolderName
+      };
+      this.users.set(id, updatedUser);
     }
   }
 
@@ -184,7 +199,7 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values());
   }
 
-  async createTransaction(data: any): Promise<Transaction> {
+  async createTransaction(data: Transaction): Promise<Transaction> {
     const id = this.currentTransactionId++;
     const transaction: Transaction = {
       id,
@@ -219,14 +234,20 @@ export class MemStorage implements IStorage {
   async approveTransaction(id: number): Promise<void> {
     const transaction = this.transactions.get(id);
     if (transaction) {
-      transaction.status = "approved";
-      this.transactions.set(id, { ...transaction }); // Create a new object to ensure updates are detected
+      const updatedTransaction = {
+        ...transaction,
+        status: "approved"
+      };
+      this.transactions.set(id, updatedTransaction);
 
       // Update loyalty points
       const user = this.users.get(transaction.userId);
       if (user) {
-        user.loyaltyPoints = (user.loyaltyPoints || 0) + Math.floor(Number(transaction.amount) / 100);
-        this.users.set(user.id, { ...user }); // Create a new object to ensure updates are detected
+        const updatedUser = {
+          ...user,
+          loyaltyPoints: (user.loyaltyPoints || 0) + Math.floor(Number(transaction.amount) / 100)
+        };
+        this.users.set(user.id, updatedUser);
       }
     }
   }
