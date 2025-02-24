@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { DocumentPreviewModal } from "@/components/document-preview-modal";
+import { PaymentProofModal } from "@/components/payment-proof-modal";
 import { useState } from "react";
 import { Eye } from "lucide-react";
 
@@ -14,6 +15,7 @@ export default function AdminPage() {
   const [selectedUser, setSelectedUser] = useState<{ id: number; username: string } | null>(null);
   const [processingKycId, setProcessingKycId] = useState<number | null>(null);
   const [processingTxId, setProcessingTxId] = useState<number | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<{ id: number; username: string } | null>(null);
 
   const { data: users, isLoading: isLoadingUsers } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
@@ -100,6 +102,12 @@ export default function AdminPage() {
         onClose={() => setSelectedUser(null)}
         userId={selectedUser?.id || null}
         username={selectedUser?.username || ''}
+      />
+      <PaymentProofModal 
+        isOpen={!!selectedTransaction}
+        onClose={() => setSelectedTransaction(null)}
+        transactionId={selectedTransaction?.id || null}
+        username={selectedTransaction?.username || ''}
       />
 
       <Tabs defaultValue="users" className="w-full">
@@ -205,13 +213,26 @@ export default function AdminPage() {
                                 <td className="px-4 py-3 text-sm capitalize">{tx.status}</td>
                                 <td className="px-4 py-3">
                                   {tx.status === 'pending' && (
-                                    <Button
-                                      size="sm"
-                                      onClick={() => approveTransactionMutation.mutate(tx.id)}
-                                      disabled={processingTxId === tx.id}
-                                    >
-                                      {processingTxId === tx.id ? 'Approving...' : 'Approve'}
-                                    </Button>
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => setSelectedTransaction({ 
+                                          id: tx.id, 
+                                          username: user?.username || '' 
+                                        })}
+                                      >
+                                        <Eye className="h-4 w-4 mr-1" />
+                                        <span className="hidden sm:inline">View</span> Proof
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        onClick={() => approveTransactionMutation.mutate(tx.id)}
+                                        disabled={processingTxId === tx.id}
+                                      >
+                                        {processingTxId === tx.id ? 'Approving...' : 'Approve'}
+                                      </Button>
+                                    </div>
                                   )}
                                 </td>
                               </tr>

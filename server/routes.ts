@@ -206,6 +206,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add this route after existing admin routes
+  app.get("/api/admin/payment-proof/:transactionId", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+
+    try {
+      const transaction = await storage.getTransaction(parseInt(req.params.transactionId));
+      if (!transaction || !transaction.proofOfPayment) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+
+      const buffer = Buffer.from(transaction.proofOfPayment, 'base64');
+
+      // Check the file signature to determine the actual file type
+      const isPng = buffer.toString('hex', 0, 8) === '89504e470d0a1a0a';
+      const isJpg = buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[buffer.length - 2] === 0xFF && buffer[buffer.length - 1] === 0xD9;
+
+      let contentType = 'application/octet-stream';
+      let extension = '.bin';
+
+      if (isPng) {
+        contentType = 'image/png';
+        extension = '.png';
+      } else if (isJpg) {
+        contentType = 'image/jpeg';
+        extension = '.jpg';
+      }
+
+      // Set proper headers for preview and download
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Length', buffer.length);
+      res.setHeader('Accept-Ranges', 'bytes');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+
+      if (req.query.download) {
+        res.setHeader('Content-Disposition', `attachment; filename="payment-proof-${transaction.id}${extension}"`);
+      } else {
+        res.setHeader('Content-Disposition', 'inline');
+      }
+
+      // Send the raw buffer data
+      res.send(buffer);
+    } catch (error) {
+      console.error('Error fetching payment proof:', error);
+      res.status(500).json({ message: "Failed to fetch document" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
