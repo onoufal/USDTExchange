@@ -27,16 +27,18 @@ export default function TradeForm() {
   const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">("native");
   const [copyingTRC20, setCopyingTRC20] = useState(false);
   const [copyingBEP20, setCopyingBEP20] = useState(false);
+  const [copyingCliqAlias, setCopyingCliqAlias] = useState(false);
+  const [copyingMobileWallet, setCopyingMobileWallet] = useState(false);
 
-  const { data: paymentSettings } = useQuery<{ 
-    cliqAlias: string; 
-    mobileWallet: string; 
-    cliqBankName: string; 
-    cliqAccountHolder: string; 
-    walletType: string; 
-    walletHolderName: string; 
-    usdtAddressTRC20: string; 
-    usdtAddressBEP20: string 
+  const { data: paymentSettings } = useQuery<{
+    cliqAlias: string;
+    mobileWallet: string;
+    cliqBankName: string;
+    cliqAccountHolder: string;
+    walletType: string;
+    walletHolderName: string;
+    usdtAddressTRC20: string;
+    usdtAddressBEP20: string
   }>({
     queryKey: ["/api/settings/payment"],
     staleTime: 5000,
@@ -54,19 +56,25 @@ export default function TradeForm() {
   });
 
   // Copy address to clipboard with feedback
-  const copyToClipboard = async (text: string, network: "trc20" | "bep20") => {
+  const copyToClipboard = async (text: string, network: "trc20" | "bep20" | 'cliqAlias' | 'mobileWallet') => {
     try {
       await navigator.clipboard.writeText(text);
       if (network === "trc20") {
         setCopyingTRC20(true);
         setTimeout(() => setCopyingTRC20(false), 2000);
-      } else {
+      } else if (network === "bep20") {
         setCopyingBEP20(true);
         setTimeout(() => setCopyingBEP20(false), 2000);
+      } else if (network === 'cliqAlias') {
+        setCopyingCliqAlias(true);
+        setTimeout(() => setCopyingCliqAlias(false), 2000);
+      } else if (network === 'mobileWallet') {
+        setCopyingMobileWallet(true);
+        setTimeout(() => setCopyingMobileWallet(false), 2000);
       }
       toast({
         title: "Address copied",
-        description: "USDT address has been copied to clipboard",
+        description: "Text has been copied to clipboard",
       });
     } catch (err) {
       toast({
@@ -433,7 +441,21 @@ export default function TradeForm() {
                             <FormLabel className="font-medium">CliQ Payment</FormLabel>
                           </FormItem>
                           <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                            <p><span className="text-muted-foreground">Cliq Alias:</span> {paymentSettings.cliqAlias}</p>
+                            <div className="flex items-center justify-between">
+                              <p><span className="text-muted-foreground">Cliq Alias:</span> {paymentSettings.cliqAlias}</p>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 shrink-0"
+                                onClick={() => copyToClipboard(paymentSettings.cliqAlias, 'cliqAlias')}
+                              >
+                                {copyingCliqAlias ? (
+                                  <Check className="h-4 w-4" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
                             <p><span className="text-muted-foreground">Bank:</span> {paymentSettings.cliqBankName}</p>
                             <p><span className="text-muted-foreground">Account Holder:</span> {paymentSettings.cliqAccountHolder}</p>
                           </div>
@@ -448,7 +470,21 @@ export default function TradeForm() {
                             <FormLabel className="font-medium">Mobile Wallet</FormLabel>
                           </FormItem>
                           <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                            <p><span className="text-muted-foreground">Number:</span> {paymentSettings.mobileWallet}</p>
+                            <div className="flex items-center justify-between">
+                              <p><span className="text-muted-foreground">Number:</span> {paymentSettings.mobileWallet}</p>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 shrink-0"
+                                onClick={() => copyToClipboard(paymentSettings.mobileWallet, 'mobileWallet')}
+                              >
+                                {copyingMobileWallet ? (
+                                  <Check className="h-4 w-4" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
                             <p><span className="text-muted-foreground">Wallet Type:</span> {paymentSettings.walletType}</p>
                             <p><span className="text-muted-foreground">Holder Name:</span> {paymentSettings.walletHolderName}</p>
                           </div>
