@@ -13,14 +13,50 @@ export default function AdminPage() {
   const { toast } = useToast();
   const [selectedUser, setSelectedUser] = useState<{ id: number; username: string } | null>(null);
   const [processingKycId, setProcessingKycId] = useState<number | null>(null);
+  const [processingTxId, setProcessingTxId] = useState<number | null>(null);
 
   const { data: users, isLoading: isLoadingUsers } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
     refetchInterval: 5000 // Refresh every 5 seconds to keep status updated
   });
 
-  const { data: transactions } = useQuery<Transaction[]>({
+  const { data: transactions, isLoading: isLoadingTransactions } = useQuery<Transaction[]>({
     queryKey: ["/api/admin/transactions"],
+    refetchInterval: 5000 // Refresh every 5 seconds
+  });
+
+  const approveTransactionMutation = useMutation({
+    mutationFn: async (txId: number) => {
+      setProcessingTxId(txId);
+      try {
+        const res = await apiRequest("POST", `/api/admin/approve-transaction/${txId}`);
+        if (!res.ok) {
+          throw new Error("Failed to approve transaction");
+        }
+        return res.json();
+      } catch (error) {
+        console.error('Transaction approval error:', error);
+        setProcessingTxId(null);
+        throw error;
+      }
+    },
+    onSuccess: (_, txId) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      setProcessingTxId(null);
+      toast({
+        title: "Transaction Approved",
+        description: "Transaction has been approved and loyalty points awarded",
+      });
+    },
+    onError: (error: Error) => {
+      setProcessingTxId(null);
+      toast({
+        title: "Approval failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   const approveKYCMutation = useMutation({
@@ -142,35 +178,51 @@ export default function AdminPage() {
               <CardTitle>Transaction Management</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto -mx-4 sm:mx-0">
-                <div className="min-w-full inline-block align-middle">
-                  <div className="overflow-hidden">
-                    <table className="min-w-full divide-y divide-border">
-                      <thead>
-                        <tr>
-                          <th className="px-4 py-3 text-left text-sm font-medium">User</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium">Type</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium">Amount</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {transactions?.map((tx) => {
-                          const user = users?.find(u => u.id === tx.userId);
-                          return (
-                            <tr key={tx.id}>
-                              <td className="px-4 py-3 text-sm">{user?.username}</td>
-                              <td className="px-4 py-3 text-sm capitalize">{tx.type}</td>
-                              <td className="px-4 py-3 text-sm">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
-                              <td className="px-4 py-3 text-sm capitalize">{tx.status}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+              {isLoadingTransactions ? (
+                <div className="text-center py-4">Loading transactions...</div>
+              ) : (
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <div className="min-w-full inline-block align-middle">
+                    <div className="overflow-hidden">
+                      <table className="min-w-full divide-y divide-border">
+                        <thead>
+                          <tr>
+                            <th className="px-4 py-3 text-left text-sm font-medium">User</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Type</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Amount</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                          {transactions?.map((tx) => {
+                            const user = users?.find(u => u.id === tx.userId);
+                            return (
+                              <tr key={tx.id}>
+                                <td className="px-4 py-3 text-sm">{user?.username}</td>
+                                <td className="px-4 py-3 text-sm capitalize">{tx.type}</td>
+                                <td className="px-4 py-3 text-sm">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
+                                <td className="px-4 py-3 text-sm capitalize">{tx.status}</td>
+                                <td className="px-4 py-3">
+                                  {tx.status === 'pending' && (
+                                    <Button
+                                      size="sm"
+                                      onClick={() => approveTransactionMutation.mutate(tx.id)}
+                                      disabled={processingTxId === tx.id}
+                                    >
+                                      {processingTxId === tx.id ? 'Approving...' : 'Approve'}
+                                    </Button>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

@@ -109,6 +109,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ success: true });
   });
 
+  app.post("/api/admin/approve-transaction/:transactionId", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+
+    try {
+      await storage.approveTransaction(parseInt(req.params.transactionId));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Transaction approval error:', error);
+      res.status(500).json({ message: "Failed to approve transaction" });
+    }
+  });
+
   app.get("/api/admin/kyc-document/:userId", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
 
