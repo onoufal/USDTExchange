@@ -14,10 +14,22 @@ import NavBar from "./components/nav-bar";
 function Router() {
   return (
     <Switch>
-      <ProtectedRoute path="/" component={HomePage} />
+      <Route path="/">
+        <ProtectedRoute>
+          <HomePage />
+        </ProtectedRoute>
+      </Route>
       <Route path="/auth" component={AuthPage} />
-      <ProtectedRoute path="/admin" component={AdminPage} adminOnly />
-      <ProtectedRoute path="/settings" component={SettingsPage} />
+      <Route path="/admin">
+        <ProtectedRoute adminOnly>
+          <AdminPage />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/settings">
+        <ProtectedRoute>
+          <SettingsPage />
+        </ProtectedRoute>
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
