@@ -44,6 +44,7 @@ export default function AdminPage() {
     },
     onSuccess: (_, txId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       setProcessingTxId(null);
       toast({

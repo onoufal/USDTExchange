@@ -12,6 +12,7 @@ export default function HomePage() {
   const { user } = useAuth();
   const { data: transactions } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions"],
+    refetchInterval: 5000 // Refresh every 5 seconds to keep status updated
   });
 
   // All derived state after hooks
