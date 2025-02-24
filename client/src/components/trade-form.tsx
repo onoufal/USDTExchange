@@ -328,7 +328,7 @@ export default function TradeForm() {
                     <span>
                       {type === "buy"
                         ? (currencyBasis === "foreign" ? "Total to Pay" : "Total to Receive")
-                        : (currencyBasis === "foreign" ? "Total to Receive" : "Total to Pay")}
+                        : (currencyBasis === "foreign" ? "Total to Pay" : "Total to Receive")}
                     </span>
                     <span>
                       {calculateFinalAmount(amount)} {getEquivalentCurrencyLabel()}
