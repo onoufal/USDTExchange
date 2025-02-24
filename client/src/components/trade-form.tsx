@@ -392,11 +392,11 @@ export default function TradeForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Amount</FormLabel>
-                      <div className="space-y-3 sm:space-y-4">
+                      <div className="space-y-3">
                         <RadioGroup
                           value={currencyBasis}
                           onValueChange={(value: "native" | "foreign") => setCurrencyBasis(value)}
-                          className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0"
+                          className="flex flex-col space-y-2 sm:flex-row sm:space-x-4 sm:space-y-0"
                         >
                           <FormItem className="flex items-center space-x-2">
                             <FormControl>
@@ -434,25 +434,25 @@ export default function TradeForm() {
                 />
 
                 <Card className="p-3 sm:p-4">
-                  <div className="flex justify-between mb-2 text-sm">
+                  <div className="flex flex-wrap justify-between gap-2 mb-2 text-sm">
                     <span>Exchange Rate</span>
-                    <span>1 USDT = {MOCK_RATE} JOD</span>
+                    <span className="font-mono">1 USDT = {MOCK_RATE} JOD</span>
                   </div>
                   {amount && (
                     <>
-                      <div className="flex justify-between mb-2 text-sm">
+                      <div className="flex flex-wrap justify-between gap-2 mb-2 text-sm">
                         <span>Base Amount</span>
                         <span className="font-mono">
                           {calculateEquivalentAmount(amount)} {getEquivalentCurrencyLabel()}
                         </span>
                       </div>
-                      <div className="flex justify-between mb-2 text-xs sm:text-sm text-muted-foreground">
+                      <div className="flex flex-wrap justify-between gap-2 mb-2 text-xs sm:text-sm text-muted-foreground">
                         <span>Commission (2%)</span>
                         <span className="font-mono">
                           {calculateCommission(amount)}
                         </span>
                       </div>
-                      <div className="flex justify-between font-medium pt-2 border-t text-sm">
+                      <div className="flex flex-wrap justify-between gap-2 pt-2 border-t text-sm font-medium">
                         <span>
                           {type === "buy"
                             ? currencyBasis === "foreign"
@@ -486,9 +486,9 @@ export default function TradeForm() {
                                   CliQ Payment
                                 </FormLabel>
                               </FormItem>
-                              <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                              <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 sm:p-3 rounded-md">
                                 <div className="flex items-center justify-between">
-                                  <p>
+                                  <p className="truncate mr-2">
                                     <span className="text-muted-foreground">
                                       Cliq Alias:
                                     </span>{" "}
@@ -537,7 +537,7 @@ export default function TradeForm() {
                                   Mobile Wallet
                                 </FormLabel>
                               </FormItem>
-                              <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                              <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 sm:p-3 rounded-md">
                                 <div className="flex items-center justify-between">
                                   <p>
                                     <span className="text-muted-foreground">
@@ -590,17 +590,17 @@ export default function TradeForm() {
                     ) : (
                       <>
                         <p className="mb-4 font-medium">Select USDT network for payment:</p>
-                        <div className="space-y-6">
+                        <div className="space-y-4 sm:space-y-6">
                           <FormField
                             control={form.control}
                             name="network"
                             render={({ field }) => (
-                              <FormItem className="space-y-6">
+                              <FormItem className="space-y-4 sm:space-y-6">
                                 <FormControl>
                                   <RadioGroup
                                     onValueChange={field.onChange}
                                     value={field.value}
-                                    className="space-y-6"
+                                    className="space-y-4 sm:space-y-6"
                                   >
                                     <div className="space-y-3">
                                       <div className="flex items-center space-x-3">
@@ -610,7 +610,7 @@ export default function TradeForm() {
                                         </FormLabel>
                                       </div>
                                       {selectedNetwork === "trc20" && (
-                                        <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                        <div className="ml-7 text-xs bg-muted/50 p-2 sm:p-3 rounded-md">
                                           {!paymentSettings?.usdtAddressTRC20 ? (
                                             <div className="text-muted-foreground">
                                               TRC20 address not set in admin settings
@@ -651,7 +651,7 @@ export default function TradeForm() {
                                         </FormLabel>
                                       </div>
                                       {selectedNetwork === "bep20" && (
-                                        <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                        <div className="ml-7 text-xs bg-muted/50 p-2 sm:p-3 rounded-md">
                                           {!paymentSettings?.usdtAddressBEP20 ? (
                                             <div className="text-muted-foreground">
                                               BEP20 address not set in admin settings
@@ -690,7 +690,7 @@ export default function TradeForm() {
                             )}
                           />
                         </div>
-                        <p className="text-xs text-muted-foreground mt-6">
+                        <p className="text-xs text-muted-foreground mt-4 sm:mt-6">
                           Please send {form.watch("amount")} USDT to the selected network address
                           and upload the transaction proof below.
                           <br />

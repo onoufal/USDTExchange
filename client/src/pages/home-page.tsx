@@ -8,17 +8,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Transaction } from "@shared/schema";
 
 export default function HomePage() {
-  // All hooks at the top
   const { user } = useAuth();
   const { data: transactions } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions"],
-    refetchInterval: 5000 // Refresh every 5 seconds to keep status updated
+    refetchInterval: 5000
   });
 
-  // All derived state after hooks
   const showKYCWarning = user && (!user.mobileVerified || user.kycStatus !== "approved");
 
-  // Return null or loading state if no user
   if (!user) return null;
 
   return (
@@ -69,25 +66,25 @@ export default function HomePage() {
         <CardContent>
           <div className="overflow-x-auto -mx-4 sm:mx-0">
             <div className="min-w-full inline-block align-middle">
-              <div className="overflow-hidden">
+              <div className="overflow-hidden rounded-lg border">
                 <table className="min-w-full divide-y divide-border">
                   <thead>
                     <tr className="bg-muted/50">
-                      <th className="px-4 py-2 text-left text-xs sm:text-sm font-medium">Type</th>
-                      <th className="px-4 py-2 text-left text-xs sm:text-sm font-medium">Amount</th>
-                      <th className="px-4 py-2 text-left text-xs sm:text-sm font-medium">Rate</th>
-                      <th className="px-4 py-2 text-left text-xs sm:text-sm font-medium">Status</th>
-                      <th className="px-4 py-2 text-left text-xs sm:text-sm font-medium">Date</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium sm:px-4">Type</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium sm:px-4">Amount</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium sm:px-4">Rate</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium sm:px-4">Status</th>
+                      <th className="px-3 py-2 text-left text-xs font-medium sm:px-4">Date</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {transactions?.map((tx) => (
                       <tr key={tx.id} className="hover:bg-muted/50">
-                        <td className="px-4 py-2 text-xs sm:text-sm capitalize">{tx.type}</td>
-                        <td className="px-4 py-2 text-xs sm:text-sm">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
-                        <td className="px-4 py-2 text-xs sm:text-sm">{tx.rate}</td>
-                        <td className="px-4 py-2 text-xs sm:text-sm capitalize">{tx.status}</td>
-                        <td className="px-4 py-2 text-xs sm:text-sm">{new Date(tx.createdAt).toLocaleDateString()}</td>
+                        <td className="px-3 py-2 text-xs sm:px-4 capitalize">{tx.type}</td>
+                        <td className="px-3 py-2 text-xs sm:px-4">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
+                        <td className="px-3 py-2 text-xs sm:px-4">{tx.rate}</td>
+                        <td className="px-3 py-2 text-xs sm:px-4 capitalize">{tx.status}</td>
+                        <td className="px-3 py-2 text-xs sm:px-4">{new Date(tx.createdAt).toLocaleDateString()}</td>
                       </tr>
                     ))}
                     {(!transactions || transactions.length === 0) && (
