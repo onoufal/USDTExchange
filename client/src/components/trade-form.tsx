@@ -5,7 +5,7 @@ import { insertTransactionSchema } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -27,7 +27,6 @@ export default function TradeForm() {
   const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">("native");
   const [selectedNetwork, setSelectedNetwork] = useState<"trc20" | "bep20">("trc20");
 
-  // Fetch platform payment settings
   const { data: paymentSettings } = useQuery<{ cliqAlias: string; mobileWallet: string; cliqBankName: string; cliqAccountHolder: string; walletType: string; walletHolderName: string; usdtAddressTRC20: string; usdtAddressBEP20: string }>({
     queryKey: ["/api/settings/payment"],
   });
@@ -38,7 +37,7 @@ export default function TradeForm() {
       type: "buy",
       amount: "",
       rate: MOCK_RATE.toString(),
-      network: "trc20" // Added default network
+      network: "trc20"
     },
   });
 
@@ -46,7 +45,6 @@ export default function TradeForm() {
     setUploadProgress(0);
   }, [file]);
 
-  // Cleanup effect when component unmounts or form resets
   useEffect(() => {
     return () => {
       setFile(null);
@@ -68,7 +66,6 @@ export default function TradeForm() {
         return;
       }
 
-      // Check file size (max 5MB)
       const maxSize = 5 * 1024 * 1024;
       if (selectedFile.size > maxSize) {
         toast({
@@ -103,7 +100,7 @@ export default function TradeForm() {
           aborted = true;
           xhr.abort();
           reject(new Error("Upload timed out"));
-        }, 30000); // 30 second timeout
+        }, 30000); 
 
         xhr.upload.addEventListener("progress", (event) => {
           if (aborted) return;
@@ -152,7 +149,6 @@ export default function TradeForm() {
       return promise;
     },
     onSuccess: () => {
-      // Invalidate both user transactions and admin transactions
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/transactions"] });
       cleanupForm();
@@ -177,12 +173,8 @@ export default function TradeForm() {
     const isForeignCurrency = currencyBasis === "foreign";
 
     if (type === "buy") {
-      // For buy: if entering USDT, multiply by rate to get JOD cost
-      // if entering JOD, divide by rate to get USDT received
       return isForeignCurrency ? (num * MOCK_RATE).toFixed(2) : (num / MOCK_RATE).toFixed(2);
     } else {
-      // For sell: if entering USDT, multiply by rate to get JOD received
-      // if entering JOD, divide by rate to get USDT needed
       return isForeignCurrency ? (num / MOCK_RATE).toFixed(2) : (num * MOCK_RATE).toFixed(2);
     }
   };
@@ -198,19 +190,13 @@ export default function TradeForm() {
     const type = form.watch("type");
 
     if (type === "buy") {
-      // When buying USDT:
-      // If entering USDT (foreign), show JOD cost with commission added
-      // If entering JOD (native), show USDT received with commission subtracted
       return currencyBasis === "foreign"
-        ? (equivalentNum * (1 + COMMISSION_RATE)).toFixed(2)  // JOD to pay
-        : (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2); // USDT to receive
+        ? (equivalentNum * (1 + COMMISSION_RATE)).toFixed(2) 
+        : (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2); 
     } else {
-      // When selling USDT:
-      // If entering JOD (foreign), show USDT needed with commission added
-      // If entering USDT (native), show JOD to receive with commission deducted
       return currencyBasis === "foreign"
-        ? (equivalentNum * (1 + COMMISSION_RATE)).toFixed(2)  // USDT to pay to get desired JOD
-        : (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2); // JOD to receive
+        ? (equivalentNum * (1 + COMMISSION_RATE)).toFixed(2)  
+        : (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2); 
     }
   };
 
@@ -233,7 +219,6 @@ export default function TradeForm() {
   };
 
   const onSubmit = (values: any) => {
-    // Check for USDT wallet settings when buying
     if (values.type === "buy" && !user?.usdtAddress) {
       toast({
         title: "USDT wallet not set",
@@ -243,7 +228,6 @@ export default function TradeForm() {
       return;
     }
 
-    // Check for CliQ settings when selling
     if (values.type === "sell" && !(user?.cliqAlias || user?.cliqNumber)) {
       toast({
         title: "CliQ details not set",
@@ -265,7 +249,6 @@ export default function TradeForm() {
     const formData = new FormData();
     formData.append("type", values.type);
 
-    // Convert amount if needed based on currency basis
     const amount = currencyBasis === "foreign" ?
       calculateEquivalentAmount(values.amount) :
       values.amount;
@@ -273,7 +256,7 @@ export default function TradeForm() {
     formData.append("amount", amount);
     formData.append("rate", values.rate.toString());
     formData.append("proofOfPayment", file);
-    formData.append("network", values.network); // Add network to formData
+    formData.append("network", values.network); 
 
     tradeMutation.mutate(formData);
   };
@@ -437,44 +420,43 @@ export default function TradeForm() {
                       control={form.control}
                       name="network"
                       render={({ field }) => (
-                        <RadioGroup
-                          defaultValue="trc20"
-                          className="mb-4 space-y-3"
-                          onValueChange={(value) => {
-                            setSelectedNetwork(value as "trc20" | "bep20");
-                            field.onChange(value);
-                          }}
-                        >
-                          {paymentSettings?.usdtAddressTRC20 && (
-                            <div className="space-y-2">
-                              <FormItem className="flex items-center space-x-3">
-                                <FormControl>
-                                  <RadioGroupItem value="trc20" />
-                                </FormControl>
-                                <FormLabel className="font-medium">TRC20 Network</FormLabel>
-                              </FormItem>
-                              <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                                <p className="font-mono break-all">{paymentSettings.usdtAddressTRC20}</p>
-                              </div>
-                            </div>
-                          )}
-                          {paymentSettings?.usdtAddressBEP20 && (
-                            <div className="space-y-2">
-                              <FormItem className="flex items-center space-x-3">
-                                <FormControl>
-                                  <RadioGroupItem value="bep20" />
-                                </FormControl>
-                                <FormLabel className="font-medium">BEP20 Network</FormLabel>
-                              </FormItem>
-                              <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                                <p className="font-mono break-all">{paymentSettings.usdtAddressBEP20}</p>
-                              </div>
-                            </div>
-                          )}
-                        </RadioGroup>
+                        <FormItem>
+                          <FormControl>
+                            <RadioGroup
+                              defaultValue="trc20"
+                              className="mb-4 space-y-3"
+                              value={field.value}
+                              onValueChange={field.onChange}
+                            >
+                              {paymentSettings?.usdtAddressTRC20 && (
+                                <div className="space-y-2">
+                                  <div className="flex items-center space-x-3">
+                                    <RadioGroupItem value="trc20" id="trc20" />
+                                    <FormLabel htmlFor="trc20" className="font-medium">TRC20 Network</FormLabel>
+                                  </div>
+                                  <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                                    <p className="font-mono break-all">{paymentSettings.usdtAddressTRC20}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {paymentSettings?.usdtAddressBEP20 && (
+                                <div className="space-y-2">
+                                  <div className="flex items-center space-x-3">
+                                    <RadioGroupItem value="bep20" id="bep20" />
+                                    <FormLabel htmlFor="bep20" className="font-medium">BEP20 Network</FormLabel>
+                                  </div>
+                                  <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                                    <p className="font-mono break-all">{paymentSettings.usdtAddressBEP20}</p>
+                                  </div>
+                                </div>
+                              )}
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground mt-4">
                       Please send {amount} USDT to the selected network address and upload the transaction proof below.
                       <br />
                       You will receive {calculateFinalAmount(amount)} JOD after approval.

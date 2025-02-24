@@ -137,7 +137,8 @@ export const insertTransactionSchema = createInsertSchema(transactions)
       .regex(/^\d+(\.\d{1,2})?$/, "Rate must be a valid number with up to 2 decimal places")
       .transform(Number),
     commission: z.number().default(0),
-    fee: z.number().default(0)
+    fee: z.number().default(0),
+    network: z.enum(["trc20", "bep20"]).optional()
   });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
