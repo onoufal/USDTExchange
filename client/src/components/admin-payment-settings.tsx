@@ -8,17 +8,36 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { JORDANIAN_BANKS } from "@shared/schema";
 
 const paymentSettingsSchema = z.object({
+  // CliQ Settings
   cliqAlias: z.string().min(1, "CliQ alias is required"),
+  cliqBankName: z.string().min(1, "Bank name is required"),
+  cliqAccountHolder: z.string().min(1, "Account holder name is required"),
+  cliqNumber: z.string().regex(/^07[789]\d{7}$/, {
+    message: "Invalid Jordanian mobile number format"
+  }),
+  cliqBankNameForNumber: z.string().min(1, "Bank name is required"),
+  cliqNumberAccountHolder: z.string().min(1, "Account holder name is required"),
+
+  // Mobile Wallet Settings
   mobileWallet: z.string().regex(/^07[789]\d{7}$/, {
     message: "Invalid Jordanian mobile number format"
   }),
-  usdtAddress: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
-  usdtNetwork: z.string().min(1, "USDT network is required")
+  walletType: z.string().min(1, "Wallet type is required"),
+  walletHolderName: z.string().min(1, "Wallet holder name is required"),
+
+  // USDT Settings
+  usdtAddressTRC20: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
+  usdtAddressBEP20: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
 });
 
 type PaymentSettings = z.infer<typeof paymentSettingsSchema>;
+
+const WALLET_TYPES = ["Orange Money", "Zain Cash", "U Wallet"];
 
 export default function AdminPaymentSettings() {
   const { toast } = useToast();
@@ -31,9 +50,16 @@ export default function AdminPaymentSettings() {
     resolver: zodResolver(paymentSettingsSchema),
     defaultValues: settings || {
       cliqAlias: "",
+      cliqBankName: JORDANIAN_BANKS[0],
+      cliqAccountHolder: "",
+      cliqNumber: "",
+      cliqBankNameForNumber: JORDANIAN_BANKS[0],
+      cliqNumberAccountHolder: "",
       mobileWallet: "",
-      usdtAddress: "",
-      usdtNetwork: "TRC20"
+      walletType: WALLET_TYPES[0],
+      walletHolderName: "",
+      usdtAddressTRC20: "",
+      usdtAddressBEP20: "",
     },
     values: settings
   });
@@ -73,78 +99,220 @@ export default function AdminPaymentSettings() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(data => updateSettingsMutation.mutate(data))} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="cliqAlias"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CliQ Alias</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your CliQ alias" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Users will send JOD to this CliQ alias
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <form onSubmit={form.handleSubmit(data => updateSettingsMutation.mutate(data))} className="space-y-6">
+            {/* CliQ Settings - Alias */}
+            <div className="space-y-4">
+              <h3 className="font-medium text-lg">CliQ Settings - Alias</h3>
+              <FormField
+                control={form.control}
+                name="cliqAlias"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CliQ Alias</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your CliQ alias" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="mobileWallet"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mobile Wallet Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="07XXXXXXXX" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Alternative payment option for mobile wallet transfers
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="cliqBankName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bank Name</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select bank" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {JORDANIAN_BANKS.map((bank) => (
+                          <SelectItem key={bank} value={bank}>
+                            {bank}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="usdtAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Platform USDT Wallet Address</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your USDT wallet address" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Users will send USDT to this address when selling
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="cliqAccountHolder"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Account Holder Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter account holder name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-            <FormField
-              control={form.control}
-              name="usdtNetwork"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>USDT Network</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. TRC20" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Specify the USDT network type (e.g. TRC20, ERC20)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* CliQ Settings - Number */}
+            <div className="space-y-4">
+              <h3 className="font-medium text-lg">CliQ Settings - Mobile Number</h3>
+              <FormField
+                control={form.control}
+                name="cliqNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CliQ Mobile Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="07XXXXXXXX" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="cliqBankNameForNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bank Name</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select bank" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {JORDANIAN_BANKS.map((bank) => (
+                          <SelectItem key={bank} value={bank}>
+                            {bank}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="cliqNumberAccountHolder"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Account Holder Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter account holder name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Mobile Wallet Settings */}
+            <div className="space-y-4">
+              <h3 className="font-medium text-lg">Mobile Wallet Settings</h3>
+              <FormField
+                control={form.control}
+                name="mobileWallet"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mobile Wallet Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="07XXXXXXXX" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="walletType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wallet Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select wallet type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {WALLET_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="walletHolderName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Wallet Holder Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter wallet holder name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* USDT Settings */}
+            <div className="space-y-4">
+              <h3 className="font-medium text-lg">USDT Wallet Settings</h3>
+              <FormField
+                control={form.control}
+                name="usdtAddressTRC20"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>USDT Address (TRC20)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your TRC20 USDT wallet address" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      USDT wallet address on the Tron (TRC20) network
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="usdtAddressBEP20"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>USDT Address (BEP20)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your BEP20 USDT wallet address" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      USDT wallet address on the Binance Smart Chain (BEP20) network
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <Button 
               type="submit" 
               disabled={updateSettingsMutation.isPending}
+              className="w-full"
             >
               {updateSettingsMutation.isPending ? "Saving..." : "Save Settings"}
             </Button>

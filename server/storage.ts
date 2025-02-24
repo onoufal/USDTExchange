@@ -61,10 +61,17 @@ export class MemStorage implements IStorage {
     });
 
     // Set default payment settings
-    this.settings.set("cliqAlias", "your-cliq-alias");
-    this.settings.set("mobileWallet", "07XXXXXXXX");
-    this.settings.set("usdtAddress", "");
-    this.settings.set("usdtNetwork", "TRC20");
+    this.settings.set("cliqAlias", "");
+    this.settings.set("cliqBankName", "Arab Bank"); // Assuming JORDANIAN_BANKS[0] = "Arab Bank"
+    this.settings.set("cliqAccountHolder", "");
+    this.settings.set("cliqNumber", "");
+    this.settings.set("cliqBankNameForNumber", "Arab Bank"); // Assuming JORDANIAN_BANKS[0] = "Arab Bank"
+    this.settings.set("cliqNumberAccountHolder", "");
+    this.settings.set("mobileWallet", "");
+    this.settings.set("walletType", "Orange Money");
+    this.settings.set("walletHolderName", "");
+    this.settings.set("usdtAddressTRC20", "");
+    this.settings.set("usdtAddressBEP20", "");
   }
 
   async getUser(id: number): Promise<User | undefined> {
