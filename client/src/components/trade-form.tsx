@@ -6,11 +6,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Upload } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card } from "@/components/ui/card";
 
 const MOCK_RATE = 0.71; // 1 USDT = 0.71 JOD
 
@@ -18,6 +21,7 @@ export default function TradeForm() {
   const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">("native");
 
   const form = useForm({
     resolver: zodResolver(insertTransactionSchema),
@@ -157,6 +161,36 @@ export default function TradeForm() {
     },
   });
 
+  const calculateEquivalentAmount = (amount: string) => {
+    const num = Number(amount) || 0;
+    const type = form.watch("type");
+    const isForeignCurrency = currencyBasis === "foreign";
+
+    if (type === "buy") {
+      return isForeignCurrency ? (num * MOCK_RATE).toFixed(2) : (num / MOCK_RATE).toFixed(2);
+    } else {
+      return isForeignCurrency ? (num / MOCK_RATE).toFixed(2) : (num * MOCK_RATE).toFixed(2);
+    }
+  };
+
+  const getCurrentCurrencyLabel = () => {
+    const type = form.watch("type");
+    if (type === "buy") {
+      return currencyBasis === "native" ? "JOD" : "USDT";
+    } else {
+      return currencyBasis === "native" ? "USDT" : "JOD";
+    }
+  };
+
+  const getEquivalentCurrencyLabel = () => {
+    const type = form.watch("type");
+    if (type === "buy") {
+      return currencyBasis === "native" ? "USDT" : "JOD";
+    } else {
+      return currencyBasis === "native" ? "JOD" : "USDT";
+    }
+  };
+
   const onSubmit = (values: any) => {
     if (!file) {
       toast({
@@ -169,7 +203,13 @@ export default function TradeForm() {
 
     const formData = new FormData();
     formData.append("type", values.type);
-    formData.append("amount", values.amount.toString());
+
+    // Convert amount if needed based on currency basis
+    const amount = currencyBasis === "foreign" ? 
+      calculateEquivalentAmount(values.amount) : 
+      values.amount;
+
+    formData.append("amount", amount);
     formData.append("rate", values.rate.toString());
     formData.append("proofOfPayment", file);
 
@@ -177,85 +217,136 @@ export default function TradeForm() {
   };
 
   const isUploading = tradeMutation.isPending && uploadProgress > 0;
+  const type = form.watch("type");
+  const amount = form.watch("amount");
 
   return (
-    <Tabs defaultValue="buy" onValueChange={(value) => form.setValue("type", value)}>
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="buy">Buy USDT</TabsTrigger>
-        <TabsTrigger value="sell">Sell USDT</TabsTrigger>
-      </TabsList>
+    <div className="space-y-6">
+      <Tabs defaultValue="buy" onValueChange={(value) => form.setValue("type", value)}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="buy">Buy USDT</TabsTrigger>
+          <TabsTrigger value="sell">Sell USDT</TabsTrigger>
+        </TabsList>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
-          <FormField
-            control={form.control}
-            name="amount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Amount ({form.watch("type") === "buy" ? "JOD" : "USDT"})</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" {...field} />
-                </FormControl>
-                <FormDescription className="text-xs">
-                  Enter the amount you want to {form.watch("type")}
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="p-4 bg-muted rounded-lg">
-            <div className="flex justify-between mb-2">
-              <span>Rate</span>
-              <span>1 USDT = {MOCK_RATE} JOD</span>
-            </div>
-            <div className="flex justify-between font-medium">
-              <span>You will {form.watch("type") === "buy" ? "receive" : "pay"}</span>
-              <span>
-                {(Number(form.watch("amount") || 0) * (form.watch("type") === "buy" ? (1/MOCK_RATE) : MOCK_RATE)).toFixed(2)} {form.watch("type") === "buy" ? "USDT" : "JOD"}
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <FormLabel>Payment Proof</FormLabel>
-            <Input
-              type="file"
-              onChange={handleFileChange}
-              accept="image/*"
-              className="mt-2"
-              disabled={isUploading}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Amount</FormLabel>
+                  <div className="space-y-4">
+                    <RadioGroup
+                      value={currencyBasis}
+                      onValueChange={(value: "native" | "foreign") => setCurrencyBasis(value)}
+                      className="flex space-x-4"
+                    >
+                      <FormItem className="flex items-center space-x-2">
+                        <FormControl>
+                          <RadioGroupItem value="native" />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Enter in {type === "buy" ? "JOD" : "USDT"}
+                        </FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-2">
+                        <FormControl>
+                          <RadioGroupItem value="foreign" />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Enter in {type === "buy" ? "USDT" : "JOD"}
+                        </FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        step="0.01" 
+                        {...field} 
+                        placeholder={`Enter amount in ${getCurrentCurrencyLabel()}`}
+                      />
+                    </FormControl>
+                  </div>
+                  <FormDescription className="text-xs">
+                    Enter the amount you want to {type} in {getCurrentCurrencyLabel()}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <FormDescription className="text-xs mt-1">
-              Upload a screenshot of your payment (JPG or PNG, max 5MB)
-            </FormDescription>
-          </div>
 
-          {isUploading && (
-            <div className="space-y-2">
-              <Progress value={uploadProgress} className="w-full" />
-              <p className="text-xs text-center text-muted-foreground">
-                Uploading... {uploadProgress}%
-              </p>
+            <Card className="p-4">
+              <div className="flex justify-between mb-2 text-sm">
+                <span>Exchange Rate</span>
+                <span>1 USDT = {MOCK_RATE} JOD</span>
+              </div>
+              {amount && (
+                <div className="flex justify-between font-medium">
+                  <span>You will {type === "buy" ? "receive" : "pay"}</span>
+                  <span>
+                    {calculateEquivalentAmount(amount)} {getEquivalentCurrencyLabel()}
+                  </span>
+                </div>
+              )}
+            </Card>
+
+            <Alert>
+              <AlertDescription className="text-sm">
+                {type === "buy" ? (
+                  <>
+                    Please send {currencyBasis === "native" ? amount : calculateEquivalentAmount(amount)} JOD 
+                    to our CliQ/mobile wallet and upload the payment proof below.
+                  </>
+                ) : (
+                  <>
+                    Please send {currencyBasis === "native" ? amount : calculateEquivalentAmount(amount)} USDT
+                    to our wallet address and upload the transaction proof below.
+                  </>
+                )}
+              </AlertDescription>
+            </Alert>
+
+            <div>
+              <FormLabel>Payment Proof</FormLabel>
+              <Input
+                type="file"
+                onChange={handleFileChange}
+                accept="image/*"
+                className="mt-2"
+                disabled={isUploading}
+              />
+              <FormDescription className="text-xs mt-1">
+                Upload a screenshot of your payment (JPG or PNG, max 5MB)
+              </FormDescription>
             </div>
-          )}
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={tradeMutation.isPending}
-          >
-            {tradeMutation.isPending ? (
-              <>
-                <Upload className="h-4 w-4 mr-2 animate-bounce" />
-                Processing...
-              </>
-            ) : (
-              "Submit Trade"
+            {isUploading && (
+              <div className="space-y-2">
+                <Progress value={uploadProgress} className="w-full" />
+                <p className="text-xs text-center text-muted-foreground">
+                  Uploading... {uploadProgress}%
+                </p>
+              </div>
             )}
-          </Button>
-        </form>
-      </Form>
-    </Tabs>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={tradeMutation.isPending}
+            >
+              {tradeMutation.isPending ? (
+                <>
+                  <Upload className="h-4 w-4 mr-2 animate-bounce" />
+                  Processing...
+                </>
+              ) : (
+                "Submit Trade"
+              )}
+            </Button>
+          </form>
+        </Form>
+      </Tabs>
+    </div>
   );
 }

@@ -1,0 +1,75 @@
+1. Trade Types & Currency Selection
+A. Buy USDT
+User Chooses Currency Basis
+
+Option 1: Enter Amount in USDT
+The user inputs how many USDT they want to buy (e.g., 100 USDT).
+The system calculates the corresponding amount in JOD based on the current exchange rate (plus any fees/commissions you may add later).
+Option 2: Enter Amount in JOD
+The user inputs how many JOD they want to spend (e.g., 100 JOD).
+The system calculates how many USDT they will receive.
+User’s Payment Method (for JOD)
+
+The user is going to transfer JOD to your predefined payment options (CliQ alias or mobile wallet).
+The user must have already set their USDT address (either Tron network or BEP20) in their profile/dashboard. This address will be used by the admin to manually send USDT after confirming the user’s JOD payment.
+Order Creation
+
+Once the user clicks “Submit” or “Create Order,” a transaction is created in the database with status Pending (or Awaiting Payment).
+The admin sees the new transaction in the admin dashboard with all relevant details:
+User’s chosen payment method (CliQ, wallet, etc.).
+The user’s USDT address.
+The amount of USDT or JOD.
+The calculated equivalent amount.
+The user sees the payment instructions (e.g., “Send 100 JOD to [CliQ alias or mobile number]”).
+Payment Confirmation
+
+The user manually completes the transfer outside the platform.
+The user clicks a “Mark as Paid” or “I’ve Paid” button in the dashboard.
+The admin receives a notification that the user claims to have paid.
+The admin checks the payment receipt or bank account/wallet. If confirmed:
+The admin updates the order status to Processing or Completed.
+The admin manually sends the USDT to the user’s USDT address on Tron or BEP20.
+The final status is set to Completed.
+B. Sell USDT
+User Chooses Currency Basis
+
+Option 1: Enter Amount in USDT
+The user inputs how many USDT they want to sell (e.g., 100 USDT).
+The system calculates how much JOD they will receive.
+Option 2: Enter Amount in JOD
+The user inputs how much JOD they want to receive (e.g., 100 JOD).
+The system calculates how many USDT they must send.
+User’s Payment Method (for JOD)
+
+The user must have already set their JOD receiving details in their profile/dashboard:
+CliQ alias
+Or mobile wallet number
+During the Sell transaction, the user sees your USDT address (Tron or BEP20) so they can send the USDT to you.
+Order Creation
+
+The user clicks “Submit” or “Create Order,” creating a transaction with status Pending (or Awaiting USDT).
+The admin sees the new transaction with:
+The user’s chosen receiving method for JOD.
+The user’s total USDT to send or the JOD amount requested.
+Your own USDT address (shown to the user).
+Payment Confirmation
+
+The user sends the USDT to your address.
+The user then clicks a button like “I’ve Sent USDT.”
+The admin checks the wallet to confirm the USDT was received.
+Once confirmed, the admin manually sends JOD to the user’s CliQ alias or mobile wallet.
+The admin updates the transaction to Completed.
+2. Admin Controls for Payment Details
+Editable Payment Info:
+In the Admin Panel, you want a section where the admin can modify or update:
+
+Our JOD receiving details (e.g., different bank accounts, CliQ aliases, mobile wallet numbers).
+Our USDT address (for Sell orders), if needed.
+Transaction Overview:
+
+The Admin Dashboard should list all orders (Buy/Sell) with real-time statuses.
+Admin can filter by Pending, Processing, Completed, or Canceled.
+3. Commission or Fee Handling
+You mentioned you’ll “put the commission for buying or selling USDT later.”
+The system should ideally have a fee configuration so that when a user enters an amount, the final cost or final receive amount automatically includes the fee.
+Example: If the user wants to buy 100 USDT and the fee is 2%, the system shows them the total cost in JOD including that 2% commission.
