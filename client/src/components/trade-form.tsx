@@ -11,7 +11,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Copy, Check } from "lucide-react";
+import { Upload, Copy, Check, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
@@ -21,7 +21,7 @@ const COMMISSION_RATE = 0.02;
 
 export default function TradeForm() {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isLoading: isLoadingUser } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">("native");
@@ -30,7 +30,7 @@ export default function TradeForm() {
   const [copyingCliqAlias, setCopyingCliqAlias] = useState(false);
   const [copyingMobileWallet, setCopyingMobileWallet] = useState(false);
 
-  const { data: paymentSettings } = useQuery<{
+  const { data: paymentSettings, isLoading: isLoadingSettings } = useQuery<{
     cliqAlias: string;
     mobileWallet: string;
     cliqBankName: string;
@@ -41,7 +41,7 @@ export default function TradeForm() {
     usdtAddressBEP20: string
   }>({
     queryKey: ["/api/settings/payment"],
-    staleTime: 5000,
+    staleTime: 1000,
     retry: 3
   });
 
@@ -55,7 +55,6 @@ export default function TradeForm() {
     }
   });
 
-  // Copy address to clipboard with feedback
   const copyToClipboard = async (text: string, network: "trc20" | "bep20" | 'cliqAlias' | 'mobileWallet') => {
     try {
       await navigator.clipboard.writeText(text);
@@ -223,7 +222,7 @@ export default function TradeForm() {
   const calculateCommission = (amount: string) => {
     const num = Number(amount) || 0;
     const type = form.watch("type");
-    return type === "buy" 
+    return type === "buy"
       ? (num * COMMISSION_RATE).toFixed(2) + " JOD"
       : (num * COMMISSION_RATE).toFixed(2) + " USDT";
   };
@@ -251,7 +250,7 @@ export default function TradeForm() {
   };
 
   const getCurrentCurrencyLabel = () => {
-    return form.watch("type") === "buy" 
+    return form.watch("type") === "buy"
       ? (currencyBasis === "native" ? "JOD" : "USDT")
       : (currencyBasis === "native" ? "USDT" : "JOD");
   };
@@ -263,7 +262,6 @@ export default function TradeForm() {
   };
 
   const onSubmit = (values: any) => {
-    // When buying USDT, check for CliQ settings
     if (values.type === "buy" && !(user?.cliqAlias || user?.cliqNumber)) {
       toast({
         title: "CliQ details not set",
@@ -273,7 +271,6 @@ export default function TradeForm() {
       return;
     }
 
-    // When selling USDT, check for USDT wallet
     if (values.type === "sell" && !user?.usdtAddress) {
       toast({
         title: "USDT wallet not set",
@@ -307,9 +304,14 @@ export default function TradeForm() {
     tradeMutation.mutate(formData);
   };
 
-  const isUploading = tradeMutation.isPending && uploadProgress > 0;
+  const isLoading = isLoadingUser || isLoadingSettings;
+  const hasUsdtAddress = user?.usdtAddress || false;
+  const hasCliqSettings = user?.cliqAlias || user?.cliqNumber || false;
   const type = form.watch("type");
   const amount = form.watch("amount");
+
+  const isUploading = tradeMutation.isPending && uploadProgress > 0;
+
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -321,304 +323,313 @@ export default function TradeForm() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {type === "sell" && !user?.usdtAddress && (
-              <Alert variant="destructive">
-                <AlertDescription className="text-sm">
-                  Please set your USDT wallet address in settings before selling
-                </AlertDescription>
-              </Alert>
-            )}
-            {type === "buy" && !(user?.cliqAlias || user?.cliqNumber) && (
-              <Alert variant="destructive">
-                <AlertDescription className="text-sm">
-                  Please set your CliQ account details in settings before buying
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Amount</FormLabel>
-                  <div className="space-y-3 sm:space-y-4">
-                    <RadioGroup
-                      value={currencyBasis}
-                      onValueChange={(value: "native" | "foreign") => setCurrencyBasis(value)}
-                      className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0"
-                    >
-                      <FormItem className="flex items-center space-x-2">
-                        <FormControl>
-                          <RadioGroupItem value="native" />
-                        </FormControl>
-                        <FormLabel className="font-normal text-sm">
-                          Enter in {type === "buy" ? "JOD" : "USDT"}
-                        </FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-2">
-                        <FormControl>
-                          <RadioGroupItem value="foreign" />
-                        </FormControl>
-                        <FormLabel className="font-normal text-sm">
-                          Enter in {type === "buy" ? "USDT" : "JOD"}
-                        </FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        placeholder={`Enter amount in ${getCurrentCurrencyLabel()}`}
-                        className="text-base"
-                      />
-                    </FormControl>
-                  </div>
-                  <FormDescription className="text-xs">
-                    Enter the amount you want to {form.watch("type")} in {getCurrentCurrencyLabel()}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Card className="p-3 sm:p-4">
-              <div className="flex justify-between mb-2 text-sm">
-                <span>Exchange Rate</span>
-                <span>1 USDT = {MOCK_RATE} JOD</span>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
-              {amount && (
-                <>
-                  <div className="flex justify-between mb-2 text-sm">
-                    <span>Base Amount</span>
-                    <span className="font-mono">
-                      {calculateEquivalentAmount(amount)} {getEquivalentCurrencyLabel()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between mb-2 text-xs sm:text-sm text-muted-foreground">
-                    <span>Commission (2%)</span>
-                    <span className="font-mono">
-                      {calculateCommission(currencyBasis === "foreign" ? calculateEquivalentAmount(amount) : amount)} 
-                    </span>
-                  </div>
-                  <div className="flex justify-between font-medium pt-2 border-t text-sm">
-                    <span>
-                      {type === "buy"
-                        ? (currencyBasis === "foreign" ? "Total to Pay" : "Total to Receive")
-                        : (currencyBasis === "foreign" ? "Total to Pay" : "Total to Receive")}
-                    </span>
-                    <span className="font-mono">
-                      {calculateFinalAmount(amount)} {getEquivalentCurrencyLabel()}
-                    </span>
-                  </div>
-                </>
-              )}
-            </Card>
-
-            <Alert>
-              <AlertDescription className="text-xs sm:text-sm">
-                {form.watch("type") === "buy" ? (
-                  <>
-                    <p className="mb-2">Choose your preferred payment method:</p>
-                    <RadioGroup defaultValue="cliq" className="mb-4 space-y-3">
-                      {paymentSettings?.cliqAlias && (
-                        <div className="space-y-2">
-                          <FormItem className="flex items-center space-x-3">
-                            <FormControl>
-                              <RadioGroupItem value="cliq" />
-                            </FormControl>
-                            <FormLabel className="font-medium">CliQ Payment</FormLabel>
-                          </FormItem>
-                          <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                            <div className="flex items-center justify-between">
-                              <p><span className="text-muted-foreground">Cliq Alias:</span> {paymentSettings.cliqAlias}</p>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 shrink-0"
-                                onClick={() => copyToClipboard(paymentSettings.cliqAlias, 'cliqAlias')}
-                              >
-                                {copyingCliqAlias ? (
-                                  <Check className="h-4 w-4" />
-                                ) : (
-                                  <Copy className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </div>
-                            <p><span className="text-muted-foreground">Bank:</span> {paymentSettings.cliqBankName}</p>
-                            <p><span className="text-muted-foreground">Account Holder:</span> {paymentSettings.cliqAccountHolder}</p>
-                          </div>
-                        </div>
-                      )}
-                      {paymentSettings?.mobileWallet && (
-                        <div className="space-y-2">
-                          <FormItem className="flex items-center space-x-3">
-                            <FormControl>
-                              <RadioGroupItem value="wallet" />
-                            </FormControl>
-                            <FormLabel className="font-medium">Mobile Wallet</FormLabel>
-                          </FormItem>
-                          <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                            <div className="flex items-center justify-between">
-                              <p><span className="text-muted-foreground">Number:</span> {paymentSettings.mobileWallet}</p>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 shrink-0"
-                                onClick={() => copyToClipboard(paymentSettings.mobileWallet, 'mobileWallet')}
-                              >
-                                {copyingMobileWallet ? (
-                                  <Check className="h-4 w-4" />
-                                ) : (
-                                  <Copy className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </div>
-                            <p><span className="text-muted-foreground">Wallet Type:</span> {paymentSettings.walletType}</p>
-                            <p><span className="text-muted-foreground">Holder Name:</span> {paymentSettings.walletHolderName}</p>
-                          </div>
-                        </div>
-                      )}
-                    </RadioGroup>
-                    <p className="text-xs text-muted-foreground">
-                      Please send {form.watch("amount")} JOD using your selected payment method and upload the proof below.
-                      <br />
-                      You will receive {calculateFinalAmount(form.watch("amount"))} USDT after approval.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="mb-4 font-medium">Select USDT network for payment:</p>
-                    <div className="space-y-6">
-                      <FormField
-                        control={form.control}
-                        name="network"
-                        render={({ field }) => (
-                          <FormItem className="space-y-6">
-                            <FormControl>
-                              <RadioGroup
-                                onValueChange={field.onChange}
-                                value={field.value}
-                                className="space-y-6"
-                              >
-                                {/* TRC20 Network Option */}
-                                <div className="space-y-3">
-                                  <div className="flex items-center space-x-3">
-                                    <RadioGroupItem value="trc20" id="trc20" />
-                                    <FormLabel htmlFor="trc20" className="font-medium">TRC20 Network</FormLabel>
-                                  </div>
-                                  <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
-                                    {!paymentSettings?.usdtAddressTRC20 ? (
-                                      <div className="text-muted-foreground">
-                                        TRC20 address not set in admin settings
-                                      </div>
-                                    ) : (
-                                      <div className="flex items-center justify-between">
-                                        <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressTRC20}</p>
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-6 w-6 shrink-0"
-                                          onClick={() => copyToClipboard(paymentSettings.usdtAddressTRC20, "trc20")}
-                                        >
-                                          {copyingTRC20 ? (
-                                            <Check className="h-4 w-4" />
-                                          ) : (
-                                            <Copy className="h-4 w-4" />
-                                          )}
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-
-                                {/* BEP20 Network Option */}
-                                <div className="space-y-3">
-                                  <div className="flex items-center space-x-3">
-                                    <RadioGroupItem value="bep20" id="bep20" />
-                                    <FormLabel htmlFor="bep20" className="font-medium">BEP20 Network</FormLabel>
-                                  </div>
-                                  <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
-                                    {!paymentSettings?.usdtAddressBEP20 ? (
-                                      <div className="text-muted-foreground">
-                                        BEP20 address not set in admin settings
-                                      </div>
-                                    ) : (
-                                      <div className="flex items-center justify-between">
-                                        <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressBEP20}</p>
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-6 w-6 shrink-0"
-                                          onClick={() => copyToClipboard(paymentSettings.usdtAddressBEP20, "bep20")}
-                                        >
-                                          {copyingBEP20 ? (
-                                            <Check className="h-4 w-4" />
-                                          ) : (
-                                            <Copy className="h-4 w-4" />
-                                          )}
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </RadioGroup>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-6">
-                      Please send {form.watch("amount")} USDT to the selected network address and upload the transaction proof below.
-                      <br />
-                      You will receive {calculateFinalAmount(form.watch("amount"))} JOD after approval.
-                    </p>
-                  </>
+            ) : (
+              <>
+                {type === "sell" && !hasUsdtAddress && (
+                  <Alert variant="destructive">
+                    <AlertDescription className="text-sm">
+                      Please set your USDT wallet address in settings before selling
+                    </AlertDescription>
+                  </Alert>
                 )}
-              </AlertDescription>
-            </Alert>
+                {type === "buy" && !hasCliqSettings && (
+                  <Alert variant="destructive">
+                    <AlertDescription className="text-sm">
+                      Please set your CliQ account details in settings before buying
+                    </AlertDescription>
+                  </Alert>
+                )}
 
-            <div>
-              <FormLabel>Payment Proof</FormLabel>
-              <Input
-                type="file"
-                onChange={handleFileChange}
-                accept="image/*"
-                className="mt-2 text-sm"
-                disabled={isUploading}
-              />
-              <FormDescription className="text-xs mt-1">
-                Upload a screenshot of your payment (JPG or PNG, max 5MB)
-              </FormDescription>
-            </div>
+                <FormField
+                  control={form.control}
+                  name="amount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Amount</FormLabel>
+                      <div className="space-y-3 sm:space-y-4">
+                        <RadioGroup
+                          value={currencyBasis}
+                          onValueChange={(value: "native" | "foreign") => setCurrencyBasis(value)}
+                          className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0"
+                        >
+                          <FormItem className="flex items-center space-x-2">
+                            <FormControl>
+                              <RadioGroupItem value="native" />
+                            </FormControl>
+                            <FormLabel className="font-normal text-sm">
+                              Enter in {type === "buy" ? "JOD" : "USDT"}
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2">
+                            <FormControl>
+                              <RadioGroupItem value="foreign" />
+                            </FormControl>
+                            <FormLabel className="font-normal text-sm">
+                              Enter in {type === "buy" ? "USDT" : "JOD"}
+                            </FormLabel>
+                          </FormItem>
+                        </RadioGroup>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...field}
+                            placeholder={`Enter amount in ${getCurrentCurrencyLabel()}`}
+                            className="text-base"
+                          />
+                        </FormControl>
+                      </div>
+                      <FormDescription className="text-xs">
+                        Enter the amount you want to {form.watch("type")} in {getCurrentCurrencyLabel()}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {isUploading && (
-              <div className="space-y-2">
-                <Progress value={uploadProgress} className="w-full" />
-                <p className="text-xs text-center text-muted-foreground">
-                  Uploading... {uploadProgress}%
-                </p>
-              </div>
+                <Card className="p-3 sm:p-4">
+                  <div className="flex justify-between mb-2 text-sm">
+                    <span>Exchange Rate</span>
+                    <span>1 USDT = {MOCK_RATE} JOD</span>
+                  </div>
+                  {amount && (
+                    <>
+                      <div className="flex justify-between mb-2 text-sm">
+                        <span>Base Amount</span>
+                        <span className="font-mono">
+                          {calculateEquivalentAmount(amount)} {getEquivalentCurrencyLabel()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between mb-2 text-xs sm:text-sm text-muted-foreground">
+                        <span>Commission (2%)</span>
+                        <span className="font-mono">
+                          {calculateCommission(currencyBasis === "foreign" ? calculateEquivalentAmount(amount) : amount)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between font-medium pt-2 border-t text-sm">
+                        <span>
+                          {type === "buy"
+                            ? (currencyBasis === "foreign" ? "Total to Pay" : "Total to Receive")
+                            : (currencyBasis === "foreign" ? "Total to Pay" : "Total to Receive")}
+                        </span>
+                        <span className="font-mono">
+                          {calculateFinalAmount(amount)} {getEquivalentCurrencyLabel()}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </Card>
+
+                <Alert>
+                  <AlertDescription className="text-xs sm:text-sm">
+                    {form.watch("type") === "buy" ? (
+                      <>
+                        <p className="mb-2">Choose your preferred payment method:</p>
+                        <RadioGroup defaultValue="cliq" className="mb-4 space-y-3">
+                          {paymentSettings?.cliqAlias && (
+                            <div className="space-y-2">
+                              <FormItem className="flex items-center space-x-3">
+                                <FormControl>
+                                  <RadioGroupItem value="cliq" />
+                                </FormControl>
+                                <FormLabel className="font-medium">CliQ Payment</FormLabel>
+                              </FormItem>
+                              <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                                <div className="flex items-center justify-between">
+                                  <p><span className="text-muted-foreground">Cliq Alias:</span> {paymentSettings.cliqAlias}</p>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 shrink-0"
+                                    onClick={() => copyToClipboard(paymentSettings.cliqAlias, 'cliqAlias')}
+                                  >
+                                    {copyingCliqAlias ? (
+                                      <Check className="h-4 w-4" />
+                                    ) : (
+                                      <Copy className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </div>
+                                <p><span className="text-muted-foreground">Bank:</span> {paymentSettings.cliqBankName}</p>
+                                <p><span className="text-muted-foreground">Account Holder:</span> {paymentSettings.cliqAccountHolder}</p>
+                              </div>
+                            </div>
+                          )}
+                          {paymentSettings?.mobileWallet && (
+                            <div className="space-y-2">
+                              <FormItem className="flex items-center space-x-3">
+                                <FormControl>
+                                  <RadioGroupItem value="wallet" />
+                                </FormControl>
+                                <FormLabel className="font-medium">Mobile Wallet</FormLabel>
+                              </FormItem>
+                              <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                                <div className="flex items-center justify-between">
+                                  <p><span className="text-muted-foreground">Number:</span> {paymentSettings.mobileWallet}</p>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 shrink-0"
+                                    onClick={() => copyToClipboard(paymentSettings.mobileWallet, 'mobileWallet')}
+                                  >
+                                    {copyingMobileWallet ? (
+                                      <Check className="h-4 w-4" />
+                                    ) : (
+                                      <Copy className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </div>
+                                <p><span className="text-muted-foreground">Wallet Type:</span> {paymentSettings.walletType}</p>
+                                <p><span className="text-muted-foreground">Holder Name:</span> {paymentSettings.walletHolderName}</p>
+                              </div>
+                            </div>
+                          )}
+                        </RadioGroup>
+                        <p className="text-xs text-muted-foreground">
+                          Please send {form.watch("amount")} JOD using your selected payment method and upload the proof below.
+                          <br />
+                          You will receive {calculateFinalAmount(form.watch("amount"))} USDT after approval.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="mb-4 font-medium">Select USDT network for payment:</p>
+                        <div className="space-y-6">
+                          <FormField
+                            control={form.control}
+                            name="network"
+                            render={({ field }) => (
+                              <FormItem className="space-y-6">
+                                <FormControl>
+                                  <RadioGroup
+                                    onValueChange={field.onChange}
+                                    value={field.value}
+                                    className="space-y-6"
+                                  >
+                                    <div className="space-y-3">
+                                      <div className="flex items-center space-x-3">
+                                        <RadioGroupItem value="trc20" id="trc20" />
+                                        <FormLabel htmlFor="trc20" className="font-medium">TRC20 Network</FormLabel>
+                                      </div>
+                                      <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                        {!paymentSettings?.usdtAddressTRC20 ? (
+                                          <div className="text-muted-foreground">
+                                            TRC20 address not set in admin settings
+                                          </div>
+                                        ) : (
+                                          <div className="flex items-center justify-between">
+                                            <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressTRC20}</p>
+                                            <Button
+                                              variant="ghost"
+                                              size="icon"
+                                              className="h-6 w-6 shrink-0"
+                                              onClick={() => copyToClipboard(paymentSettings.usdtAddressTRC20, "trc20")}
+                                            >
+                                              {copyingTRC20 ? (
+                                                <Check className="h-4 w-4" />
+                                              ) : (
+                                                <Copy className="h-4 w-4" />
+                                              )}
+                                            </Button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                      <div className="flex items-center space-x-3">
+                                        <RadioGroupItem value="bep20" id="bep20" />
+                                        <FormLabel htmlFor="bep20" className="font-medium">BEP20 Network</FormLabel>
+                                      </div>
+                                      <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                        {!paymentSettings?.usdtAddressBEP20 ? (
+                                          <div className="text-muted-foreground">
+                                            BEP20 address not set in admin settings
+                                          </div>
+                                        ) : (
+                                          <div className="flex items-center justify-between">
+                                            <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressBEP20}</p>
+                                            <Button
+                                              variant="ghost"
+                                              size="icon"
+                                              className="h-6 w-6 shrink-0"
+                                              onClick={() => copyToClipboard(paymentSettings.usdtAddressBEP20, "bep20")}
+                                            >
+                                              {copyingBEP20 ? (
+                                                <Check className="h-4 w-4" />
+                                              ) : (
+                                                <Copy className="h-4 w-4" />
+                                              )}
+                                            </Button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-6">
+                          Please send {form.watch("amount")} USDT to the selected network address and upload the transaction proof below.
+                          <br />
+                          You will receive {calculateFinalAmount(form.watch("amount"))} JOD after approval.
+                        </p>
+                      </>
+                    )}
+                  </AlertDescription>
+                </Alert>
+
+                <div>
+                  <FormLabel>Payment Proof</FormLabel>
+                  <Input
+                    type="file"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="mt-2 text-sm"
+                    disabled={isUploading}
+                  />
+                  <FormDescription className="text-xs mt-1">
+                    Upload a screenshot of your payment (JPG or PNG, max 5MB)
+                  </FormDescription>
+                </div>
+
+                {isUploading && (
+                  <div className="space-y-2">
+                    <Progress value={uploadProgress} className="w-full" />
+                    <p className="text-xs text-center text-muted-foreground">
+                      Uploading... {uploadProgress}%
+                    </p>
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full mt-6"
+                  disabled={
+                    tradeMutation.isPending ||
+                    isLoading ||
+                    (type === "sell" && !hasUsdtAddress) ||
+                    (type === "buy" && !hasCliqSettings)
+                  }
+                >
+                  {tradeMutation.isPending ? (
+                    <>
+                      <Upload className="h-4 w-4 mr-2 animate-bounce" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Submit Trade"
+                  )}
+                </Button>
+              </>
             )}
-
-            <Button
-              type="submit"
-              className="w-full mt-6"
-              disabled={tradeMutation.isPending ||
-                (form.watch("type") === "sell" && !user?.usdtAddress) ||
-                (form.watch("type") === "buy" && !(user?.cliqAlias || user?.cliqNumber))}
-            >
-              {tradeMutation.isPending ? (
-                <>
-                  <Upload className="h-4 w-4 mr-2 animate-bounce" />
-                  Processing...
-                </>
-              ) : (
-                "Submit Trade"
-              )}
-            </Button>
           </form>
         </Form>
       </Tabs>
