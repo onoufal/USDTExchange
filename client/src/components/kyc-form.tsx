@@ -269,7 +269,7 @@ export default function KYCForm() {
                   </div>
                 )}
 
-                {user?.kycStatus === "pending" && (
+                {user?.kycDocument && user?.kycStatus === "pending" && (
                   <Alert>
                     <AlertDescription className="text-sm">
                       Your document is under review. We'll notify you once it's approved.
