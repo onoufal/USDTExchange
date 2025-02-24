@@ -10,11 +10,9 @@ import {
 import { UserCircle, LogOut, Shield } from "lucide-react";
 
 export default function NavBar() {
-  // All hooks at the top of the component, no conditional calls
   const { user, logoutMutation } = useAuth();
   const [, setLocation] = useLocation();
 
-  // Event handlers after hooks
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
       onSuccess: () => {
@@ -23,54 +21,55 @@ export default function NavBar() {
     });
   };
 
-  // Return early with null, but only after all hooks are called
   if (!user) {
     return null;
   }
 
   return (
     <nav className="border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4">
         <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex items-center px-2 text-xl font-bold">
-              <Link href="/">USDT Exchange</Link>
-            </div>
+          <div className="flex items-center">
+            <Link href="/" className="text-xl font-bold truncate">
+              USDT Exchange
+            </Link>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="mr-4">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <span className="hidden sm:inline text-sm">
               Points: {user.loyaltyPoints}
             </span>
 
             {user.role === "admin" && (
               <Button 
                 variant="outline"
-                className="flex items-center gap-2"
+                size="sm"
+                className="flex items-center gap-1 sm:gap-2"
                 onClick={() => setLocation('/admin')}
               >
                 <Shield className="h-4 w-4" />
-                Admin Panel
+                <span className="hidden sm:inline">Admin Panel</span>
               </Button>
             )}
 
             <Button 
               variant="outline"
+              size="sm"
               onClick={handleLogout}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1 sm:gap-2"
             >
               <LogOut className="h-4 w-4" />
-              Sign Out
+              <span className="hidden sm:inline">Sign Out</span>
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
                   <UserCircle className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link href="/profile">Profile</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
