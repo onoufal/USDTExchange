@@ -144,6 +144,20 @@ export const insertTransactionSchema = createInsertSchema(transactions)
     network: z.enum(["trc20", "bep20"]).optional()
   });
 
+// Add the bank settings schema
+export const updateUserBankSchema = z.object({
+  bankName: z.enum(JORDANIAN_BANKS, {
+    errorMap: () => ({ message: "Please select a bank from the list" })
+  }),
+  bankBranch: z.string().min(1, "Bank branch is required"),
+  bankAccountNumber: z.string().min(1, "Account number is required"),
+  bankIban: z.string()
+    .min(1, "IBAN is required")
+    .regex(/^JO\d{2}[A-Z]{4}\d{22}$/, "Invalid Jordanian IBAN format")
+});
+
+export type UpdateUserBank = z.infer<typeof updateUserBankSchema>;
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;

@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateUserBankSchema, type UpdateUserBank } from "@shared/schema";
+import { updateUserBankSchema, type UpdateUserBank, JORDANIAN_BANKS } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +20,6 @@ export default function BankSettings() {
     defaultValues: {
       bankName: user?.bankName || "",
       bankBranch: user?.bankBranch || "",
-      bankAccountName: user?.bankAccountName || "",
       bankAccountNumber: user?.bankAccountNumber || "",
       bankIban: user?.bankIban || ""
     }
@@ -67,9 +67,20 @@ export default function BankSettings() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Bank Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your bank name" {...field} />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your bank" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {JORDANIAN_BANKS.map((bank) => (
+                        <SelectItem key={bank} value={bank}>
+                          {bank}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -83,20 +94,6 @@ export default function BankSettings() {
                   <FormLabel>Branch Name</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter bank branch name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="bankAccountName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Account Holder Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter account holder name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -133,6 +130,7 @@ export default function BankSettings() {
 
             <Button 
               type="submit" 
+              className="w-full"
               disabled={updateBankMutation.isPending}
             >
               {updateBankMutation.isPending ? "Saving..." : "Save Settings"}
