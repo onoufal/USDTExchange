@@ -138,7 +138,9 @@ export default function TradeForm() {
       return promise;
     },
     onSuccess: () => {
+      // Invalidate both user transactions and admin transactions
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/transactions"] });
       cleanupForm();
       toast({
         title: "Trade submitted",
