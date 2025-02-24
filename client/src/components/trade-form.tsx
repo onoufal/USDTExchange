@@ -25,7 +25,6 @@ export default function TradeForm() {
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">("native");
-  const [selectedNetwork, setSelectedNetwork] = useState<"trc20" | "bep20">("trc20");
 
   const { data: paymentSettings } = useQuery<{ cliqAlias: string; mobileWallet: string; cliqBankName: string; cliqAccountHolder: string; walletType: string; walletHolderName: string; usdtAddressTRC20: string; usdtAddressBEP20: string }>({
     queryKey: ["/api/settings/payment"],
@@ -38,7 +37,7 @@ export default function TradeForm() {
       amount: "",
       rate: MOCK_RATE.toString(),
       network: "trc20"
-    },
+    }
   });
 
   useEffect(() => {
@@ -100,7 +99,7 @@ export default function TradeForm() {
           aborted = true;
           xhr.abort();
           reject(new Error("Upload timed out"));
-        }, 30000); 
+        }, 30000);
 
         xhr.upload.addEventListener("progress", (event) => {
           if (aborted) return;
@@ -191,12 +190,12 @@ export default function TradeForm() {
 
     if (type === "buy") {
       return currencyBasis === "foreign"
-        ? (equivalentNum * (1 + COMMISSION_RATE)).toFixed(2) 
-        : (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2); 
+        ? (equivalentNum * (1 + COMMISSION_RATE)).toFixed(2)
+        : (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2);
     } else {
       return currencyBasis === "foreign"
-        ? (equivalentNum * (1 + COMMISSION_RATE)).toFixed(2)  
-        : (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2); 
+        ? (equivalentNum * (1 + COMMISSION_RATE)).toFixed(2)
+        : (equivalentNum * (1 - COMMISSION_RATE)).toFixed(2);
     }
   };
 
@@ -256,7 +255,7 @@ export default function TradeForm() {
     formData.append("amount", amount);
     formData.append("rate", values.rate.toString());
     formData.append("proofOfPayment", file);
-    formData.append("network", values.network); 
+    formData.append("network", values.network);
 
     tradeMutation.mutate(formData);
   };
@@ -423,10 +422,9 @@ export default function TradeForm() {
                         <FormItem>
                           <FormControl>
                             <RadioGroup
-                              defaultValue="trc20"
-                              className="mb-4 space-y-3"
                               value={field.value}
                               onValueChange={field.onChange}
+                              className="mb-4 space-y-3"
                             >
                               {paymentSettings?.usdtAddressTRC20 && (
                                 <div className="space-y-2">
