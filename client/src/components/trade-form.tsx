@@ -32,6 +32,14 @@ export default function TradeForm() {
     setUploadProgress(0);
   }, [file]);
 
+  // Cleanup effect when component unmounts or form resets
+  useEffect(() => {
+    return () => {
+      setFile(null);
+      setUploadProgress(0);
+    };
+  }, []);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     if (selectedFile) {
@@ -61,12 +69,30 @@ export default function TradeForm() {
     setFile(selectedFile);
   };
 
+  const cleanupForm = () => {
+    form.reset();
+    setFile(null);
+    setUploadProgress(0);
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
   const tradeMutation = useMutation({
     mutationFn: async (formData: FormData) => {
       const xhr = new XMLHttpRequest();
+      let aborted = false;
 
       const promise = new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          aborted = true;
+          xhr.abort();
+          reject(new Error("Upload timed out"));
+        }, 30000); // 30 second timeout
+
         xhr.upload.addEventListener("progress", (event) => {
+          if (aborted) return;
           if (event.lengthComputable) {
             const progress = Math.round((event.loaded * 100) / event.total);
             setUploadProgress(progress);
@@ -74,31 +100,46 @@ export default function TradeForm() {
         });
 
         xhr.addEventListener("load", () => {
+          clearTimeout(timeout);
+          if (aborted) return;
+
           if (xhr.status >= 200 && xhr.status < 300) {
-            resolve(JSON.parse(xhr.responseText));
+            try {
+              resolve(JSON.parse(xhr.responseText));
+            } catch (e) {
+              reject(new Error("Invalid response from server"));
+            }
           } else {
-            reject(new Error(xhr.responseText || "Trade submission failed"));
+            try {
+              const error = JSON.parse(xhr.responseText);
+              reject(new Error(error.message || "Trade submission failed"));
+            } catch (e) {
+              reject(new Error("Trade submission failed"));
+            }
           }
         });
 
-        xhr.addEventListener("error", () => reject(new Error("Trade submission failed")));
-      });
+        xhr.addEventListener("error", () => {
+          clearTimeout(timeout);
+          if (aborted) return;
+          reject(new Error("Network error occurred"));
+        });
 
-      xhr.open("POST", "/api/trade");
-      xhr.withCredentials = true;
-      xhr.send(formData);
+        xhr.addEventListener("abort", () => {
+          clearTimeout(timeout);
+          reject(new Error("Upload was cancelled"));
+        });
+
+        xhr.open("POST", "/api/trade");
+        xhr.withCredentials = true;
+        xhr.send(formData);
+      });
 
       return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
-      form.reset();
-      setFile(null);
-      setUploadProgress(0);
-      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = '';
-      }
+      cleanupForm();
       toast({
         title: "Trade submitted",
         description: "Your trade request has been submitted for approval",
@@ -181,6 +222,7 @@ export default function TradeForm() {
               onChange={handleFileChange}
               accept="image/*"
               className="mt-2"
+              disabled={isUploading}
             />
             <FormDescription className="text-xs mt-1">
               Upload a screenshot of your payment (JPG or PNG, max 5MB)
