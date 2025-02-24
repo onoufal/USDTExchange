@@ -44,12 +44,12 @@ export default function AdminPage() {
 
   const { data: users, isLoading: isLoadingUsers } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
-    refetchInterval: 5000 // Refresh every 5 seconds to keep status updated
+    refetchInterval: 5000
   });
 
   const { data: transactions, isLoading: isLoadingTransactions } = useQuery<Transaction[]>({
     queryKey: ["/api/admin/transactions"],
-    refetchInterval: 5000 // Refresh every 5 seconds
+    refetchInterval: 5000
   });
 
   const approveTransactionMutation = useMutation({
