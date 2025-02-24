@@ -169,36 +169,39 @@ export default function AdminPage() {
                     <div className="overflow-hidden">
                       <table className="min-w-full divide-y divide-border">
                         <thead>
-                          <tr>
-                            <th className="px-4 py-3 text-left text-sm font-medium">Username</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium hidden sm:table-cell">Full Name</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium hidden sm:table-cell">Mobile</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium">KYC Status</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
+                          <tr className="bg-muted/50">
+                            <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium">Username</th>
+                            <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium hidden sm:table-cell">Full Name</th>
+                            <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium hidden sm:table-cell">Mobile</th>
+                            <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium">KYC Status</th>
+                            <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-border">
+                        <tbody className="divide-y divide-border bg-background">
                           {users?.map((user) => (
-                            <tr key={user.id} className="transition-colors hover:bg-muted/50">
-                              <td className="px-4 py-3 text-sm">{user.username}</td>
-                              <td className="px-4 py-3 text-sm hidden sm:table-cell">{user.fullName}</td>
-                              <td className="px-4 py-3 text-sm hidden sm:table-cell">{user.mobileNumber || 'Not verified'}</td>
-                              <td className="px-4 py-3 text-sm capitalize">
-                                <span className={`inline-flex items-center gap-1.5 ${user.kycStatus === 'approved' ? 'text-green-600' : ''}`}>
+                            <tr key={user.id} className="hover:bg-muted/50 transition-colors">
+                              <td className="whitespace-nowrap px-4 py-4 text-sm">{user.username}</td>
+                              <td className="whitespace-nowrap px-4 py-4 text-sm hidden sm:table-cell">{user.fullName}</td>
+                              <td className="whitespace-nowrap px-4 py-4 text-sm hidden sm:table-cell">{user.mobileNumber || 'Not verified'}</td>
+                              <td className="whitespace-nowrap px-4 py-4 text-sm">
+                                <span className={`inline-flex items-center gap-1.5 ${
+                                  user.kycStatus === 'approved' ? 'text-green-600 dark:text-green-500' : ''
+                                }`}>
                                   {user.kycStatus}
                                   {user.kycStatus === 'approved' && <Check className="h-4 w-4" />}
                                 </span>
                               </td>
-                              <td className="px-4 py-3">
-                                <div className="flex flex-col sm:flex-row gap-2">
+                              <td className="whitespace-nowrap px-4 py-4">
+                                <div className="flex items-center gap-2">
                                   {user.kycDocument && (
                                     <Button
                                       size="sm"
                                       variant="outline"
                                       onClick={() => setSelectedUser({ id: user.id, username: user.username })}
+                                      className="inline-flex items-center"
                                     >
-                                      <Eye className="h-4 w-4 mr-1" />
-                                      <span className="hidden sm:inline">View</span> Doc
+                                      <Eye className="h-4 w-4 mr-1.5" />
+                                      View Doc
                                     </Button>
                                   )}
                                   {user.kycDocument && user.kycStatus === 'pending' && (
@@ -207,16 +210,16 @@ export default function AdminPage() {
                                       variant={approvedKycIds.includes(user.id) ? "outline" : "default"}
                                       onClick={() => approveKYCMutation.mutate(user.id)}
                                       disabled={processingKycId === user.id || approvedKycIds.includes(user.id)}
-                                      className="transition-all duration-200"
+                                      className="inline-flex items-center transition-all duration-200"
                                     >
                                       {processingKycId === user.id ? (
                                         <>
-                                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                          <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
                                           Processing...
                                         </>
                                       ) : approvedKycIds.includes(user.id) ? (
                                         <>
-                                          <Check className="h-4 w-4 mr-2" />
+                                          <Check className="h-4 w-4 mr-1.5" />
                                           Approved
                                         </>
                                       ) : (
