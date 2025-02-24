@@ -7,22 +7,29 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Upload } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
+import { useAuth } from "@/hooks/use-auth";
 
 const MOCK_RATE = 0.71; // 1 USDT = 0.71 JOD
 const COMMISSION_RATE = 0.02; // 2% commission placeholder
 
 export default function TradeForm() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">("native");
+
+  // Fetch platform payment settings
+  const { data: paymentSettings } = useQuery<{ cliqAlias: string; mobileWallet: string }>({
+    queryKey: ["/api/settings/payment"],
+  });
 
   const form = useForm({
     resolver: zodResolver(insertTransactionSchema),
@@ -224,6 +231,16 @@ export default function TradeForm() {
   };
 
   const onSubmit = (values: any) => {
+    // Check for USDT wallet settings when buying
+    if (values.type === "buy" && !user?.usdtAddress) {
+      toast({
+        title: "USDT wallet not set",
+        description: "Please set your USDT wallet address in settings before buying",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!file) {
       toast({
         title: "Missing payment proof",
@@ -262,6 +279,14 @@ export default function TradeForm() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
+            {type === "buy" && !user?.usdtAddress && (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  Please set your USDT wallet address in settings before buying
+                </AlertDescription>
+              </Alert>
+            )}
+
             <FormField
               control={form.control}
               name="amount"
@@ -348,11 +373,13 @@ export default function TradeForm() {
                     {currencyBasis === "foreign" ? (
                       <>
                         To receive {amount} USDT, please send {calculateFinalAmount(amount)} JOD
-                        to our CliQ/mobile wallet and upload the payment proof below.
+                        to our {paymentSettings?.cliqAlias} (CliQ) or {paymentSettings?.mobileWallet} (mobile wallet)
+                        and upload the payment proof below.
                       </>
                     ) : (
                       <>
-                        Please send {amount} JOD to our CliQ/mobile wallet and upload the payment proof below.
+                        Please send {amount} JOD to our {paymentSettings?.cliqAlias} (CliQ) or {paymentSettings?.mobileWallet} (mobile wallet)
+                        and upload the payment proof below.
                         <br />
                         <span className="text-xs text-muted-foreground mt-1 block">
                           You will receive {calculateFinalAmount(amount)} USDT after approval
@@ -407,7 +434,7 @@ export default function TradeForm() {
             <Button
               type="submit"
               className="w-full"
-              disabled={tradeMutation.isPending}
+              disabled={tradeMutation.isPending || (type === "buy" && !user?.usdtAddress)}
             >
               {tradeMutation.isPending ? (
                 <>

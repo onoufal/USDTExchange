@@ -4,6 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import TradeForm from "@/components/trade-form";
 import KYCForm from "@/components/kyc-form";
+import WalletSettings from "@/components/wallet-settings";
 import { useQuery } from "@tanstack/react-query";
 import { Transaction } from "@shared/schema";
 
@@ -49,13 +50,24 @@ export default function HomePage() {
         </div>
 
         {/* KYC & Status Section */}
-        <div>
+        <div className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl">Verification Status</CardTitle>
             </CardHeader>
             <CardContent>
               <KYCForm />
+            </CardContent>
+          </Card>
+
+          {/* Wallet Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg sm:text-xl">USDT Wallet</CardTitle>
+              <CardDescription>Set your USDT receiving address</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <WalletSettings />
             </CardContent>
           </Card>
         </div>

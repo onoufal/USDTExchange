@@ -4,6 +4,7 @@ import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import multer from "multer";
 import { z } from "zod";
+import { updateUserWalletSchema } from "@shared/schema"; // Fixed import path
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -266,6 +267,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching payment proof:', error);
       res.status(500).json({ message: "Failed to fetch document" });
+    }
+  });
+
+  // User wallet settings
+  app.post("/api/settings/wallet", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      const data = updateUserWalletSchema.parse(req.body);
+      await storage.updateUserWallet(req.user.id, data.usdtAddress, data.usdtNetwork);
+      res.json({ success: true });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      console.error('Wallet update error:', error);
+      res.status(500).json({ message: "Failed to update wallet settings" });
+    }
+  });
+
+  // Get platform payment settings (public)
+  app.get("/api/settings/payment", async (req, res) => {
+    try {
+      const settings = await storage.getPaymentSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error('Error fetching payment settings:', error);
+      res.status(500).json({ message: "Failed to fetch payment settings" });
+    }
+  });
+
+  // Update platform payment settings (admin only)
+  app.post("/api/admin/settings/payment", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+
+    try {
+      const schema = z.object({
+        cliqAlias: z.string().min(1, "CliQ alias is required"),
+        mobileWallet: z.string().regex(/^07[789]\d{7}$/, {
+          message: "Invalid Jordanian mobile number format"
+        })
+      });
+
+      const settings = schema.parse(req.body);
+      await storage.updatePaymentSettings(settings);
+      res.json({ success: true });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      console.error('Payment settings update error:', error);
+      res.status(500).json({ message: "Failed to update payment settings" });
     }
   });
 

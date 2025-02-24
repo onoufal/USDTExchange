@@ -1,4 +1,4 @@
-import { users, transactions, type User, type InsertUser, type Transaction } from "@shared/schema";
+import { users, transactions, type User, type InsertUser, type Transaction, platformSettings } from "@shared/schema";
 import type { SessionData, Store } from "express-session";
 import createMemoryStore from "memorystore";
 import session from "express-session";
@@ -20,11 +20,15 @@ export interface IStorage {
   getAllTransactions(): Promise<Transaction[]>;
   approveTransaction(id: number): Promise<void>;
   getTransaction(id: number): Promise<Transaction | undefined>;
+  updateUserWallet(id: number, usdtAddress: string, usdtNetwork: string): Promise<void>;
+  getPaymentSettings(): Promise<{ [key: string]: string }>;
+  updatePaymentSettings(settings: { [key: string]: string }): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private transactions: Map<number, Transaction>;
+  private settings: Map<string, string>;
   sessionStore: Store;
   private currentUserId: number;
   private currentTransactionId: number;
@@ -32,6 +36,7 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.transactions = new Map();
+    this.settings = new Map();
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000 // 24h
     });
@@ -47,6 +52,10 @@ export class MemStorage implements IStorage {
       user.role = "admin";
       this.users.set(user.id, user);
     });
+
+    // Set default payment settings
+    this.settings.set("cliqAlias", "your-cliq-alias");
+    this.settings.set("mobileWallet", "07XXXXXXXX");
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -70,7 +79,9 @@ export class MemStorage implements IStorage {
       kycDocument: null,
       loyaltyPoints: 0,
       role: "user",
-      createdAt: new Date()
+      createdAt: new Date(),
+      usdtAddress: null,
+      usdtNetwork: null
     };
     this.users.set(id, user);
     return user;
@@ -92,6 +103,25 @@ export class MemStorage implements IStorage {
       user.kycStatus = "pending";
       this.users.set(id, { ...user }); // Create a new object to ensure updates are detected
     }
+  }
+
+  async updateUserWallet(id: number, usdtAddress: string, usdtNetwork: string): Promise<void> {
+    const user = this.users.get(id);
+    if (user) {
+      user.usdtAddress = usdtAddress;
+      user.usdtNetwork = usdtNetwork;
+      this.users.set(id, { ...user });
+    }
+  }
+
+  async getPaymentSettings(): Promise<{ [key: string]: string }> {
+    return Object.fromEntries(this.settings.entries());
+  }
+
+  async updatePaymentSettings(settings: { [key: string]: string }): Promise<void> {
+    Object.entries(settings).forEach(([key, value]) => {
+      this.settings.set(key, value);
+    });
   }
 
   async approveKYC(id: number): Promise<void> {
@@ -122,7 +152,9 @@ export class MemStorage implements IStorage {
       rate: data.rate,
       status: "pending",
       proofOfPayment: data.proofOfPayment || null,
-      createdAt: new Date()
+      createdAt: new Date(),
+      commission: data.commission || '0',
+      fee: data.fee || '0'
     };
     this.transactions.set(id, transaction);
     return transaction;
