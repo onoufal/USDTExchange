@@ -26,6 +26,7 @@ export default function CliqSettings() {
   const form = useForm<UpdateUserCliq>({
     resolver: zodResolver(updateUserCliqSchema),
     defaultValues: {
+      bankName: user?.bankName || "",
       cliqType: user?.cliqType || "alias",
       cliqAlias: user?.cliqAlias || "",
       cliqNumber: user?.cliqNumber || "",
@@ -60,6 +61,20 @@ export default function CliqSettings() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="bankName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Bank Name</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Enter your bank name" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="cliqType"

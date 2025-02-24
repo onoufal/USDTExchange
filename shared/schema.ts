@@ -27,7 +27,8 @@ export const users = pgTable("users", {
   cliqType: text("cliq_type"), // 'alias' or 'number'
   cliqAlias: text("cliq_alias"),
   cliqNumber: text("cliq_number"),
-  accountHolderName: text("account_holder_name")
+  accountHolderName: text("account_holder_name"),
+  bankName: text("bank_name")
 });
 
 export const platformSettings = pgTable("platform_settings", {
@@ -64,6 +65,7 @@ export const updateUserWalletSchema = z.object({
 });
 
 export const updateUserCliqSchema = z.object({
+  bankName: z.string().min(1, "Bank name is required"),
   cliqType: z.enum(["alias", "number"], {
     errorMap: () => ({ message: "Please select either Alias or CliQ number" })
   }),

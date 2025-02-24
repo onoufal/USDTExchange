@@ -22,6 +22,7 @@ export interface IStorage {
   getTransaction(id: number): Promise<Transaction | undefined>;
   updateUserWallet(id: number, usdtAddress: string, usdtNetwork: string): Promise<void>;
   updateUserCliq(id: number, cliqDetails: {
+    bankName: string,
     cliqType: string,
     cliqAlias?: string,
     cliqNumber?: string,
@@ -91,7 +92,8 @@ export class MemStorage implements IStorage {
       cliqType: null,
       cliqAlias: null,
       cliqNumber: null,
-      accountHolderName: insertUser.fullName // Pre-fill with user's full name
+      accountHolderName: insertUser.fullName, // Pre-fill with user's full name
+      bankName: null
     };
     this.users.set(id, user);
     return user;
@@ -125,6 +127,7 @@ export class MemStorage implements IStorage {
   }
 
   async updateUserCliq(id: number, cliqDetails: {
+    bankName: string,
     cliqType: string,
     cliqAlias?: string,
     cliqNumber?: string,
@@ -132,6 +135,7 @@ export class MemStorage implements IStorage {
   }): Promise<void> {
     const user = this.users.get(id);
     if (user) {
+      user.bankName = cliqDetails.bankName;
       user.cliqType = cliqDetails.cliqType;
       user.cliqAlias = cliqDetails.cliqAlias || null;
       user.cliqNumber = cliqDetails.cliqNumber || null;
