@@ -229,13 +229,13 @@ export default function TradeForm() {
       return (jodAmount * COMMISSION_RATE).toFixed(2) + " JOD";
     } else {
       if (currencyBasis === "foreign") {
-        // If entering JOD, calculate commission in USDT
-        const baseUsdtAmount = num / MOCK_RATE;
-        return (baseUsdtAmount * COMMISSION_RATE).toFixed(2) + " USDT";
+        // If entering JOD (e.g. 1000 JOD), show commission in USDT
+        const baseUsdtAmount = num / MOCK_RATE;  // 1000/0.71 = 1408.45 USDT
+        return (baseUsdtAmount * COMMISSION_RATE).toFixed(2) + " USDT";  // 28.17 USDT
       } else {
-        // If entering USDT, calculate commission in JOD
-        const jodAmount = num * MOCK_RATE;
-        return (jodAmount * COMMISSION_RATE).toFixed(2) + " JOD";
+        // If entering USDT directly, show commission in JOD
+        const baseJodAmount = num * MOCK_RATE;  // Convert USDT to JOD first
+        return (baseJodAmount * COMMISSION_RATE).toFixed(2) + " JOD";
       }
     }
   };
@@ -256,13 +256,14 @@ export default function TradeForm() {
     } else {
       if (currencyBasis === "foreign") {
         // Entering JOD (e.g. 1000 JOD)
-        const baseUsdtAmount = num / MOCK_RATE;  // Convert to USDT (1408.45 USDT)
-        const commission = baseUsdtAmount * COMMISSION_RATE;  // Calculate commission (28.17 USDT)
-        return (baseUsdtAmount + commission).toFixed(2);  // Total: 1436.62 USDT
+        const baseUsdtAmount = num / MOCK_RATE;  // 1000/0.71 = 1408.45 USDT
+        const commissionUSDT = baseUsdtAmount * COMMISSION_RATE;  // 28.17 USDT
+        return (baseUsdtAmount + commissionUSDT).toFixed(2);  // 1436.62 USDT
       } else {
-        // Entering USDT, show final JOD amount
-        const jodAmount = num * MOCK_RATE;
-        return (jodAmount * (1 - COMMISSION_RATE)).toFixed(2);
+        // Entering USDT directly
+        const baseJodAmount = num * MOCK_RATE;  // Convert to JOD
+        const commissionJOD = baseJodAmount * COMMISSION_RATE;  // Calculate commission in JOD
+        return (baseJodAmount - commissionJOD).toFixed(2);  // Subtract commission as user receives less
       }
     }
   };
