@@ -1,0 +1,64 @@
+2. Detailed Logic for “Buy USDT”
+A. User Inputs USDT Directly
+Scenario: The user types 100 USDT.
+Expected Result:
+The system calculates how many JOD the user needs to pay to get 100 USDT.
+Display that JOD value in a read-only or auto-updating field.
+Example:
+
+Current exchange rate (plus any fees) might be 1 USDT = 0.71 JOD.
+For 100 USDT, the user must pay 100 * 0.71 = 71 JOD (assuming no additional fees, just for illustration).
+B. User Inputs JOD
+Scenario: The user types 100 JOD.
+Expected Result:
+The system calculates how many USDT the user will get for 100 JOD.
+Display that USDT amount in a read-only or auto-updating field.
+Example:
+
+With the same 1 USDT = 0.71 JOD, if the user enters 100 JOD, the system calculates 100 / 0.71 ≈ 140.85 USDT.
+Summary for “Buy”:
+
+If user chooses USDT as the input, show the JOD cost.
+If user chooses JOD as the input, show the USDT they’ll receive.
+3. Detailed Logic for “Sell USDT”
+A. User Inputs USDT Directly
+Scenario: The user types 100 USDT to sell.
+Expected Result:
+The system calculates how many JOD the user will receive for those 100 USDT.
+Display that JOD value in a read-only or auto-updating field.
+Example:
+
+If the rate is still 1 USDT = 0.71 JOD, 100 USDT yields 71 JOD.
+B. User Inputs JOD
+Scenario: The user wants to receive exactly 100 JOD.
+Expected Result:
+The system calculates how many USDT the user must send to get 100 JOD.
+Display that required USDT amount in a read-only or auto-updating field.
+Example:
+
+With 1 USDT = 0.71 JOD, to get 100 JOD, the user must send 100 / 0.71 ≈ 140.85 USDT.
+Summary for “Sell”:
+
+If user chooses USDT as the input, show how many JOD they get.
+If user chooses JOD as the input, show how many USDT they must send.
+4. Implementation Tips
+Single Rate Source
+
+You’ll have a single exchange rate (plus any fees) that you use to convert between JOD and USDT. Let’s call it rate (where 1 USDT = rate JOD).
+Two Fields, One Active Input
+
+Typically, you’d have two fields: “Amount in JOD” and “Amount in USDT.”
+Whichever field the user is actively typing in, you calculate and update the other field on the fly.
+Read-Only Field
+
+The “other” field is often set to read-only (or disabled) so the user doesn’t accidentally fill both fields. This ensures the user can only choose one currency basis at a time.
+Direction (Buy vs. Sell)
+
+The rate might differ for buying vs. selling if you have different fees or a spread. Make sure your code references the correct rate or formula depending on “Buy” or “Sell.”
+Validation
+
+Validate the user input. For example, if the user tries to buy negative USDT or enters zero, show an error.
+Handle edge cases where the user might leave the field empty or type non-numeric characters.
+Submission
+
+When the user clicks “Submit,” store both values (JOD and USDT) in the transaction record, along with the user’s choice (Buy or Sell). This way, the admin can see exactly how the numbers were calculated.

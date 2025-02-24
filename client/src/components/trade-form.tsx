@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
 
 const MOCK_RATE = 0.71; // 1 USDT = 0.71 JOD
+const COMMISSION_RATE = 0.02; // 2% commission placeholder
 
 export default function TradeForm() {
   const { toast } = useToast();
@@ -173,6 +174,11 @@ export default function TradeForm() {
     }
   };
 
+  const calculateCommission = (amount: string) => {
+    const num = Number(amount) || 0;
+    return (num * COMMISSION_RATE).toFixed(2);
+  };
+
   const getCurrentCurrencyLabel = () => {
     const type = form.watch("type");
     if (type === "buy") {
@@ -282,12 +288,26 @@ export default function TradeForm() {
                 <span>1 USDT = {MOCK_RATE} JOD</span>
               </div>
               {amount && (
-                <div className="flex justify-between font-medium">
-                  <span>You will {type === "buy" ? "receive" : "pay"}</span>
-                  <span>
-                    {calculateEquivalentAmount(amount)} {getEquivalentCurrencyLabel()}
-                  </span>
-                </div>
+                <>
+                  <div className="flex justify-between mb-2">
+                    <span>Base Amount</span>
+                    <span>
+                      {calculateEquivalentAmount(amount)} {getEquivalentCurrencyLabel()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between mb-2 text-sm text-muted-foreground">
+                    <span>Commission (2%)</span>
+                    <span>
+                      {calculateCommission(amount)} {getCurrentCurrencyLabel()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-medium pt-2 border-t">
+                    <span>Final {type === "buy" ? "Receive" : "Pay"} Amount</span>
+                    <span>
+                      {(Number(calculateEquivalentAmount(amount)) * (1 - COMMISSION_RATE)).toFixed(2)} {getEquivalentCurrencyLabel()}
+                    </span>
+                  </div>
+                </>
               )}
             </Card>
 
@@ -297,11 +317,19 @@ export default function TradeForm() {
                   <>
                     Please send {currencyBasis === "native" ? amount : calculateEquivalentAmount(amount)} JOD 
                     to our CliQ/mobile wallet and upload the payment proof below.
+                    <br/>
+                    <span className="text-xs text-muted-foreground mt-1 block">
+                      You will receive {(Number(calculateEquivalentAmount(amount)) * (1 - COMMISSION_RATE)).toFixed(2)} USDT after approval
+                    </span>
                   </>
                 ) : (
                   <>
                     Please send {currencyBasis === "native" ? amount : calculateEquivalentAmount(amount)} USDT
                     to our wallet address and upload the transaction proof below.
+                    <br/>
+                    <span className="text-xs text-muted-foreground mt-1 block">
+                      You will receive {(Number(calculateEquivalentAmount(amount)) * (1 - COMMISSION_RATE)).toFixed(2)} JOD after approval
+                    </span>
                   </>
                 )}
               </AlertDescription>

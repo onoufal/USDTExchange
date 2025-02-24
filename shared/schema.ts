@@ -32,7 +32,10 @@ export const transactions = pgTable("transactions", {
   rate: decimal("rate").notNull(),
   status: text("status").default("pending"),
   proofOfPayment: text("proof_of_payment"),
-  createdAt: timestamp("created_at").defaultNow()
+  createdAt: timestamp("created_at").defaultNow(),
+  commission: decimal("commission").default(0), // Added commission field
+  fee: decimal("fee").default(0) // Added fee field
+
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -45,7 +48,9 @@ export const insertTransactionSchema = createInsertSchema(transactions)
   .pick({
     type: true,
     amount: true,
-    rate: true
+    rate: true,
+    commission: true, // Added commission to schema
+    fee: true // Added fee to schema
   })
   .extend({
     type: z.enum(["buy", "sell"]),
@@ -56,6 +61,8 @@ export const insertTransactionSchema = createInsertSchema(transactions)
     rate: z.string()
       .regex(/^\d+(\.\d{1,2})?$/, "Rate must be a valid number with up to 2 decimal places")
       .transform(Number),
+    commission: z.number().default(0), // Added commission validation
+    fee: z.number().default(0) // Added fee validation
   });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
