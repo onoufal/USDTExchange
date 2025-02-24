@@ -89,7 +89,11 @@ export const updateUserCliqSchema = z.object({
   cliqType: z.enum(["alias", "number"], {
     errorMap: () => ({ message: "Please select either Alias or CliQ number" })
   }),
-  cliqAlias: z.string().optional(),
+  cliqAlias: z.string()
+    .optional()
+    .refine(val => !val || /^[a-zA-Z]{1,10}$/.test(val), {
+      message: "CliQ alias must contain only letters and not exceed 10 characters"
+    }),
   cliqNumber: z.string()
     .optional()
     .refine(val => !val || /^009627[0-9]{8}$/.test(val), {

@@ -136,8 +136,11 @@ export default function CliqSettings() {
               <FormItem>
                 <FormLabel>CliQ Alias/Username</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} placeholder="Enter your CliQ alias (letters only)" />
                 </FormControl>
+                <FormDescription>
+                  Must contain only letters and not exceed 10 characters
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -175,8 +178,8 @@ export default function CliqSettings() {
           )}
         />
 
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="w-full"
           disabled={mutation.isPending}
         >
