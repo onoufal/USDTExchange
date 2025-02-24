@@ -1,7 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Loader2, Download } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 interface DocumentPreviewModalProps {
   isOpen: boolean
@@ -11,10 +12,12 @@ interface DocumentPreviewModalProps {
 }
 
 export function DocumentPreviewModal({ isOpen, onClose, userId, username }: DocumentPreviewModalProps) {
+  const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(true)
   const [previewError, setPreviewError] = useState(false)
   const [documentUrl, setDocumentUrl] = useState<string | null>(null)
   const [isPdf, setIsPdf] = useState(false)
+  const documentUrlRef = useRef<string | null>(null)
 
   useEffect(() => {
     let isMounted = true;
@@ -23,6 +26,7 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
       if (!isOpen || !userId) return;
 
       try {
+        console.log('Fetching document for user:', userId);
         setIsLoading(true);
         setPreviewError(false);
         setDocumentUrl(null);
@@ -32,16 +36,26 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
         if (!isMounted) return;
 
         if (!response.ok) {
+          console.error('Document fetch failed:', response.status, response.statusText);
           throw new Error('Failed to fetch document');
         }
 
         const contentType = response.headers.get('Content-Type');
+        console.log('Document content type:', contentType);
+
         setIsPdf(contentType === 'application/pdf');
-        setDocumentUrl(`/api/admin/kyc-document/${userId}`);
+        const url = `/api/admin/kyc-document/${userId}`;
+        setDocumentUrl(url);
+        documentUrlRef.current = url;
       } catch (error) {
         if (isMounted) {
           console.error('Error fetching document:', error);
           setPreviewError(true);
+          toast({
+            title: "Error",
+            description: "Failed to load document. Please try again.",
+            variant: "destructive",
+          });
         }
       } finally {
         if (isMounted) {
@@ -54,29 +68,38 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
 
     return () => {
       isMounted = false;
-    };
-  }, [isOpen, userId]);
-
-  const handleDownload = () => {
-    if (!documentUrl) return;
-    const downloadUrl = `${documentUrl}?download=true`;
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  useEffect(() => {
-    return () => {
-      // Cleanup any document URLs when component unmounts
-      if (documentUrl) {
-        URL.revokeObjectURL(documentUrl);
+      if (documentUrlRef.current) {
+        console.log('Cleaning up document URL:', documentUrlRef.current);
+        URL.revokeObjectURL(documentUrlRef.current);
+        documentUrlRef.current = null;
       }
     };
-  }, []);
+  }, [isOpen, userId, toast]);
+
+  const handleDownload = () => {
+    if (!documentUrl) {
+      console.log('No document URL available for download');
+      return;
+    }
+    try {
+      console.log('Initiating download for document');
+      const downloadUrl = `${documentUrl}?download=true`;
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Download Failed",
+        description: "Unable to download the document. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -110,7 +133,10 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
                 <iframe
                   src={documentUrl}
                   className="absolute inset-0 w-full h-full border-0"
-                  onError={() => setPreviewError(true)}
+                  onError={() => {
+                    console.error('PDF preview failed');
+                    setPreviewError(true);
+                  }}
                 />
               </div>
               <div className="flex justify-end p-2 sm:p-4 bg-background">
@@ -127,7 +153,11 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
                   src={documentUrl}
                   alt={`KYC Document for ${username}`}
                   className="w-full h-auto object-contain"
-                  onError={() => setPreviewError(true)}
+                  onError={() => {
+                    console.error('Image preview failed');
+                    setPreviewError(true);
+                  }}
+                  loading="lazy"
                 />
               </div>
               <Button onClick={handleDownload} variant="outline" size="sm">

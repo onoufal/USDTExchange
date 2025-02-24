@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface PaymentProofModalProps {
   isOpen: boolean;
@@ -21,9 +22,11 @@ export function PaymentProofModal({
   transactionId,
   username,
 }: PaymentProofModalProps) {
+  const { toast } = useToast();
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [previewError, setPreviewError] = useState(false);
+  const documentUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -32,24 +35,34 @@ export function PaymentProofModal({
       if (!isOpen || !transactionId) return;
 
       try {
+        console.log('Fetching payment proof for transaction:', transactionId);
         setIsLoading(true);
         setPreviewError(false);
+        setDocumentUrl(null);
 
         const response = await fetch(`/api/admin/payment-proof/${transactionId}`);
 
         if (!isMounted) return;
 
         if (!response.ok) {
+          console.error('Payment proof fetch failed:', response.status, response.statusText);
           throw new Error("Failed to fetch document");
         }
 
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
+        console.log('Created blob URL for payment proof');
         setDocumentUrl(url);
+        documentUrlRef.current = url;
       } catch (error) {
         if (isMounted) {
           console.error('Error fetching payment proof:', error);
           setPreviewError(true);
+          toast({
+            title: "Error",
+            description: "Failed to load payment proof. Please try again.",
+            variant: "destructive",
+          });
         }
       } finally {
         if (isMounted) {
@@ -62,25 +75,38 @@ export function PaymentProofModal({
 
     return () => {
       isMounted = false;
-      // Cleanup any document URLs when effect re-runs
-      if (documentUrl) {
-        URL.revokeObjectURL(documentUrl);
-        setDocumentUrl(null);
+      if (documentUrlRef.current) {
+        console.log('Cleaning up payment proof URL:', documentUrlRef.current);
+        URL.revokeObjectURL(documentUrlRef.current);
+        documentUrlRef.current = null;
       }
     };
-  }, [isOpen, transactionId]);
+  }, [isOpen, transactionId, toast]);
 
   const handleDownload = () => {
-    if (!transactionId) return;
+    if (!transactionId) {
+      console.log('No transaction ID available for download');
+      return;
+    }
 
-    const downloadUrl = `/api/admin/payment-proof/${transactionId}?download=true`;
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      console.log('Initiating download for payment proof');
+      const downloadUrl = `/api/admin/payment-proof/${transactionId}?download=true`;
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Download Failed",
+        description: "Unable to download the payment proof. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -116,7 +142,10 @@ export function PaymentProofModal({
                   src={documentUrl}
                   alt={`Payment Proof for ${username}`}
                   className="w-full h-auto object-contain"
-                  onError={() => setPreviewError(true)}
+                  onError={() => {
+                    console.error('Image preview failed');
+                    setPreviewError(true);
+                  }}
                   loading="lazy"
                 />
               </div>
