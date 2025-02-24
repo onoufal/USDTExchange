@@ -26,13 +26,13 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background">
+        <AuthProvider>
           <NavBar />
           <Router />
-          <Toaster />
-        </div>
-      </AuthProvider>
+        </AuthProvider>
+        <Toaster />
+      </div>
     </QueryClientProvider>
   );
 }
