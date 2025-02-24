@@ -8,9 +8,13 @@ import { useToast } from "@/hooks/use-toast";
 import { DocumentPreviewModal } from "@/components/document-preview-modal";
 import { PaymentProofModal } from "@/components/payment-proof-modal";
 import { useState } from "react";
-import { Eye } from "lucide-react";
-import { Copy } from "lucide-react";
+import { Eye, Copy, ChevronDown, ChevronUp } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 export default function AdminPage() {
   const { toast } = useToast();
@@ -19,6 +23,7 @@ export default function AdminPage() {
   const [processingTxId, setProcessingTxId] = useState<number | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<{ id: number; username: string } | null>(null);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+  const [openPaymentDetails, setOpenPaymentDetails] = useState<number | null>(null);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -26,7 +31,7 @@ export default function AdminPage() {
       setCopiedAddress(text);
       setTimeout(() => setCopiedAddress(null), 2000);
       toast({
-        description: "USDT address copied to clipboard",
+        description: "Address copied to clipboard",
       });
     } catch (err) {
       toast({
@@ -220,7 +225,7 @@ export default function AdminPage() {
                             <th className="px-4 py-3 text-left text-sm font-medium">Type</th>
                             <th className="px-4 py-3 text-left text-sm font-medium">Amount</th>
                             <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
-                            <th className="px-4 py-3 text-left text-sm font-medium">USDT Address</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Payment Details</th>
                             <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
                           </tr>
                         </thead>
@@ -257,6 +262,45 @@ export default function AdminPage() {
                                         </Tooltip>
                                       </TooltipProvider>
                                     </div>
+                                  )}
+                                  {tx.type === 'sell' && user && (
+                                    <Collapsible
+                                      open={openPaymentDetails === tx.id}
+                                      onOpenChange={(open) => setOpenPaymentDetails(open ? tx.id : null)}
+                                    >
+                                      <CollapsibleTrigger asChild>
+                                        <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                                          View CliQ Details
+                                          {openPaymentDetails === tx.id ? (
+                                            <ChevronUp className="h-4 w-4" />
+                                          ) : (
+                                            <ChevronDown className="h-4 w-4" />
+                                          )}
+                                        </Button>
+                                      </CollapsibleTrigger>
+                                      <CollapsibleContent className="space-y-2 mt-2">
+                                        <div className="text-sm space-y-1">
+                                          <p><span className="font-medium">Bank:</span> {user.bankName}</p>
+                                          <p>
+                                            <span className="font-medium">CliQ {user.cliqType === 'alias' ? 'Alias' : 'Number'}:</span>
+                                            <span className="ml-1 font-mono">
+                                              {user.cliqType === 'alias' ? user.cliqAlias : user.cliqNumber}
+                                            </span>
+                                            {user.cliqType === 'alias' && user.cliqAlias && (
+                                              <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-6 w-6 ml-1"
+                                                onClick={() => copyToClipboard(user.cliqAlias!)}
+                                              >
+                                                <Copy className="h-3 w-3" />
+                                              </Button>
+                                            )}
+                                          </p>
+                                          <p><span className="font-medium">Account Holder:</span> {user.accountHolderName}</p>
+                                        </div>
+                                      </CollapsibleContent>
+                                    </Collapsible>
                                   )}
                                 </td>
                                 <td className="px-4 py-3">
