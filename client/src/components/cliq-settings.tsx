@@ -1,12 +1,19 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateUserCliqSchema } from "@shared/schema";
+import { updateUserCliqSchema, JORDANIAN_BANKS } from "@shared/schema";
 import type { UpdateUserCliq } from "@shared/schema";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Form,
   FormControl,
@@ -26,7 +33,7 @@ export default function CliqSettings() {
   const form = useForm<UpdateUserCliq>({
     resolver: zodResolver(updateUserCliqSchema),
     defaultValues: {
-      bankName: user?.bankName || "",
+      bankName: user?.bankName || JORDANIAN_BANKS[0],
       cliqType: user?.cliqType || "alias",
       cliqAlias: user?.cliqAlias || "",
       cliqNumber: user?.cliqNumber || "",
@@ -67,9 +74,20 @@ export default function CliqSettings() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Bank Name</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Enter your bank name" />
-              </FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your bank" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {JORDANIAN_BANKS.map((bank) => (
+                    <SelectItem key={bank} value={bank}>
+                      {bank}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

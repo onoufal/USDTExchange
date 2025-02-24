@@ -10,6 +10,24 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// List of Jordanian banks
+export const JORDANIAN_BANKS = [
+  "Arab Bank",
+  "Housing Bank",
+  "Jordan Islamic Bank",
+  "Cairo Amman Bank",
+  "Bank of Jordan",
+  "Jordan Kuwait Bank",
+  "Jordan Ahli Bank",
+  "Arab Jordan Investment Bank",
+  "Jordan Commercial Bank",
+  "Societe Generale Jordan",
+  "Capital Bank of Jordan",
+  "Bank al Etihad",
+  "Safwa Islamic Bank",
+  "Arab Banking Corporation (Jordan)"
+] as const;
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -65,7 +83,9 @@ export const updateUserWalletSchema = z.object({
 });
 
 export const updateUserCliqSchema = z.object({
-  bankName: z.string().min(1, "Bank name is required"),
+  bankName: z.enum(JORDANIAN_BANKS, {
+    errorMap: () => ({ message: "Please select a bank from the list" })
+  }),
   cliqType: z.enum(["alias", "number"], {
     errorMap: () => ({ message: "Please select either Alias or CliQ number" })
   }),
