@@ -244,19 +244,21 @@ export default function TradeForm() {
   };
 
   const onSubmit = (values: any) => {
-    if (values.type === "buy" && !user?.usdtAddress) {
+    // When buying USDT, check for CliQ settings
+    if (values.type === "buy" && !(user?.cliqAlias || user?.cliqNumber)) {
       toast({
-        title: "USDT wallet not set",
-        description: "Please set your USDT wallet address in settings before buying",
+        title: "CliQ details not set",
+        description: "Please set your CliQ account details in settings before buying",
         variant: "destructive",
       });
       return;
     }
 
-    if (values.type === "sell" && !(user?.cliqAlias || user?.cliqNumber)) {
+    // When selling USDT, check for USDT wallet
+    if (values.type === "sell" && !user?.usdtAddress) {
       toast({
-        title: "CliQ details not set",
-        description: "Please set your CliQ account details in settings before selling",
+        title: "USDT wallet not set",
+        description: "Please set your USDT wallet address in settings before selling",
         variant: "destructive",
       });
       return;
@@ -300,17 +302,17 @@ export default function TradeForm() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {type === "buy" && !user?.usdtAddress && (
+            {type === "sell" && !user?.usdtAddress && (
               <Alert variant="destructive">
                 <AlertDescription className="text-sm">
-                  Please set your USDT wallet address in settings before buying
+                  Please set your USDT wallet address in settings before selling
                 </AlertDescription>
               </Alert>
             )}
-            {type === "sell" && !(user?.cliqAlias || user?.cliqNumber) && (
+            {type === "buy" && !(user?.cliqAlias || user?.cliqNumber) && (
               <Alert variant="destructive">
                 <AlertDescription className="text-sm">
-                  Please set your CliQ account details in settings before selling
+                  Please set your CliQ account details in settings before buying
                 </AlertDescription>
               </Alert>
             )}
@@ -558,12 +560,12 @@ export default function TradeForm() {
               </div>
             )}
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full mt-6"
               disabled={tradeMutation.isPending ||
-                (form.watch("type") === "buy" && !user?.usdtAddress) ||
-                (form.watch("type") === "sell" && !(user?.cliqAlias || user?.cliqNumber))}
+                (form.watch("type") === "sell" && !user?.usdtAddress) ||
+                (form.watch("type") === "buy" && !(user?.cliqAlias || user?.cliqNumber))}
             >
               {tradeMutation.isPending ? (
                 <>
