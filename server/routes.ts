@@ -172,6 +172,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/trade", upload.single("proofOfPayment"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.file) return res.status(400).json({ message: "No payment proof uploaded" });
+
+    try {
+      const schema = z.object({
+        type: z.enum(["buy", "sell"]),
+        amount: z.string().transform(Number),
+        rate: z.string().transform(Number),
+      });
+
+      const data = schema.parse(req.body);
+
+      // Create transaction
+      const transaction = await storage.createTransaction({
+        userId: req.user.id,
+        type: data.type,
+        amount: data.amount.toString(),
+        rate: data.rate,
+        status: "pending",
+        proofOfPayment: req.file.buffer.toString("base64"),
+        createdAt: new Date(),
+      });
+
+      res.json(transaction);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      console.error('Trade submission error:', error);
+      res.status(500).json({ message: "Failed to process trade" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

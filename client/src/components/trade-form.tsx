@@ -5,17 +5,19 @@ import { insertTransactionSchema } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
+import { Upload } from "lucide-react";
 
 const MOCK_RATE = 0.71; // 1 USDT = 0.71 JOD
 
 export default function TradeForm() {
   const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const form = useForm({
     resolver: zodResolver(insertTransactionSchema),
@@ -28,24 +30,49 @@ export default function TradeForm() {
 
   const tradeMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const res = await fetch("/api/trade", {
-        method: "POST",
-        body: data,
-        credentials: "include",
+      const xhr = new XMLHttpRequest();
+
+      const promise = new Promise((resolve, reject) => {
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded * 100) / event.total);
+            setUploadProgress(progress);
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            reject(new Error(xhr.responseText || "Trade submission failed"));
+          }
+        });
+
+        xhr.addEventListener("error", () => reject(new Error("Trade submission failed")));
       });
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
+
+      xhr.open("POST", "/api/trade");
+      xhr.withCredentials = true;
+      xhr.send(data);
+
+      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       form.reset();
       setFile(null);
+      setUploadProgress(0);
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
       toast({
         title: "Trade submitted",
         description: "Your trade request has been submitted for approval",
       });
     },
     onError: (error: Error) => {
+      setUploadProgress(0);
       toast({
         title: "Trade failed",
         description: error.message,
@@ -69,9 +96,11 @@ export default function TradeForm() {
       formData.append(key, value as string);
     });
     formData.append("proofOfPayment", file);
-    
+
     tradeMutation.mutate(formData);
   };
+
+  const isUploading = tradeMutation.isPending && uploadProgress > 0;
 
   return (
     <Tabs defaultValue="buy" onValueChange={(value) => form.setValue("type", value)}>
@@ -119,12 +148,28 @@ export default function TradeForm() {
             />
           </div>
 
+          {isUploading && (
+            <div className="space-y-2">
+              <Progress value={uploadProgress} className="w-full" />
+              <p className="text-xs text-center text-muted-foreground">
+                Uploading... {uploadProgress}%
+              </p>
+            </div>
+          )}
+
           <Button
             type="submit"
             className="w-full"
             disabled={tradeMutation.isPending}
           >
-            {tradeMutation.isPending ? "Processing..." : "Submit Trade"}
+            {tradeMutation.isPending ? (
+              <>
+                <Upload className="h-4 w-4 mr-2 animate-bounce" />
+                Processing...
+              </>
+            ) : (
+              "Submit Trade"
+            )}
           </Button>
         </form>
       </Form>
