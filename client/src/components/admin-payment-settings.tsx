@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
@@ -10,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { JORDANIAN_BANKS } from "@shared/schema";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Copy } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const paymentSettingsSchema = z.object({
@@ -37,6 +38,8 @@ const WALLET_TYPES = ["Orange Money", "Zain Cash", "U Wallet"];
 
 export default function AdminPaymentSettings() {
   const { toast } = useToast();
+  const [copyingCliqAlias, setCopyingCliqAlias] = useState(false);
+  const [copyingMobileWallet, setCopyingMobileWallet] = useState(false);
 
   const { data: settings, isLoading, isError } = useQuery<PaymentSettings>({
     queryKey: ["/api/settings/payment"],
@@ -83,6 +86,29 @@ export default function AdminPaymentSettings() {
       });
     }
   });
+
+  const copyToClipboard = async (text: string, field: 'cliqAlias' | 'mobileWallet') => {
+    try {
+      await navigator.clipboard.writeText(text);
+      if (field === 'cliqAlias') {
+        setCopyingCliqAlias(true);
+        setTimeout(() => setCopyingCliqAlias(false), 2000);
+      } else {
+        setCopyingMobileWallet(true);
+        setTimeout(() => setCopyingMobileWallet(false), 2000);
+      }
+      toast({
+        title: "Copied",
+        description: "Text has been copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Please try copying manually",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -177,9 +203,25 @@ export default function AdminPaymentSettings() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>CliQ Alias</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your CliQ alias" {...field} />
-                  </FormControl>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <Input placeholder="Enter your CliQ alias" {...field} />
+                    </FormControl>
+                    {settings?.cliqAlias && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="shrink-0"
+                        onClick={() => copyToClipboard(settings.cliqAlias, 'cliqAlias')}
+                      >
+                        {copyingCliqAlias ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
                   <FormMessage />
                   {settings?.cliqAlias && (
                     <div className="mt-2 text-sm flex items-center gap-2 text-green-600">
@@ -247,9 +289,25 @@ export default function AdminPaymentSettings() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Mobile Wallet Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="07XXXXXXXX" {...field} />
-                  </FormControl>
+                  <div className="flex gap-2">
+                    <FormControl>
+                      <Input placeholder="07XXXXXXXX" {...field} />
+                    </FormControl>
+                    {settings?.mobileWallet && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="shrink-0"
+                        onClick={() => copyToClipboard(settings.mobileWallet, 'mobileWallet')}
+                      >
+                        {copyingMobileWallet ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
                   <FormDescription>
                     Enter a valid Jordanian mobile number (e.g., 0791234567)
                   </FormDescription>
