@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -26,30 +26,61 @@ export function PaymentProofModal({
   const [previewError, setPreviewError] = useState(false);
 
   useEffect(() => {
-    if (isOpen && transactionId) {
-      setIsLoading(true);
-      setPreviewError(false);
-      fetch(`/api/admin/payment-proof/${transactionId}`)
-        .then(async (res) => {
-          if (!res.ok) throw new Error("Failed to fetch document");
-          const blob = await res.blob();
-          const url = URL.createObjectURL(blob);
-          setDocumentUrl(url);
-        })
-        .catch(() => setPreviewError(true))
-        .finally(() => setIsLoading(false));
-    } else {
+    let isMounted = true;
+
+    const fetchDocument = async () => {
+      if (!isOpen || !transactionId) return;
+
+      try {
+        setIsLoading(true);
+        setPreviewError(false);
+
+        const response = await fetch(`/api/admin/payment-proof/${transactionId}`);
+
+        if (!isMounted) return;
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch document");
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        setDocumentUrl(url);
+      } catch (error) {
+        if (isMounted) {
+          console.error('Error fetching payment proof:', error);
+          setPreviewError(true);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchDocument();
+
+    return () => {
+      isMounted = false;
+      // Cleanup any document URLs when effect re-runs
       if (documentUrl) {
         URL.revokeObjectURL(documentUrl);
+        setDocumentUrl(null);
       }
-      setDocumentUrl(null);
-    }
+    };
   }, [isOpen, transactionId]);
 
   const handleDownload = () => {
-    if (transactionId) {
-      window.open(`/api/admin/payment-proof/${transactionId}?download=true`, '_blank');
-    }
+    if (!transactionId) return;
+
+    const downloadUrl = `/api/admin/payment-proof/${transactionId}?download=true`;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -86,6 +117,7 @@ export function PaymentProofModal({
                   alt={`Payment Proof for ${username}`}
                   className="w-full h-auto object-contain"
                   onError={() => setPreviewError(true)}
+                  loading="lazy"
                 />
               </div>
               <Button onClick={handleDownload} variant="outline" size="sm">

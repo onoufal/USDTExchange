@@ -17,29 +17,66 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
   const [isPdf, setIsPdf] = useState(false)
 
   useEffect(() => {
-    if (isOpen && userId) {
-      setIsLoading(true)
-      setPreviewError(false)
-      setDocumentUrl(null)
+    let isMounted = true;
 
-      fetch(`/api/admin/kyc-document/${userId}`, { method: 'HEAD' })
-        .then(response => {
-          const contentType = response.headers.get('Content-Type')
-          setIsPdf(contentType === 'application/pdf')
-          setDocumentUrl(`/api/admin/kyc-document/${userId}`)
-          setIsLoading(false)
-        })
-        .catch(() => {
-          setPreviewError(true)
-          setIsLoading(false)
-        })
-    }
-  }, [isOpen, userId])
+    const fetchDocument = async () => {
+      if (!isOpen || !userId) return;
+
+      try {
+        setIsLoading(true);
+        setPreviewError(false);
+        setDocumentUrl(null);
+
+        const response = await fetch(`/api/admin/kyc-document/${userId}`, { method: 'HEAD' });
+
+        if (!isMounted) return;
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch document');
+        }
+
+        const contentType = response.headers.get('Content-Type');
+        setIsPdf(contentType === 'application/pdf');
+        setDocumentUrl(`/api/admin/kyc-document/${userId}`);
+      } catch (error) {
+        if (isMounted) {
+          console.error('Error fetching document:', error);
+          setPreviewError(true);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchDocument();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, userId]);
 
   const handleDownload = () => {
-    if (!documentUrl) return
-    window.open(`${documentUrl}?download=true`, '_blank')
-  }
+    if (!documentUrl) return;
+    const downloadUrl = `${documentUrl}?download=true`;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  useEffect(() => {
+    return () => {
+      // Cleanup any document URLs when component unmounts
+      if (documentUrl) {
+        URL.revokeObjectURL(documentUrl);
+      }
+    };
+  }, []);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -70,21 +107,11 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
           ) : isPdf ? (
             <div className="flex flex-col h-[50vh] sm:h-[60vh]">
               <div className="flex-1 relative">
-                <object
-                  data={documentUrl}
-                  type="application/pdf"
+                <iframe
+                  src={documentUrl}
                   className="absolute inset-0 w-full h-full border-0"
-                >
-                  <div className="py-4 sm:py-8 text-center">
-                    <p className="text-sm sm:text-base text-muted-foreground mb-4">
-                      PDF preview not available. Please download to view.
-                    </p>
-                    <Button onClick={handleDownload} variant="outline" size="sm">
-                      <Download className="h-4 w-4 mr-2" />
-                      Download PDF
-                    </Button>
-                  </div>
-                </object>
+                  onError={() => setPreviewError(true)}
+                />
               </div>
               <div className="flex justify-end p-2 sm:p-4 bg-background">
                 <Button onClick={handleDownload} variant="outline" size="sm">
