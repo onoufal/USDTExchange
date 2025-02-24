@@ -154,8 +154,8 @@ export default function KYCForm() {
   return (
     <div className="space-y-6">
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium">Mobile Verification</h3>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+          <h3 className="text-base sm:text-lg font-medium">Mobile Verification</h3>
           <Badge variant={user?.mobileVerified ? "default" : "destructive"}>
             {user?.mobileVerified ? (
               <CheckCircle2 className="w-4 h-4 mr-1" />
@@ -176,7 +176,7 @@ export default function KYCForm() {
                   <FormItem>
                     <FormLabel>Mobile Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="07xxxxxxxx" {...field} />
+                      <Input placeholder="07xxxxxxxx" {...field} className="w-full" />
                     </FormControl>
                     <FormDescription className="text-xs">
                       Enter your Jordanian mobile number starting with 077, 078, or 079
@@ -198,8 +198,8 @@ export default function KYCForm() {
       </div>
 
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium">KYC Verification</h3>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+          <h3 className="text-base sm:text-lg font-medium">KYC Verification</h3>
           <Badge variant={
             user?.kycStatus === "approved" ? "default" :
               user?.kycStatus === "pending" ? "secondary" : "destructive"
@@ -249,6 +249,7 @@ export default function KYCForm() {
                           }}
                           accept="image/jpeg,image/png,image/jpg,application/pdf"
                           disabled={!user?.mobileVerified || isUploading || user?.kycStatus === "approved"}
+                          className="w-full"
                         />
                       </FormControl>
                       <FormDescription className="text-xs">
@@ -258,6 +259,15 @@ export default function KYCForm() {
                     </FormItem>
                   )}
                 />
+
+                {isUploading && (
+                  <div className="space-y-2">
+                    <Progress value={uploadProgress} className="w-full" />
+                    <p className="text-xs text-center text-muted-foreground">
+                      Uploading... {uploadProgress}%
+                    </p>
+                  </div>
+                )}
 
                 {user?.kycStatus === "pending" && (
                   <Alert>

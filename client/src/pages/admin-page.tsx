@@ -58,7 +58,7 @@ export default function AdminPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="container mx-auto px-4 py-8">
       <DocumentPreviewModal 
         isOpen={!!selectedUser}
         onClose={() => setSelectedUser(null)}
@@ -66,10 +66,10 @@ export default function AdminPage() {
         username={selectedUser?.username || ''}
       />
 
-      <Tabs defaultValue="users">
-        <TabsList>
-          <TabsTrigger value="users">Users & KYC</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+      <Tabs defaultValue="users" className="w-full">
+        <TabsList className="w-full sm:w-auto">
+          <TabsTrigger value="users" className="flex-1 sm:flex-none">Users & KYC</TabsTrigger>
+          <TabsTrigger value="transactions" className="flex-1 sm:flex-none">Transactions</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -81,51 +81,55 @@ export default function AdminPage() {
               {isLoadingUsers ? (
                 <div className="text-center py-4">Loading users...</div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2">Username</th>
-                        <th className="text-left py-2">Full Name</th>
-                        <th className="text-left py-2">Mobile</th>
-                        <th className="text-left py-2">KYC Status</th>
-                        <th className="text-left py-2">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {users?.map((user) => (
-                        <tr key={user.id} className="border-b">
-                          <td className="py-2">{user.username}</td>
-                          <td className="py-2">{user.fullName}</td>
-                          <td className="py-2">{user.mobileNumber || 'Not verified'}</td>
-                          <td className="py-2 capitalize">{user.kycStatus}</td>
-                          <td className="py-2">
-                            <div className="flex gap-2">
-                              {user.kycDocument && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setSelectedUser({ id: user.id, username: user.username })}
-                                >
-                                  <Eye className="h-4 w-4 mr-1" />
-                                  View Document
-                                </Button>
-                              )}
-                              {user.kycDocument && user.kycStatus === 'pending' && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => approveKYCMutation.mutate(user.id)}
-                                  disabled={processingKycId === user.id}
-                                >
-                                  {processingKycId === user.id ? 'Approving...' : 'Approve KYC'}
-                                </Button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                  <div className="min-w-full inline-block align-middle">
+                    <div className="overflow-hidden">
+                      <table className="min-w-full divide-y divide-border">
+                        <thead>
+                          <tr>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Username</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium hidden sm:table-cell">Full Name</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium hidden sm:table-cell">Mobile</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">KYC Status</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                          {users?.map((user) => (
+                            <tr key={user.id}>
+                              <td className="px-4 py-3 text-sm">{user.username}</td>
+                              <td className="px-4 py-3 text-sm hidden sm:table-cell">{user.fullName}</td>
+                              <td className="px-4 py-3 text-sm hidden sm:table-cell">{user.mobileNumber || 'Not verified'}</td>
+                              <td className="px-4 py-3 text-sm capitalize">{user.kycStatus}</td>
+                              <td className="px-4 py-3">
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                  {user.kycDocument && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => setSelectedUser({ id: user.id, username: user.username })}
+                                    >
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      <span className="hidden sm:inline">View</span> Doc
+                                    </Button>
+                                  )}
+                                  {user.kycDocument && user.kycStatus === 'pending' && (
+                                    <Button
+                                      size="sm"
+                                      onClick={() => approveKYCMutation.mutate(user.id)}
+                                      disabled={processingKycId === user.id}
+                                    >
+                                      {processingKycId === user.id ? 'Approving...' : 'Approve'}
+                                    </Button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -138,34 +142,34 @@ export default function AdminPage() {
               <CardTitle>Transaction Management</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2">User</th>
-                      <th className="text-left py-2">Type</th>
-                      <th className="text-left py-2">Amount</th>
-                      <th className="text-left py-2">Status</th>
-                      <th className="text-left py-2">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {transactions?.map((tx) => {
-                      const user = users?.find(u => u.id === tx.userId);
-                      return (
-                        <tr key={tx.id} className="border-b">
-                          <td className="py-2">{user?.username}</td>
-                          <td className="py-2 capitalize">{tx.type}</td>
-                          <td className="py-2">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
-                          <td className="py-2 capitalize">{tx.status}</td>
-                          <td className="py-2">
-                            {/* Transaction approval will be implemented later */}
-                          </td>
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <div className="min-w-full inline-block align-middle">
+                  <div className="overflow-hidden">
+                    <table className="min-w-full divide-y divide-border">
+                      <thead>
+                        <tr>
+                          <th className="px-4 py-3 text-left text-sm font-medium">User</th>
+                          <th className="px-4 py-3 text-left text-sm font-medium">Type</th>
+                          <th className="px-4 py-3 text-left text-sm font-medium">Amount</th>
+                          <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {transactions?.map((tx) => {
+                          const user = users?.find(u => u.id === tx.userId);
+                          return (
+                            <tr key={tx.id}>
+                              <td className="px-4 py-3 text-sm">{user?.username}</td>
+                              <td className="px-4 py-3 text-sm capitalize">{tx.type}</td>
+                              <td className="px-4 py-3 text-sm">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
+                              <td className="px-4 py-3 text-sm capitalize">{tx.status}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

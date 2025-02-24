@@ -43,50 +43,50 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>KYC Document - {username}</DialogTitle>
+          <DialogTitle className="text-base sm:text-lg">KYC Document - {username}</DialogTitle>
         </DialogHeader>
 
-        <div>
+        <div className="relative">
           {isLoading ? (
-            <div className="flex items-center justify-center p-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
+            <div className="flex items-center justify-center p-4 sm:p-8">
+              <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin" />
             </div>
           ) : previewError ? (
-            <div className="py-8 text-center space-y-4">
-              <p className="text-muted-foreground">
+            <div className="py-4 sm:py-8 text-center space-y-4">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Unable to preview document.
               </p>
-              <Button onClick={handleDownload} variant="outline">
+              <Button onClick={handleDownload} variant="outline" size="sm">
                 <Download className="h-4 w-4 mr-2" />
                 Download Document
               </Button>
             </div>
           ) : !documentUrl ? (
-            <div className="py-8 text-center text-muted-foreground">
+            <div className="py-4 sm:py-8 text-center text-sm sm:text-base text-muted-foreground">
               No document available
             </div>
           ) : isPdf ? (
-            <div className="flex flex-col h-[60vh]">
+            <div className="flex flex-col h-[50vh] sm:h-[60vh]">
               <div className="flex-1 relative">
                 <object
                   data={documentUrl}
                   type="application/pdf"
                   className="absolute inset-0 w-full h-full border-0"
                 >
-                  <div className="py-8 text-center">
-                    <p className="text-muted-foreground mb-4">
+                  <div className="py-4 sm:py-8 text-center">
+                    <p className="text-sm sm:text-base text-muted-foreground mb-4">
                       PDF preview not available. Please download to view.
                     </p>
-                    <Button onClick={handleDownload} variant="outline">
+                    <Button onClick={handleDownload} variant="outline" size="sm">
                       <Download className="h-4 w-4 mr-2" />
                       Download PDF
                     </Button>
                   </div>
                 </object>
               </div>
-              <div className="flex justify-end p-4 bg-background">
+              <div className="flex justify-end p-2 sm:p-4 bg-background">
                 <Button onClick={handleDownload} variant="outline" size="sm">
                   <Download className="h-4 w-4 mr-2" />
                   Download PDF
@@ -95,12 +95,14 @@ export function DocumentPreviewModal({ isOpen, onClose, userId, username }: Docu
             </div>
           ) : (
             <div className="flex flex-col items-center gap-4">
-              <img 
-                src={documentUrl}
-                alt={`KYC Document for ${username}`}
-                className="max-h-[60vh] w-auto object-contain"
-                onError={() => setPreviewError(true)}
-              />
+              <div className="w-full max-h-[50vh] sm:max-h-[60vh] overflow-hidden">
+                <img 
+                  src={documentUrl}
+                  alt={`KYC Document for ${username}`}
+                  className="w-full h-auto object-contain"
+                  onError={() => setPreviewError(true)}
+                />
+              </div>
               <Button onClick={handleDownload} variant="outline" size="sm">
                 <Download className="h-4 w-4 mr-2" />
                 Download Image
