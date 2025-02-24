@@ -9,8 +9,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { JORDANIAN_BANKS } from "@shared/schema";
+import { Check } from "lucide-react";
 
 const paymentSettingsSchema = z.object({
   // CliQ Settings
@@ -42,8 +42,10 @@ const WALLET_TYPES = ["Orange Money", "Zain Cash", "U Wallet"];
 export default function AdminPaymentSettings() {
   const { toast } = useToast();
 
-  const { data: settings } = useQuery<PaymentSettings>({
+  const { data: settings, isLoading } = useQuery<PaymentSettings>({
     queryKey: ["/api/settings/payment"],
+    staleTime: 5000,
+    retry: 3
   });
 
   const form = useForm<PaymentSettings>({
@@ -77,7 +79,7 @@ export default function AdminPaymentSettings() {
       queryClient.invalidateQueries({ queryKey: ["/api/settings/payment"] });
       toast({
         title: "Settings updated",
-        description: "Platform payment settings have been saved"
+        description: "Platform payment settings have been saved successfully"
       });
     },
     onError: (error: Error) => {
@@ -89,9 +91,70 @@ export default function AdminPaymentSettings() {
     }
   });
 
+  if (isLoading) {
+    return <div>Loading settings...</div>;
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(data => updateSettingsMutation.mutate(data))} className="space-y-6">
+        {/* USDT Settings Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>USDT Wallet Settings</CardTitle>
+            <CardDescription>
+              Configure USDT wallet addresses for each supported network
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="usdtAddressTRC20"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>USDT Address (TRC20)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your TRC20 USDT wallet address" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    USDT wallet address on the Tron (TRC20) network
+                  </FormDescription>
+                  <FormMessage />
+                  {settings?.usdtAddressTRC20 && (
+                    <div className="mt-2 text-sm flex items-center gap-2 text-muted-foreground">
+                      <Check className="h-4 w-4" />
+                      <span>TRC20 address is set and active</span>
+                    </div>
+                  )}
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="usdtAddressBEP20"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>USDT Address (BEP20)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your BEP20 USDT wallet address" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    USDT wallet address on the Binance Smart Chain (BEP20) network
+                  </FormDescription>
+                  <FormMessage />
+                  {settings?.usdtAddressBEP20 && (
+                    <div className="mt-2 text-sm flex items-center gap-2 text-muted-foreground">
+                      <Check className="h-4 w-4" />
+                      <span>BEP20 address is set and active</span>
+                    </div>
+                  )}
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
         {/* CliQ Settings Card */}
         <Card>
           <CardHeader>
@@ -281,55 +344,10 @@ export default function AdminPaymentSettings() {
           </CardContent>
         </Card>
 
-        {/* USDT Settings Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>USDT Wallet Settings</CardTitle>
-            <CardDescription>
-              Configure USDT wallet addresses for each supported network
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="usdtAddressTRC20"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>USDT Address (TRC20)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your TRC20 USDT wallet address" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    USDT wallet address on the Tron (TRC20) network
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="usdtAddressBEP20"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>USDT Address (BEP20)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your BEP20 USDT wallet address" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    USDT wallet address on the Binance Smart Chain (BEP20) network
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
-
         <Button 
           type="submit" 
-          disabled={updateSettingsMutation.isPending}
           className="w-full"
+          disabled={updateSettingsMutation.isPending}
         >
           {updateSettingsMutation.isPending ? "Saving..." : "Save All Settings"}
         </Button>
