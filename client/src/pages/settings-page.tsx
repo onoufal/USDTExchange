@@ -16,11 +16,7 @@ export default function SettingsPage() {
 
       <div className="space-y-6">
         {/* USDT Wallet Settings */}
-        <Card>
-          <CardContent className="pt-6">
-            <WalletSettings />
-          </CardContent>
-        </Card>
+        <WalletSettings />
 
         {/* CliQ Account Settings */}
         <Card>
