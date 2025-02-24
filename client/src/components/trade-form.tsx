@@ -442,83 +442,76 @@ export default function TradeForm() {
                   </>
                 ) : (
                   <>
-                    <p className="mb-2">Select USDT network for payment:</p>
-                    <div className="space-y-4">
-                      {/* TRC20 Network Option */}
-                      <div className="space-y-2">
-                        <FormField
-                          control={form.control}
-                          name="network"
-                          render={({ field }) => (
-                            <FormItem className="space-y-3">
-                              <FormControl>
-                                <RadioGroup
-                                  onValueChange={field.onChange}
-                                  value={field.value}
-                                  className="space-y-4"
-                                >
-                                  <div className="space-y-2">
-                                    <div className="flex items-center space-x-3">
-                                      <RadioGroupItem value="trc20" id="trc20" />
-                                      <FormLabel htmlFor="trc20" className="font-medium">TRC20 Network</FormLabel>
+                    <p className="mb-4 font-medium">Select USDT network for payment:</p>
+                    <div className="space-y-6">
+                      <FormField
+                        control={form.control}
+                        name="network"
+                        render={({ field }) => (
+                          <FormItem className="space-y-6">
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                className="space-y-6"
+                              >
+                                {/* TRC20 Network Option */}
+                                <div className="space-y-3">
+                                  <div className="flex items-center space-x-3">
+                                    <RadioGroupItem value="trc20" id="trc20" />
+                                    <FormLabel htmlFor="trc20" className="font-medium">TRC20 Network</FormLabel>
+                                  </div>
+                                  <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                    <div className="flex items-center justify-between">
+                                      <p className="font-mono break-all mr-2">{paymentSettings?.usdtAddressTRC20}</p>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 shrink-0"
+                                        onClick={() => copyToClipboard(paymentSettings?.usdtAddressTRC20 || '', "trc20")}
+                                      >
+                                        {copyingTRC20 ? (
+                                          <Check className="h-4 w-4" />
+                                        ) : (
+                                          <Copy className="h-4 w-4" />
+                                        )}
+                                      </Button>
                                     </div>
                                   </div>
-                                  <div className="space-y-2">
-                                    <div className="flex items-center space-x-3">
-                                      <RadioGroupItem value="bep20" id="bep20" />
-                                      <FormLabel htmlFor="bep20" className="font-medium">BEP20 Network</FormLabel>
+                                </div>
+
+                                {/* BEP20 Network Option */}
+                                <div className="space-y-3">
+                                  <div className="flex items-center space-x-3">
+                                    <RadioGroupItem value="bep20" id="bep20" />
+                                    <FormLabel htmlFor="bep20" className="font-medium">BEP20 Network</FormLabel>
+                                  </div>
+                                  <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                    <div className="flex items-center justify-between">
+                                      <p className="font-mono break-all mr-2">{paymentSettings?.usdtAddressBEP20}</p>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 shrink-0"
+                                        onClick={() => copyToClipboard(paymentSettings?.usdtAddressBEP20 || '', "bep20")}
+                                      >
+                                        {copyingBEP20 ? (
+                                          <Check className="h-4 w-4" />
+                                        ) : (
+                                          <Copy className="h-4 w-4" />
+                                        )}
+                                      </Button>
                                     </div>
                                   </div>
-                                </RadioGroup>
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-
-                        {/* TRC20 Address */}
-                        <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-mono break-all mr-2">{paymentSettings?.usdtAddressTRC20}</p>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 shrink-0"
-                              onClick={() => copyToClipboard(paymentSettings?.usdtAddressTRC20 || '', "trc20")}
-                            >
-                              {copyingTRC20 ? (
-                                <Check className="h-4 w-4" />
-                              ) : (
-                                <Copy className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* BEP20 Address */}
-                        <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md mt-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-mono break-all mr-2">{paymentSettings?.usdtAddressBEP20}</p>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 shrink-0"
-                              onClick={() => copyToClipboard(paymentSettings?.usdtAddressBEP20 || '', "bep20")}
-                            >
-                              {copyingBEP20 ? (
-                                <Check className="h-4 w-4" />
-                              ) : (
-                                <Copy className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
+                                </div>
+                              </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
-                    <p className="text-xs text-muted-foreground mt-4">
+                    <p className="text-xs text-muted-foreground mt-6">
                       Please send {form.watch("amount")} USDT to the selected network address and upload the transaction proof below.
                       <br />
                       You will receive {calculateFinalAmount(form.watch("amount"))} JOD after approval.
