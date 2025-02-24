@@ -5,7 +5,7 @@ import { insertTransactionSchema } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -460,25 +460,6 @@ export default function TradeForm() {
                                     </FormControl>
                                     <FormLabel htmlFor="trc20" className="font-medium">TRC20 Network</FormLabel>
                                   </FormItem>
-                                  {paymentSettings?.usdtAddressTRC20 && field.value === "trc20" && (
-                                    <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                                      <div className="flex items-center justify-between">
-                                        <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressTRC20}</p>
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-6 w-6"
-                                          onClick={() => copyToClipboard(paymentSettings.usdtAddressTRC20, "trc20")}
-                                        >
-                                          {copyingTRC20 ? (
-                                            <Check className="h-4 w-4" />
-                                          ) : (
-                                            <Copy className="h-4 w-4" />
-                                          )}
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  )}
                                 </div>
 
                                 <div className="space-y-2">
@@ -488,25 +469,6 @@ export default function TradeForm() {
                                     </FormControl>
                                     <FormLabel htmlFor="bep20" className="font-medium">BEP20 Network</FormLabel>
                                   </FormItem>
-                                  {paymentSettings?.usdtAddressBEP20 && field.value === "bep20" && (
-                                    <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                                      <div className="flex items-center justify-between">
-                                        <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressBEP20}</p>
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-6 w-6"
-                                          onClick={() => copyToClipboard(paymentSettings.usdtAddressBEP20, "bep20")}
-                                        >
-                                          {copyingBEP20 ? (
-                                            <Check className="h-4 w-4" />
-                                          ) : (
-                                            <Copy className="h-4 w-4" />
-                                          )}
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  )}
                                 </div>
                               </RadioGroup>
                             </FormControl>
@@ -514,6 +476,54 @@ export default function TradeForm() {
                           </FormItem>
                         )}
                       />
+
+                      <div className="space-y-3">
+                        {paymentSettings?.usdtAddressTRC20 && (
+                          <div className="text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium mb-1">TRC20 Address:</p>
+                                <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressTRC20}</p>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => copyToClipboard(paymentSettings.usdtAddressTRC20, "trc20")}
+                              >
+                                {copyingTRC20 ? (
+                                  <Check className="h-4 w-4" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
+                        {paymentSettings?.usdtAddressBEP20 && (
+                          <div className="text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium mb-1">BEP20 Address:</p>
+                                <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressBEP20}</p>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                onClick={() => copyToClipboard(paymentSettings.usdtAddressBEP20, "bep20")}
+                              >
+                                {copyingBEP20 ? (
+                                  <Check className="h-4 w-4" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Please send {form.watch("amount")} USDT to the selected network address and upload the transaction proof below.
@@ -548,8 +558,8 @@ export default function TradeForm() {
               </div>
             )}
 
-            <Button
-              type="submit"
+            <Button 
+              type="submit" 
               className="w-full mt-6"
               disabled={tradeMutation.isPending ||
                 (form.watch("type") === "buy" && !user?.usdtAddress) ||
