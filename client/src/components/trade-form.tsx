@@ -11,13 +11,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
-import { Upload } from "lucide-react";
+import { Upload, Copy, Check } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 
-const MOCK_RATE = 0.71; // 1 USDT = 0.71 JOD
-const COMMISSION_RATE = 0.02; // 2% commission placeholder
+const MOCK_RATE = 0.71;
+const COMMISSION_RATE = 0.02;
 
 export default function TradeForm() {
   const { toast } = useToast();
@@ -25,6 +25,8 @@ export default function TradeForm() {
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">("native");
+  const [copyingTRC20, setCopyingTRC20] = useState(false);
+  const [copyingBEP20, setCopyingBEP20] = useState(false);
 
   const { data: paymentSettings } = useQuery<{ cliqAlias: string; mobileWallet: string; cliqBankName: string; cliqAccountHolder: string; walletType: string; walletHolderName: string; usdtAddressTRC20: string; usdtAddressBEP20: string }>({
     queryKey: ["/api/settings/payment"],
@@ -39,6 +41,30 @@ export default function TradeForm() {
       network: "trc20"
     }
   });
+
+  // Copy address to clipboard with feedback
+  const copyToClipboard = async (text: string, network: "trc20" | "bep20") => {
+    try {
+      await navigator.clipboard.writeText(text);
+      if (network === "trc20") {
+        setCopyingTRC20(true);
+        setTimeout(() => setCopyingTRC20(false), 2000);
+      } else {
+        setCopyingBEP20(true);
+        setTimeout(() => setCopyingBEP20(false), 2000);
+      }
+      toast({
+        title: "Address copied",
+        description: "USDT address has been copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Please try copying manually",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     setUploadProgress(0);
@@ -273,7 +299,7 @@ export default function TradeForm() {
         </TabsList>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6 mt-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {type === "buy" && !user?.usdtAddress && (
               <Alert variant="destructive">
                 <AlertDescription className="text-sm">
@@ -434,9 +460,23 @@ export default function TradeForm() {
                                     </FormControl>
                                     <FormLabel htmlFor="trc20" className="font-medium">TRC20 Network</FormLabel>
                                   </FormItem>
-                                  {paymentSettings?.usdtAddressTRC20 && (
+                                  {paymentSettings?.usdtAddressTRC20 && field.value === "trc20" && (
                                     <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                                      <p className="font-mono break-all">{paymentSettings.usdtAddressTRC20}</p>
+                                      <div className="flex items-center justify-between">
+                                        <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressTRC20}</p>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-6 w-6"
+                                          onClick={() => copyToClipboard(paymentSettings.usdtAddressTRC20, "trc20")}
+                                        >
+                                          {copyingTRC20 ? (
+                                            <Check className="h-4 w-4" />
+                                          ) : (
+                                            <Copy className="h-4 w-4" />
+                                          )}
+                                        </Button>
+                                      </div>
                                     </div>
                                   )}
                                 </div>
@@ -448,9 +488,23 @@ export default function TradeForm() {
                                     </FormControl>
                                     <FormLabel htmlFor="bep20" className="font-medium">BEP20 Network</FormLabel>
                                   </FormItem>
-                                  {paymentSettings?.usdtAddressBEP20 && (
+                                  {paymentSettings?.usdtAddressBEP20 && field.value === "bep20" && (
                                     <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                                      <p className="font-mono break-all">{paymentSettings.usdtAddressBEP20}</p>
+                                      <div className="flex items-center justify-between">
+                                        <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressBEP20}</p>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-6 w-6"
+                                          onClick={() => copyToClipboard(paymentSettings.usdtAddressBEP20, "bep20")}
+                                        >
+                                          {copyingBEP20 ? (
+                                            <Check className="h-4 w-4" />
+                                          ) : (
+                                            <Copy className="h-4 w-4" />
+                                          )}
+                                        </Button>
+                                      </div>
                                     </div>
                                   )}
                                 </div>
