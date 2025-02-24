@@ -72,6 +72,10 @@ export default function AdminPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       setProcessingTxId(null);
+      // Reset openPaymentDetails if it matches the approved transaction
+      if (openPaymentDetails === txId) {
+        setOpenPaymentDetails(null);
+      }
       toast({
         title: "Transaction Approved",
         description: "Transaction has been approved and loyalty points awarded",
