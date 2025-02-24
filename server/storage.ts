@@ -21,12 +21,11 @@ export interface IStorage {
   approveTransaction(id: number): Promise<void>;
   getTransaction(id: number): Promise<Transaction | undefined>;
   updateUserWallet(id: number, usdtAddress: string, usdtNetwork: string): Promise<void>;
-  updateUserBank(id: number, bankDetails: {
-    bankName: string,
-    bankBranch: string,
-    bankAccountName: string,
-    bankAccountNumber: string,
-    bankIban: string
+  updateUserCliq(id: number, cliqDetails: {
+    cliqType: string,
+    cliqAlias?: string,
+    cliqNumber?: string,
+    accountHolderName: string
   }): Promise<void>;
   getPaymentSettings(): Promise<{ [key: string]: string }>;
   updatePaymentSettings(settings: { [key: string]: string }): Promise<void>;
@@ -88,7 +87,11 @@ export class MemStorage implements IStorage {
       role: "user",
       createdAt: new Date(),
       usdtAddress: null,
-      usdtNetwork: null
+      usdtNetwork: null,
+      cliqType: null,
+      cliqAlias: null,
+      cliqNumber: null,
+      accountHolderName: insertUser.fullName // Pre-fill with user's full name
     };
     this.users.set(id, user);
     return user;
@@ -117,6 +120,22 @@ export class MemStorage implements IStorage {
     if (user) {
       user.usdtAddress = usdtAddress;
       user.usdtNetwork = usdtNetwork;
+      this.users.set(id, { ...user });
+    }
+  }
+
+  async updateUserCliq(id: number, cliqDetails: {
+    cliqType: string,
+    cliqAlias?: string,
+    cliqNumber?: string,
+    accountHolderName: string
+  }): Promise<void> {
+    const user = this.users.get(id);
+    if (user) {
+      user.cliqType = cliqDetails.cliqType;
+      user.cliqAlias = cliqDetails.cliqAlias || null;
+      user.cliqNumber = cliqDetails.cliqNumber || null;
+      user.accountHolderName = cliqDetails.accountHolderName;
       this.users.set(id, { ...user });
     }
   }
@@ -193,23 +212,6 @@ export class MemStorage implements IStorage {
         user.loyaltyPoints = (user.loyaltyPoints || 0) + Math.floor(Number(transaction.amount) / 100);
         this.users.set(user.id, { ...user }); // Create a new object to ensure updates are detected
       }
-    }
-  }
-  async updateUserBank(id: number, bankDetails: {
-    bankName: string,
-    bankBranch: string,
-    bankAccountName: string,
-    bankAccountNumber: string,
-    bankIban: string
-  }): Promise<void> {
-    const user = this.users.get(id);
-    if (user) {
-      user.bankName = bankDetails.bankName;
-      user.bankBranch = bankDetails.bankBranch;
-      user.bankAccountName = bankDetails.bankAccountName;
-      user.bankAccountNumber = bankDetails.bankAccountNumber;
-      user.bankIban = bankDetails.bankIban;
-      this.users.set(id, { ...user });
     }
   }
 }

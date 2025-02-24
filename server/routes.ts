@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import multer from "multer";
 import { z } from "zod";
 import { updateUserWalletSchema } from "@shared/schema"; // Fixed import path
-import { updateUserBankSchema } from "@shared/schema"; // Added import for bank schema
+import { updateUserCliqSchema } from "@shared/schema"; // Added import for CliQ schema
 
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -289,20 +289,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add this new route for bank settings updates
-  app.post("/api/settings/bank", async (req, res) => {
+  // Add this new route for CliQ settings updates
+  app.post("/api/settings/cliq", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
     try {
-      const data = updateUserBankSchema.parse(req.body);
-      await storage.updateUserBank(req.user.id, data);
+      const data = updateUserCliqSchema.parse(req.body);
+      await storage.updateUserCliq(req.user.id, data);
       res.json({ success: true });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: error.errors[0].message });
       }
-      console.error('Bank details update error:', error);
-      res.status(500).json({ message: "Failed to update bank settings" });
+      console.error('CliQ details update error:', error);
+      res.status(500).json({ message: "Failed to update CliQ settings" });
     }
   });
 

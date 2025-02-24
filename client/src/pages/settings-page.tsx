@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import WalletSettings from "@/components/wallet-settings";
-import BankSettings from "@/components/bank-settings";
+import CliqSettings from "@/components/cliq-settings";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function SettingsPage() {
@@ -17,24 +17,40 @@ export default function SettingsPage() {
       <div className="space-y-6">
         {/* USDT Wallet Settings */}
         <div>
-          <WalletSettings />
+          <Card>
+            <CardHeader>
+              <CardTitle>USDT Wallet Settings</CardTitle>
+              <CardDescription>Set your USDT receiving address for buy orders</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <WalletSettings />
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Bank Account Settings */}
+        {/* CliQ Account Settings */}
         <div>
-          <BankSettings />
+          <Card>
+            <CardHeader>
+              <CardTitle>CliQ Account Settings</CardTitle>
+              <CardDescription>Set your CliQ details for receiving payments</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CliqSettings />
+            </CardContent>
+          </Card>
         </div>
 
         {/* Show alerts if settings are missing */}
-        {(!user.usdtAddress || !user.bankAccountNumber) && (
-          <Alert variant="warning">
+        {(!user.usdtAddress || !user.cliqAlias && !user.cliqNumber) && (
+          <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               {!user.usdtAddress && (
                 <div>Please set your USDT wallet address to receive USDT from buy orders.</div>
               )}
-              {!user.bankAccountNumber && (
-                <div>Please set your bank account details to receive JOD from sell orders.</div>
+              {!user.cliqAlias && !user.cliqNumber && (
+                <div>Please set your CliQ account details to receive JOD from sell orders.</div>
               )}
             </AlertDescription>
           </Alert>

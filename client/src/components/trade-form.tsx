@@ -241,11 +241,11 @@ export default function TradeForm() {
       return;
     }
 
-    // Check for bank details when selling
-    if (values.type === "sell" && !user?.bankAccountNumber) {
+    // Check for CliQ settings when selling
+    if (values.type === "sell" && !user?.cliqAlias && !user?.cliqNumber) {
       toast({
-        title: "Bank details not set",
-        description: "Please set your bank account details in settings before selling",
+        title: "CliQ details not set",
+        description: "Please set your CliQ account details in settings before selling",
         variant: "destructive",
       });
       return;
@@ -296,10 +296,10 @@ export default function TradeForm() {
                 </AlertDescription>
               </Alert>
             )}
-            {type === "sell" && !user?.bankAccountNumber && (
+            {type === "sell" && !user?.cliqAlias && !user?.cliqNumber && (
               <Alert variant="destructive">
                 <AlertDescription>
-                  Please set your bank account details in settings before selling
+                  Please set your CliQ account details in settings before selling
                 </AlertDescription>
               </Alert>
             )}
@@ -451,7 +451,9 @@ export default function TradeForm() {
             <Button
               type="submit"
               className="w-full"
-              disabled={tradeMutation.isPending || (type === "buy" && !user?.usdtAddress) || (type === "sell" && !user?.bankAccountNumber)}
+              disabled={tradeMutation.isPending || 
+                (type === "buy" && !user?.usdtAddress) || 
+                (type === "sell" && !user?.cliqAlias && !user?.cliqNumber)}
             >
               {tradeMutation.isPending ? (
                 <>

@@ -24,11 +24,10 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
   usdtAddress: text("usdt_address"), 
   usdtNetwork: text("usdt_network"),
-  bankName: text("bank_name"),
-  bankBranch: text("bank_branch"),
-  bankAccountName: text("bank_account_name"),
-  bankAccountNumber: text("bank_account_number"),
-  bankIban: text("bank_iban")
+  cliqType: text("cliq_type"), // 'alias' or 'number'
+  cliqAlias: text("cliq_alias"),
+  cliqNumber: text("cliq_number"),
+  accountHolderName: text("account_holder_name")
 });
 
 export const platformSettings = pgTable("platform_settings", {
@@ -64,13 +63,32 @@ export const updateUserWalletSchema = z.object({
   })
 });
 
-export const updateUserBankSchema = z.object({
-  bankName: z.string().min(1, "Bank name is required"),
-  bankBranch: z.string().min(1, "Bank branch is required"),
-  bankAccountName: z.string().min(1, "Account name is required"),
-  bankAccountNumber: z.string().min(1, "Account number is required"),
-  bankIban: z.string().min(1, "IBAN is required")
-});
+export const updateUserCliqSchema = z.object({
+  cliqType: z.enum(["alias", "number"], {
+    errorMap: () => ({ message: "Please select either Alias or CliQ number" })
+  }),
+  cliqAlias: z.string().optional(),
+  cliqNumber: z.string()
+    .optional()
+    .refine(val => !val || /^009627[0-9]{8}$/.test(val), {
+      message: "CliQ number must be in format 009627xxxxxxxx"
+    }),
+  accountHolderName: z.string().min(1, "Account holder name is required")
+}).refine(
+  data => {
+    if (data.cliqType === "alias" && !data.cliqAlias) {
+      return false;
+    }
+    if (data.cliqType === "number" && !data.cliqNumber) {
+      return false;
+    }
+    return true;
+  },
+  {
+    message: "Either CliQ alias or number must be provided based on selected type",
+    path: ["cliqType"]
+  }
+);
 
 export const insertTransactionSchema = createInsertSchema(transactions)
   .pick({
@@ -97,4 +115,4 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;
 export type UpdateUserWallet = z.infer<typeof updateUserWalletSchema>;
-export type UpdateUserBank = z.infer<typeof updateUserBankSchema>;
+export type UpdateUserCliq = z.infer<typeof updateUserCliqSchema>;
