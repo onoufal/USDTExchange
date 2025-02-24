@@ -414,41 +414,46 @@ export default function TradeForm() {
                   </>
                 ) : (
                   <>
-                    <p className="mb-2">Select USDT network for payment:</p>
                     <div className="space-y-4 mb-4">
+                      <h3 className="text-sm font-medium mb-2">Select USDT network for payment:</h3>
                       <FormField
                         control={form.control}
                         name="network"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="space-y-3">
                             <FormControl>
                               <RadioGroup
-                                value={field.value}
                                 onValueChange={field.onChange}
-                                className="space-y-3"
+                                value={field.value}
+                                className="space-y-4"
                               >
-                                {paymentSettings?.usdtAddressTRC20 && (
-                                  <div className="space-y-2">
-                                    <div className="flex items-center space-x-3">
-                                      <RadioGroupItem value="trc20" id="trc20" />
-                                      <FormLabel htmlFor="trc20" className="font-medium">TRC20 Network</FormLabel>
-                                    </div>
+                                <div className="space-y-2">
+                                  <FormItem className="flex items-center space-x-3">
+                                    <FormControl>
+                                      <RadioGroupItem value="trc20" />
+                                    </FormControl>
+                                    <FormLabel htmlFor="trc20" className="font-medium">TRC20 Network</FormLabel>
+                                  </FormItem>
+                                  {paymentSettings?.usdtAddressTRC20 && (
                                     <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
                                       <p className="font-mono break-all">{paymentSettings.usdtAddressTRC20}</p>
                                     </div>
-                                  </div>
-                                )}
-                                {paymentSettings?.usdtAddressBEP20 && (
-                                  <div className="space-y-2">
-                                    <div className="flex items-center space-x-3">
-                                      <RadioGroupItem value="bep20" id="bep20" />
-                                      <FormLabel htmlFor="bep20" className="font-medium">BEP20 Network</FormLabel>
-                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="space-y-2">
+                                  <FormItem className="flex items-center space-x-3">
+                                    <FormControl>
+                                      <RadioGroupItem value="bep20" />
+                                    </FormControl>
+                                    <FormLabel htmlFor="bep20" className="font-medium">BEP20 Network</FormLabel>
+                                  </FormItem>
+                                  {paymentSettings?.usdtAddressBEP20 && (
                                     <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
                                       <p className="font-mono break-all">{paymentSettings.usdtAddressBEP20}</p>
                                     </div>
-                                  </div>
-                                )}
+                                  )}
+                                </div>
                               </RadioGroup>
                             </FormControl>
                             <FormMessage />
