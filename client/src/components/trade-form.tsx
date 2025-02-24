@@ -276,6 +276,15 @@ export default function TradeForm() {
     }
   };
 
+  const getEquivalentCurrencyLabel = () => {
+    const type = form.watch("type");
+    if (type === "buy") {
+      return currencyBasis === "native" ? "USDT" : "JOD";
+    } else {
+      return currencyBasis === "native" ? "JOD" : "USDT";
+    }
+  };
+
   const getCommissionCurrencyLabel = () => {
     const type = form.watch("type");
     if (type === "buy") {
