@@ -348,10 +348,33 @@ export default function AdminPage() {
                                       <CollapsibleContent className="space-y-2 mt-2">
                                         <div className="text-xs sm:text-sm space-y-1 bg-muted/50 p-2 rounded-md">
                                           {user.cliqAlias && (
-                                            <p className="flex items-center gap-1">
-                                              <span className="font-medium whitespace-nowrap">CliQ Alias:</span>
-                                              <span>{user.cliqAlias}</span>
-                                            </p>
+                                            <div className="flex items-center justify-between">
+                                              <p className="flex items-center gap-1">
+                                                <span className="font-medium whitespace-nowrap">CliQ Alias:</span>
+                                                <span className="truncate mr-2">{user.cliqAlias}</span>
+                                              </p>
+                                              <TooltipProvider>
+                                                <Tooltip>
+                                                  <TooltipTrigger asChild>
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="icon"
+                                                      className="h-8 w-8"
+                                                      onClick={() => copyToClipboard(user.cliqAlias!)}
+                                                    >
+                                                      {copiedAddress === user.cliqAlias ? (
+                                                        <Check className="h-4 w-4" />
+                                                      ) : (
+                                                        <Copy className="h-4 w-4" />
+                                                      )}
+                                                    </Button>
+                                                  </TooltipTrigger>
+                                                  <TooltipContent>
+                                                    <p>Copy CliQ Alias</p>
+                                                  </TooltipContent>
+                                                </Tooltip>
+                                              </TooltipProvider>
+                                            </div>
                                           )}
                                           <p className="flex items-center gap-1">
                                             <span className="font-medium whitespace-nowrap">Account Holder:</span>
