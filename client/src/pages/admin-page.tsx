@@ -13,7 +13,7 @@ export default function AdminPage() {
   const { toast } = useToast();
   const [selectedUser, setSelectedUser] = useState<{ id: number; username: string } | null>(null);
 
-  const { data: users } = useQuery<User[]>({
+  const { data: users, isLoading: isLoadingUsers } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
   });
 
@@ -66,36 +66,40 @@ export default function AdminPage() {
               <CardTitle>User Management</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2">Username</th>
-                      <th className="text-left py-2">Full Name</th>
-                      <th className="text-left py-2">Mobile</th>
-                      <th className="text-left py-2">KYC Status</th>
-                      <th className="text-left py-2">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users?.map((user) => (
-                      <tr key={user.id} className="border-b">
-                        <td className="py-2">{user.username}</td>
-                        <td className="py-2">{user.fullName}</td>
-                        <td className="py-2">{user.mobileNumber || 'Not verified'}</td>
-                        <td className="py-2 capitalize">{user.kycStatus}</td>
-                        <td className="py-2 space-x-2">
-                          {user.kycDocument && (
+              {isLoadingUsers ? (
+                <div className="text-center py-4">Loading users...</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2">Username</th>
+                        <th className="text-left py-2">Full Name</th>
+                        <th className="text-left py-2">Mobile</th>
+                        <th className="text-left py-2">KYC Status</th>
+                        <th className="text-left py-2">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users?.map((user) => (
+                        <tr key={user.id} className="border-b">
+                          <td className="py-2">{user.username}</td>
+                          <td className="py-2">{user.fullName}</td>
+                          <td className="py-2">{user.mobileNumber || 'Not verified'}</td>
+                          <td className="py-2 capitalize">{user.kycStatus}</td>
+                          <td className="py-2">
                             <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setSelectedUser({ id: user.id, username: user.username })}
-                              >
-                                <Eye className="h-4 w-4 mr-1" />
-                                View Document
-                              </Button>
-                              {user.kycStatus === 'pending' && (
+                              {user.kycDocument && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setSelectedUser({ id: user.id, username: user.username })}
+                                >
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  View Document
+                                </Button>
+                              )}
+                              {user.kycDocument && user.kycStatus === 'pending' && (
                                 <Button
                                   size="sm"
                                   onClick={() => approveKYCMutation.mutate(user.id)}
@@ -105,13 +109,13 @@ export default function AdminPage() {
                                 </Button>
                               )}
                             </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
