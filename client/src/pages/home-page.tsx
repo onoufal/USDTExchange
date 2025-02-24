@@ -4,7 +4,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import TradeForm from "@/components/trade-form";
 import KYCForm from "@/components/kyc-form";
-import WalletSettings from "@/components/wallet-settings";
 import { useQuery } from "@tanstack/react-query";
 import { Transaction } from "@shared/schema";
 
@@ -36,7 +35,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               {showKYCWarning ? (
-                <Alert className="mb-4">
+                <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription className="text-sm">
                     Please complete mobile verification and KYC before trading
@@ -57,17 +56,6 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <KYCForm />
-            </CardContent>
-          </Card>
-
-          {/* Wallet Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">USDT Wallet</CardTitle>
-              <CardDescription>Set your USDT receiving address</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <WalletSettings />
             </CardContent>
           </Card>
         </div>

@@ -241,6 +241,16 @@ export default function TradeForm() {
       return;
     }
 
+    // Check for bank details when selling
+    if (values.type === "sell" && !user?.bankAccountNumber) {
+      toast({
+        title: "Bank details not set",
+        description: "Please set your bank account details in settings before selling",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!file) {
       toast({
         title: "Missing payment proof",
@@ -283,6 +293,13 @@ export default function TradeForm() {
               <Alert variant="destructive">
                 <AlertDescription>
                   Please set your USDT wallet address in settings before buying
+                </AlertDescription>
+              </Alert>
+            )}
+            {type === "sell" && !user?.bankAccountNumber && (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  Please set your bank account details in settings before selling
                 </AlertDescription>
               </Alert>
             )}
@@ -434,7 +451,7 @@ export default function TradeForm() {
             <Button
               type="submit"
               className="w-full"
-              disabled={tradeMutation.isPending || (type === "buy" && !user?.usdtAddress)}
+              disabled={tradeMutation.isPending || (type === "buy" && !user?.usdtAddress) || (type === "sell" && !user?.bankAccountNumber)}
             >
               {tradeMutation.isPending ? (
                 <>

@@ -23,7 +23,12 @@ export const users = pgTable("users", {
   role: text("role").default("user"),
   createdAt: timestamp("created_at").defaultNow(),
   usdtAddress: text("usdt_address"), 
-  usdtNetwork: text("usdt_network") 
+  usdtNetwork: text("usdt_network"),
+  bankName: text("bank_name"),
+  bankBranch: text("bank_branch"),
+  bankAccountName: text("bank_account_name"),
+  bankAccountNumber: text("bank_account_number"),
+  bankIban: text("bank_iban")
 });
 
 export const platformSettings = pgTable("platform_settings", {
@@ -59,6 +64,14 @@ export const updateUserWalletSchema = z.object({
   })
 });
 
+export const updateUserBankSchema = z.object({
+  bankName: z.string().min(1, "Bank name is required"),
+  bankBranch: z.string().min(1, "Bank branch is required"),
+  bankAccountName: z.string().min(1, "Account name is required"),
+  bankAccountNumber: z.string().min(1, "Account number is required"),
+  bankIban: z.string().min(1, "IBAN is required")
+});
+
 export const insertTransactionSchema = createInsertSchema(transactions)
   .pick({
     type: true,
@@ -84,3 +97,4 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;
 export type UpdateUserWallet = z.infer<typeof updateUserWalletSchema>;
+export type UpdateUserBank = z.infer<typeof updateUserBankSchema>;
