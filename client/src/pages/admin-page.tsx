@@ -236,12 +236,12 @@ export default function AdminPage() {
                               <tr key={tx.id}>
                                 <td className="px-4 py-3 text-sm">{user?.username}</td>
                                 <td className="px-4 py-3 text-sm capitalize">{tx.type}</td>
-                                <td className="px-4 py-3 text-sm">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
+                                <td className="px-4 py-3 text-sm whitespace-nowrap">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
                                 <td className="px-4 py-3 text-sm capitalize">{tx.status}</td>
                                 <td className="px-4 py-3 text-sm">
                                   {tx.type === 'buy' && user?.usdtAddress && (
                                     <div className="flex items-center gap-2">
-                                      <span className="font-mono">
+                                      <span className="font-mono text-xs sm:text-sm">
                                         {user.usdtAddress.slice(0, 6)}...{user.usdtAddress.slice(-4)}
                                       </span>
                                       <TooltipProvider>
@@ -269,7 +269,7 @@ export default function AdminPage() {
                                       onOpenChange={(open) => setOpenPaymentDetails(open ? tx.id : null)}
                                     >
                                       <CollapsibleTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                                        <Button variant="ghost" size="sm" className="flex items-center gap-1 text-xs sm:text-sm">
                                           View CliQ Details
                                           {openPaymentDetails === tx.id ? (
                                             <ChevronUp className="h-4 w-4" />
@@ -279,25 +279,25 @@ export default function AdminPage() {
                                         </Button>
                                       </CollapsibleTrigger>
                                       <CollapsibleContent className="space-y-2 mt-2">
-                                        <div className="text-sm space-y-1">
+                                        <div className="text-xs sm:text-sm space-y-1 bg-muted/50 p-2 rounded-md">
                                           <p><span className="font-medium">Bank:</span> {user.bankName}</p>
-                                          <p>
-                                            <span className="font-medium">CliQ {user.cliqType === 'alias' ? 'Alias' : 'Number'}:</span>
-                                            <span className="ml-1 font-mono">
+                                          <p className="flex items-center gap-1">
+                                            <span className="font-medium whitespace-nowrap">CliQ {user.cliqType === 'alias' ? 'Alias' : 'Number'}:</span>
+                                            <span className="font-mono">
                                               {user.cliqType === 'alias' ? user.cliqAlias : user.cliqNumber}
                                             </span>
                                             {user.cliqType === 'alias' && user.cliqAlias && (
                                               <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-6 w-6 ml-1"
+                                                className="h-6 w-6"
                                                 onClick={() => copyToClipboard(user.cliqAlias!)}
                                               >
                                                 <Copy className="h-3 w-3" />
                                               </Button>
                                             )}
                                           </p>
-                                          <p><span className="font-medium">Account Holder:</span> {user.accountHolderName}</p>
+                                          <p className="break-words"><span className="font-medium">Account Holder:</span> {user.accountHolderName}</p>
                                         </div>
                                       </CollapsibleContent>
                                     </Collapsible>

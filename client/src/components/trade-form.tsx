@@ -280,7 +280,7 @@ export default function TradeForm() {
   const amount = form.watch("amount");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Tabs defaultValue="buy" onValueChange={(value) => form.setValue("type", value)}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="buy">Buy USDT</TabsTrigger>
@@ -288,17 +288,17 @@ export default function TradeForm() {
         </TabsList>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6 mt-4">
             {type === "buy" && !user?.usdtAddress && (
               <Alert variant="destructive">
-                <AlertDescription>
+                <AlertDescription className="text-sm">
                   Please set your USDT wallet address in settings before buying
                 </AlertDescription>
               </Alert>
             )}
             {type === "sell" && !(user?.cliqAlias || user?.cliqNumber) && (
               <Alert variant="destructive">
-                <AlertDescription>
+                <AlertDescription className="text-sm">
                   Please set your CliQ account details in settings before selling
                 </AlertDescription>
               </Alert>
@@ -310,17 +310,17 @@ export default function TradeForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Amount</FormLabel>
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     <RadioGroup
                       value={currencyBasis}
                       onValueChange={(value: "native" | "foreign") => setCurrencyBasis(value)}
-                      className="flex space-x-4"
+                      className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0"
                     >
                       <FormItem className="flex items-center space-x-2">
                         <FormControl>
                           <RadioGroupItem value="native" />
                         </FormControl>
-                        <FormLabel className="font-normal">
+                        <FormLabel className="font-normal text-sm">
                           Enter in {type === "buy" ? "JOD" : "USDT"}
                         </FormLabel>
                       </FormItem>
@@ -328,7 +328,7 @@ export default function TradeForm() {
                         <FormControl>
                           <RadioGroupItem value="foreign" />
                         </FormControl>
-                        <FormLabel className="font-normal">
+                        <FormLabel className="font-normal text-sm">
                           Enter in {type === "buy" ? "USDT" : "JOD"}
                         </FormLabel>
                       </FormItem>
@@ -339,6 +339,7 @@ export default function TradeForm() {
                         step="0.01"
                         {...field}
                         placeholder={`Enter amount in ${getCurrentCurrencyLabel()}`}
+                        className="text-base"
                       />
                     </FormControl>
                   </div>
@@ -350,32 +351,32 @@ export default function TradeForm() {
               )}
             />
 
-            <Card className="p-4">
+            <Card className="p-3 sm:p-4">
               <div className="flex justify-between mb-2 text-sm">
                 <span>Exchange Rate</span>
                 <span>1 USDT = {MOCK_RATE} JOD</span>
               </div>
               {amount && (
                 <>
-                  <div className="flex justify-between mb-2">
+                  <div className="flex justify-between mb-2 text-sm">
                     <span>Base Amount</span>
-                    <span>
+                    <span className="font-mono">
                       {calculateEquivalentAmount(amount)} {getEquivalentCurrencyLabel()}
                     </span>
                   </div>
-                  <div className="flex justify-between mb-2 text-sm text-muted-foreground">
+                  <div className="flex justify-between mb-2 text-xs sm:text-sm text-muted-foreground">
                     <span>Commission (2%)</span>
-                    <span>
+                    <span className="font-mono">
                       {calculateCommission(currencyBasis === "foreign" ? calculateEquivalentAmount(amount) : amount)} {getCurrentCurrencyLabel()}
                     </span>
                   </div>
-                  <div className="flex justify-between font-medium pt-2 border-t">
+                  <div className="flex justify-between font-medium pt-2 border-t text-sm">
                     <span>
                       {type === "buy"
                         ? (currencyBasis === "foreign" ? "Total to Pay" : "Total to Receive")
                         : (currencyBasis === "foreign" ? "Total to Pay" : "Total to Receive")}
                     </span>
-                    <span>
+                    <span className="font-mono">
                       {calculateFinalAmount(amount)} {getEquivalentCurrencyLabel()}
                     </span>
                   </div>
@@ -384,7 +385,7 @@ export default function TradeForm() {
             </Card>
 
             <Alert>
-              <AlertDescription className="text-sm">
+              <AlertDescription className="text-xs sm:text-sm">
                 {type === "buy" ? (
                   <>
                     {currencyBasis === "foreign" ? (
@@ -431,7 +432,7 @@ export default function TradeForm() {
                 type="file"
                 onChange={handleFileChange}
                 accept="image/*"
-                className="mt-2"
+                className="mt-2 text-sm"
                 disabled={isUploading}
               />
               <FormDescription className="text-xs mt-1">
@@ -450,7 +451,7 @@ export default function TradeForm() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full mt-6"
               disabled={tradeMutation.isPending ||
                 (type === "buy" && !user?.usdtAddress) ||
                 (type === "sell" && !(user?.cliqAlias || user?.cliqNumber))}
