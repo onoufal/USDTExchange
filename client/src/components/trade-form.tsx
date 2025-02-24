@@ -234,9 +234,9 @@ export default function TradeForm() {
         const commissionUSDT = baseUsdtAmount * COMMISSION_RATE;  // 1408.45 * 0.02 = 28.17 USDT
         return commissionUSDT.toFixed(2) + " USDT";
       } else {
-        // If entering USDT directly
-        const baseJodAmount = num * MOCK_RATE;  // Convert to JOD
-        const commissionJOD = baseJodAmount * COMMISSION_RATE;  // Calculate commission in JOD
+        // If entering USDT (e.g. 1000 USDT)
+        const baseJodAmount = num * MOCK_RATE;  // 1000 * 0.71 = 710 JOD
+        const commissionJOD = baseJodAmount * COMMISSION_RATE;  // 710 * 0.02 = 14.2 JOD
         return commissionJOD.toFixed(2) + " JOD";
       }
     }
@@ -262,10 +262,10 @@ export default function TradeForm() {
         const commissionUSDT = baseUsdtAmount * COMMISSION_RATE;  // 28.17 USDT
         return (baseUsdtAmount + commissionUSDT).toFixed(2);  // 1436.62 USDT
       } else {
-        // Entering USDT directly
-        const baseJodAmount = num * MOCK_RATE;  // Convert to JOD
-        const commissionJOD = baseJodAmount * COMMISSION_RATE;  // Calculate commission in JOD
-        return (baseJodAmount - commissionJOD).toFixed(2);  // Subtract commission as user receives less
+        // Entering USDT (e.g. 1000 USDT)
+        const baseJodAmount = num * MOCK_RATE;  // 1000 * 0.71 = 710 JOD
+        const commissionJOD = baseJodAmount * COMMISSION_RATE;  // 710 * 0.02 = 14.2 JOD
+        return (baseJodAmount - commissionJOD).toFixed(2);  // 710 - 14.2 = 695.8 JOD
       }
     }
   };
