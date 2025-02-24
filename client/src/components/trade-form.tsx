@@ -247,10 +247,9 @@ export default function TradeForm() {
         ? (num * MOCK_RATE * (1 + COMMISSION_RATE)).toFixed(2)
         : (num * (1 - COMMISSION_RATE)).toFixed(2);
     } else {
-      // For sell, user receives less JOD due to commission
-      return currencyBasis === "foreign"
-        ? (num * MOCK_RATE * (1 - COMMISSION_RATE)).toFixed(2)
-        : (num * (1 - COMMISSION_RATE)).toFixed(2);
+      // For sell, user receives less JOD after commission is deducted
+      const jodAmount = num * MOCK_RATE;
+      return (jodAmount * (1 - COMMISSION_RATE)).toFixed(2);
     }
   };
 
