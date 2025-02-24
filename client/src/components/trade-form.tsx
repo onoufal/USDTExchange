@@ -25,6 +25,7 @@ export default function TradeForm() {
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">("native");
+  const [selectedNetwork, setSelectedNetwork] = useState<"trc20" | "bep20">("trc20");
 
   // Fetch platform payment settings
   const { data: paymentSettings } = useQuery<{ cliqAlias: string; mobileWallet: string; cliqBankName: string; cliqAccountHolder: string; walletType: string; walletHolderName: string; usdtAddressTRC20: string; usdtAddressBEP20: string }>({
@@ -37,6 +38,7 @@ export default function TradeForm() {
       type: "buy",
       amount: "",
       rate: MOCK_RATE.toString(),
+      network: "trc20" // Added default network
     },
   });
 
@@ -271,6 +273,7 @@ export default function TradeForm() {
     formData.append("amount", amount);
     formData.append("rate", values.rate.toString());
     formData.append("proofOfPayment", file);
+    formData.append("network", values.network); // Add network to formData
 
     tradeMutation.mutate(formData);
   };
@@ -430,34 +433,47 @@ export default function TradeForm() {
                 ) : (
                   <>
                     <p className="mb-2">Select USDT network for payment:</p>
-                    <RadioGroup defaultValue="trc20" className="mb-4 space-y-3">
-                      {paymentSettings?.usdtAddressTRC20 && (
-                        <div className="space-y-2">
-                          <FormItem className="flex items-center space-x-3">
-                            <FormControl>
-                              <RadioGroupItem value="trc20" />
-                            </FormControl>
-                            <FormLabel className="font-medium">TRC20 Network</FormLabel>
-                          </FormItem>
-                          <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                            <p className="font-mono break-all">{paymentSettings.usdtAddressTRC20}</p>
-                          </div>
-                        </div>
+                    <FormField
+                      control={form.control}
+                      name="network"
+                      render={({ field }) => (
+                        <RadioGroup
+                          defaultValue="trc20"
+                          className="mb-4 space-y-3"
+                          onValueChange={(value) => {
+                            setSelectedNetwork(value as "trc20" | "bep20");
+                            field.onChange(value);
+                          }}
+                        >
+                          {paymentSettings?.usdtAddressTRC20 && (
+                            <div className="space-y-2">
+                              <FormItem className="flex items-center space-x-3">
+                                <FormControl>
+                                  <RadioGroupItem value="trc20" />
+                                </FormControl>
+                                <FormLabel className="font-medium">TRC20 Network</FormLabel>
+                              </FormItem>
+                              <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                                <p className="font-mono break-all">{paymentSettings.usdtAddressTRC20}</p>
+                              </div>
+                            </div>
+                          )}
+                          {paymentSettings?.usdtAddressBEP20 && (
+                            <div className="space-y-2">
+                              <FormItem className="flex items-center space-x-3">
+                                <FormControl>
+                                  <RadioGroupItem value="bep20" />
+                                </FormControl>
+                                <FormLabel className="font-medium">BEP20 Network</FormLabel>
+                              </FormItem>
+                              <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                                <p className="font-mono break-all">{paymentSettings.usdtAddressBEP20}</p>
+                              </div>
+                            </div>
+                          )}
+                        </RadioGroup>
                       )}
-                      {paymentSettings?.usdtAddressBEP20 && (
-                        <div className="space-y-2">
-                          <FormItem className="flex items-center space-x-3">
-                            <FormControl>
-                              <RadioGroupItem value="bep20" />
-                            </FormControl>
-                            <FormLabel className="font-medium">BEP20 Network</FormLabel>
-                          </FormItem>
-                          <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
-                            <p className="font-mono break-all">{paymentSettings.usdtAddressBEP20}</p>
-                          </div>
-                        </div>
-                      )}
-                    </RadioGroup>
+                    />
                     <p className="text-xs text-muted-foreground">
                       Please send {amount} USDT to the selected network address and upload the transaction proof below.
                       <br />
