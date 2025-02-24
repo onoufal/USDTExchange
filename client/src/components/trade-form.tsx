@@ -259,13 +259,13 @@ export default function TradeForm() {
     } else {
       // SELL scenario
       if (currencyBasis === "foreign") {
-        // User typed JOD => final USDT = baseUSDT + commission
+        // User typed JOD => final USDT = baseUsdt + commission
         // Commission is in USDT
         const baseUsdt = num / MOCK_RATE; // e.g. 1000 JOD / 0.71 = 1408.45
         const commissionUsdt = baseUsdt * COMMISSION_RATE; // 28.17
         return commissionUsdt.toFixed(2) + " USDT";
       } else {
-        // User typed USDT => final JOD = baseJOD - commission
+        // User typed USDT => final JOD = baseJod - commission
         // Commission is in JOD
         const baseJod = num * MOCK_RATE; // e.g. 1000 USDT * 0.71 = 710
         const commissionJod = baseJod * COMMISSION_RATE; // 14.2
