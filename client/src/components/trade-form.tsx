@@ -27,7 +27,7 @@ export default function TradeForm() {
   const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">("native");
 
   // Fetch platform payment settings
-  const { data: paymentSettings } = useQuery<{ cliqAlias: string; mobileWallet: string }>({
+  const { data: paymentSettings } = useQuery<{ cliqAlias: string; mobileWallet: string; cliqBankName: string; cliqAccountHolder: string; walletType: string; walletHolderName: string; usdtAddressTRC20: string; usdtAddressBEP20: string }>({
     queryKey: ["/api/settings/payment"],
   });
 
@@ -388,39 +388,81 @@ export default function TradeForm() {
               <AlertDescription className="text-xs sm:text-sm">
                 {type === "buy" ? (
                   <>
-                    {currencyBasis === "foreign" ? (
-                      <>
-                        To receive {amount} USDT, please send {calculateFinalAmount(amount)} JOD
-                        to our {paymentSettings?.cliqAlias} (CliQ) or {paymentSettings?.mobileWallet} (mobile wallet)
-                        and upload the payment proof below.
-                      </>
-                    ) : (
-                      <>
-                        Please send {amount} JOD to our {paymentSettings?.cliqAlias} (CliQ) or {paymentSettings?.mobileWallet} (mobile wallet)
-                        and upload the payment proof below.
-                        <br />
-                        <span className="text-xs text-muted-foreground mt-1 block">
-                          You will receive {calculateFinalAmount(amount)} USDT after approval
-                        </span>
-                      </>
-                    )}
+                    <p className="mb-2">Choose your preferred payment method:</p>
+                    <RadioGroup defaultValue="cliq" className="mb-4 space-y-3">
+                      {paymentSettings?.cliqAlias && (
+                        <div className="space-y-2">
+                          <FormItem className="flex items-center space-x-3">
+                            <FormControl>
+                              <RadioGroupItem value="cliq" />
+                            </FormControl>
+                            <FormLabel className="font-medium">CliQ Payment</FormLabel>
+                          </FormItem>
+                          <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                            <p><span className="text-muted-foreground">CliQ Alias:</span> {paymentSettings.cliqAlias}</p>
+                            <p><span className="text-muted-foreground">Bank:</span> {paymentSettings.cliqBankName}</p>
+                            <p><span className="text-muted-foreground">Account Holder:</span> {paymentSettings.cliqAccountHolder}</p>
+                          </div>
+                        </div>
+                      )}
+                      {paymentSettings?.mobileWallet && (
+                        <div className="space-y-2">
+                          <FormItem className="flex items-center space-x-3">
+                            <FormControl>
+                              <RadioGroupItem value="wallet" />
+                            </FormControl>
+                            <FormLabel className="font-medium">Mobile Wallet</FormLabel>
+                          </FormItem>
+                          <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                            <p><span className="text-muted-foreground">Number:</span> {paymentSettings.mobileWallet}</p>
+                            <p><span className="text-muted-foreground">Wallet Type:</span> {paymentSettings.walletType}</p>
+                            <p><span className="text-muted-foreground">Holder Name:</span> {paymentSettings.walletHolderName}</p>
+                          </div>
+                        </div>
+                      )}
+                    </RadioGroup>
+                    <p className="text-xs text-muted-foreground">
+                      Please send {amount} JOD using your selected payment method and upload the proof below.
+                      <br />
+                      You will receive {calculateFinalAmount(amount)} USDT after approval.
+                    </p>
                   </>
                 ) : (
                   <>
-                    {currencyBasis === "foreign" ? (
-                      <>
-                        To receive {amount} JOD, please send {calculateFinalAmount(amount)} USDT
-                        to our wallet address and upload the transaction proof below.
-                      </>
-                    ) : (
-                      <>
-                        Please send {amount} USDT to our wallet address and upload the transaction proof below.
-                        <br />
-                        <span className="text-xs text-muted-foreground mt-1 block">
-                          You will receive {calculateFinalAmount(amount)} JOD after approval
-                        </span>
-                      </>
-                    )}
+                    <p className="mb-2">Select USDT network for payment:</p>
+                    <RadioGroup defaultValue="trc20" className="mb-4 space-y-3">
+                      {paymentSettings?.usdtAddressTRC20 && (
+                        <div className="space-y-2">
+                          <FormItem className="flex items-center space-x-3">
+                            <FormControl>
+                              <RadioGroupItem value="trc20" />
+                            </FormControl>
+                            <FormLabel className="font-medium">TRC20 Network</FormLabel>
+                          </FormItem>
+                          <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                            <p className="font-mono break-all">{paymentSettings.usdtAddressTRC20}</p>
+                          </div>
+                        </div>
+                      )}
+                      {paymentSettings?.usdtAddressBEP20 && (
+                        <div className="space-y-2">
+                          <FormItem className="flex items-center space-x-3">
+                            <FormControl>
+                              <RadioGroupItem value="bep20" />
+                            </FormControl>
+                            <FormLabel className="font-medium">BEP20 Network</FormLabel>
+                          </FormItem>
+                          <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 rounded-md">
+                            <p className="font-mono break-all">{paymentSettings.usdtAddressBEP20}</p>
+                          </div>
+                        </div>
+                      )}
+                    </RadioGroup>
+                    <p className="text-xs text-muted-foreground">
+                      Please send {amount} USDT to the selected network address and upload the transaction proof below.
+                      <br />
+                      You will receive {calculateFinalAmount(amount)} JOD after approval.
+                    </p>
                   </>
                 )}
               </AlertDescription>
