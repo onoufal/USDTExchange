@@ -213,85 +213,53 @@ export default function TradeForm() {
 
   const calculateEquivalentAmount = (amount: string) => {
     const num = Number(amount) || 0;
-    const type = form.watch("type");
-    const isForeignCurrency = currencyBasis === "foreign";
-
-    if (type === "buy") {
-      return isForeignCurrency ? (num * MOCK_RATE).toFixed(2) : (num / MOCK_RATE).toFixed(2);
+    if (form.watch("type") === "buy") {
+      return currencyBasis === "foreign" ? (num * MOCK_RATE).toFixed(2) : (num / MOCK_RATE).toFixed(2);
     } else {
-      return isForeignCurrency ? (num / MOCK_RATE).toFixed(2) : (num * MOCK_RATE).toFixed(2);
+      return currencyBasis === "foreign" ? (num / MOCK_RATE).toFixed(2) : (num * MOCK_RATE).toFixed(2);
     }
   };
 
   const calculateCommission = (amount: string) => {
     const num = Number(amount) || 0;
     const type = form.watch("type");
-    const isForeignCurrency = currencyBasis === "foreign";
-
-    if (type === "buy") {
-      // For buy, commission is in JOD based on the JOD amount
-      return (num * COMMISSION_RATE).toFixed(2);
-    } else {
-      // For sell, commission depends on the input currency
-      if (isForeignCurrency) {
-        // If entering JOD, convert to USDT first then calculate commission
-        const usdtAmount = num / MOCK_RATE;
-        return (usdtAmount * COMMISSION_RATE).toFixed(2);
-      } else {
-        // If entering USDT directly, calculate commission in USDT
-        return (num * COMMISSION_RATE).toFixed(2);
-      }
-    }
+    return type === "buy" 
+      ? (num * COMMISSION_RATE).toFixed(2) + " JOD"
+      : (num * COMMISSION_RATE).toFixed(2) + " USDT";
   };
 
   const calculateFinalAmount = (amount: string) => {
     const num = Number(amount) || 0;
     const type = form.watch("type");
-    const isForeignCurrency = currencyBasis === "foreign";
 
     if (type === "buy") {
-      // For buy, user pays more JOD to cover commission
-      return isForeignCurrency
-        ? (num * MOCK_RATE * (1 + COMMISSION_RATE)).toFixed(2)
-        : (num * (1 - COMMISSION_RATE)).toFixed(2);
+      if (currencyBasis === "foreign") {
+        const jodAmount = num * MOCK_RATE;
+        return (jodAmount * (1 + COMMISSION_RATE)).toFixed(2);
+      } else {
+        return (num / MOCK_RATE * (1 - COMMISSION_RATE)).toFixed(2);
+      }
     } else {
-      // For sell, calculate total USDT to pay based on input currency
-      if (isForeignCurrency) {
-        // If entering JOD, convert to USDT and add commission in USDT
+      if (currencyBasis === "foreign") {
         const usdtAmount = num / MOCK_RATE;
         return (usdtAmount * (1 + COMMISSION_RATE)).toFixed(2);
       } else {
-        // If entering USDT directly, add commission in USDT
-        return (num * (1 + COMMISSION_RATE)).toFixed(2);
+        const jodAmount = num * MOCK_RATE;
+        return (jodAmount * (1 - COMMISSION_RATE)).toFixed(2);
       }
     }
   };
 
   const getCurrentCurrencyLabel = () => {
-    const type = form.watch("type");
-    if (type === "buy") {
-      return currencyBasis === "native" ? "JOD" : "USDT";
-    } else {
-      return currencyBasis === "native" ? "USDT" : "JOD";
-    }
+    return form.watch("type") === "buy" 
+      ? (currencyBasis === "native" ? "JOD" : "USDT")
+      : (currencyBasis === "native" ? "USDT" : "JOD");
   };
 
   const getEquivalentCurrencyLabel = () => {
-    const type = form.watch("type");
-    if (type === "buy") {
-      return currencyBasis === "native" ? "USDT" : "JOD";
-    } else {
-      return currencyBasis === "native" ? "JOD" : "USDT";
-    }
-  };
-
-  const getCommissionCurrencyLabel = () => {
-    const type = form.watch("type");
-    if (type === "buy") {
-      return "JOD";
-    } else {
-      return "USDT";
-    }
+    return form.watch("type") === "buy"
+      ? (currencyBasis === "native" ? "USDT" : "JOD")
+      : (currencyBasis === "native" ? "JOD" : "USDT");
   };
 
   const onSubmit = (values: any) => {
@@ -431,7 +399,7 @@ export default function TradeForm() {
                   <div className="flex justify-between mb-2 text-xs sm:text-sm text-muted-foreground">
                     <span>Commission (2%)</span>
                     <span className="font-mono">
-                      {calculateCommission(currencyBasis === "foreign" ? calculateEquivalentAmount(amount) : amount)} {getCommissionCurrencyLabel()}
+                      {calculateCommission(currencyBasis === "foreign" ? calculateEquivalentAmount(amount) : amount)} 
                     </span>
                   </div>
                   <div className="flex justify-between font-medium pt-2 border-t text-sm">
