@@ -102,7 +102,10 @@ export class MemStorage implements IStorage {
       cliqAlias: null,
       cliqNumber: null,
       accountHolderName: insertUser.fullName, // Pre-fill with user's full name
-      bankName: null
+      bankName: null,
+      bankBranch: null,
+      bankAccountNumber: null,
+      bankIban: null
     };
     this.users.set(id, user);
     return user;

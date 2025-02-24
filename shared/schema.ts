@@ -46,7 +46,10 @@ export const users = pgTable("users", {
   cliqAlias: text("cliq_alias"),
   cliqNumber: text("cliq_number"),
   accountHolderName: text("account_holder_name"),
-  bankName: text("bank_name")
+  bankName: text("bank_name"),
+  bankBranch: text("bank_branch"),
+  bankAccountNumber: text("bank_account_number"),
+  bankIban: text("bank_iban")
 });
 
 export const platformSettings = pgTable("platform_settings", {
