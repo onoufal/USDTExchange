@@ -353,6 +353,7 @@ export default function TradeForm() {
   const amount = form.watch("amount");
 
   const isUploading = tradeMutation.isPending && uploadProgress > 0;
+  const selectedNetwork = form.watch("network");
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -608,36 +609,38 @@ export default function TradeForm() {
                                           TRC20 Network
                                         </FormLabel>
                                       </div>
-                                      <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
-                                        {!paymentSettings?.usdtAddressTRC20 ? (
-                                          <div className="text-muted-foreground">
-                                            TRC20 address not set in admin settings
-                                          </div>
-                                        ) : (
-                                          <div className="flex items-center justify-between">
-                                            <p className="font-mono break-all mr-2">
-                                              {paymentSettings.usdtAddressTRC20}
-                                            </p>
-                                            <Button
-                                              variant="ghost"
-                                              size="icon"
-                                              className="h-6 w-6 shrink-0"
-                                              onClick={() =>
-                                                copyToClipboard(
-                                                  paymentSettings.usdtAddressTRC20,
-                                                  "trc20"
-                                                )
-                                              }
-                                            >
-                                              {copyingTRC20 ? (
-                                                <Check className="h-4 w-4" />
-                                              ) : (
-                                                <Copy className="h-4 w-4" />
-                                              )}
-                                            </Button>
-                                          </div>
-                                        )}
-                                      </div>
+                                      {selectedNetwork === "trc20" && (
+                                        <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                          {!paymentSettings?.usdtAddressTRC20 ? (
+                                            <div className="text-muted-foreground">
+                                              TRC20 address not set in admin settings
+                                            </div>
+                                          ) : (
+                                            <div className="flex items-center justify-between">
+                                              <p className="font-mono break-all mr-2">
+                                                {paymentSettings.usdtAddressTRC20}
+                                              </p>
+                                              <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-6 w-6 shrink-0"
+                                                onClick={() =>
+                                                  copyToClipboard(
+                                                    paymentSettings.usdtAddressTRC20,
+                                                    "trc20"
+                                                  )
+                                                }
+                                              >
+                                                {copyingTRC20 ? (
+                                                  <Check className="h-4 w-4" />
+                                                ) : (
+                                                  <Copy className="h-4 w-4" />
+                                                )}
+                                              </Button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
                                     </div>
 
                                     <div className="space-y-3">
@@ -647,36 +650,38 @@ export default function TradeForm() {
                                           BEP20 Network
                                         </FormLabel>
                                       </div>
-                                      <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
-                                        {!paymentSettings?.usdtAddressBEP20 ? (
-                                          <div className="text-muted-foreground">
-                                            BEP20 address not set in admin settings
-                                          </div>
-                                        ) : (
-                                          <div className="flex items-center justify-between">
-                                            <p className="font-mono break-all mr-2">
-                                              {paymentSettings.usdtAddressBEP20}
-                                            </p>
-                                            <Button
-                                              variant="ghost"
-                                              size="icon"
-                                              className="h-6 w-6 shrink-0"
-                                              onClick={() =>
-                                                copyToClipboard(
-                                                  paymentSettings.usdtAddressBEP20,
-                                                  "bep20"
-                                                )
-                                              }
-                                            >
-                                              {copyingBEP20 ? (
-                                                <Check className="h-4 w-4" />
-                                              ) : (
-                                                <Copy className="h-4 w-4" />
-                                              )}
-                                            </Button>
-                                          </div>
-                                        )}
-                                      </div>
+                                      {selectedNetwork === "bep20" && (
+                                        <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                          {!paymentSettings?.usdtAddressBEP20 ? (
+                                            <div className="text-muted-foreground">
+                                              BEP20 address not set in admin settings
+                                            </div>
+                                          ) : (
+                                            <div className="flex items-center justify-between">
+                                              <p className="font-mono break-all mr-2">
+                                                {paymentSettings.usdtAddressBEP20}
+                                              </p>
+                                              <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-6 w-6 shrink-0"
+                                                onClick={() =>
+                                                  copyToClipboard(
+                                                    paymentSettings.usdtAddressBEP20,
+                                                    "bep20"
+                                                  )
+                                                }
+                                              >
+                                                {copyingBEP20 ? (
+                                                  <Check className="h-4 w-4" />
+                                                ) : (
+                                                  <Copy className="h-4 w-4" />
+                                                )}
+                                              </Button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
                                     </div>
                                   </RadioGroup>
                                 </FormControl>
