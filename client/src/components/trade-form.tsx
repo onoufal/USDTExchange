@@ -472,8 +472,12 @@ export default function TradeForm() {
                                     <RadioGroupItem value="trc20" id="trc20" />
                                     <FormLabel htmlFor="trc20" className="font-medium">TRC20 Network</FormLabel>
                                   </div>
-                                  {paymentSettings?.usdtAddressTRC20 ? (
-                                    <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                  <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                    {!paymentSettings?.usdtAddressTRC20 ? (
+                                      <div className="text-muted-foreground">
+                                        TRC20 address not set in admin settings
+                                      </div>
+                                    ) : (
                                       <div className="flex items-center justify-between">
                                         <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressTRC20}</p>
                                         <Button
@@ -489,12 +493,8 @@ export default function TradeForm() {
                                           )}
                                         </Button>
                                       </div>
-                                    </div>
-                                  ) : (
-                                    <div className="ml-7 text-xs text-muted-foreground">
-                                      TRC20 address not set in admin settings
-                                    </div>
-                                  )}
+                                    )}
+                                  </div>
                                 </div>
 
                                 {/* BEP20 Network Option */}
@@ -503,8 +503,12 @@ export default function TradeForm() {
                                     <RadioGroupItem value="bep20" id="bep20" />
                                     <FormLabel htmlFor="bep20" className="font-medium">BEP20 Network</FormLabel>
                                   </div>
-                                  {paymentSettings?.usdtAddressBEP20 ? (
-                                    <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                  <div className="ml-7 text-xs bg-muted/50 p-3 rounded-md">
+                                    {!paymentSettings?.usdtAddressBEP20 ? (
+                                      <div className="text-muted-foreground">
+                                        BEP20 address not set in admin settings
+                                      </div>
+                                    ) : (
                                       <div className="flex items-center justify-between">
                                         <p className="font-mono break-all mr-2">{paymentSettings.usdtAddressBEP20}</p>
                                         <Button
@@ -520,12 +524,8 @@ export default function TradeForm() {
                                           )}
                                         </Button>
                                       </div>
-                                    </div>
-                                  ) : (
-                                    <div className="ml-7 text-xs text-muted-foreground">
-                                      BEP20 address not set in admin settings
-                                    </div>
-                                  )}
+                                    )}
+                                  </div>
                                 </div>
                               </RadioGroup>
                             </FormControl>
