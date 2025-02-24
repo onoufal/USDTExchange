@@ -356,6 +356,18 @@ export default function AdminPage() {
                                             <span className="font-medium whitespace-nowrap">IBAN:</span>
                                             <span className="font-mono">{user.bankIban}</span>
                                           </p>
+                                          {user.cliqAlias && (
+                                            <>
+                                              <p className="flex items-center gap-1">
+                                                <span className="font-medium whitespace-nowrap">CliQ Alias:</span>
+                                                <span>{user.cliqAlias}</span>
+                                              </p>
+                                              <p className="flex items-center gap-1">
+                                                <span className="font-medium whitespace-nowrap">CliQ Bank:</span>
+                                                <span>{user.cliqBankName}</span>
+                                              </p>
+                                            </>
+                                          )}
                                         </div>
                                       </CollapsibleContent>
                                     </Collapsible>
