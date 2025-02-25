@@ -15,6 +15,22 @@ import { Check, Loader2, Copy } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const paymentSettingsSchema = z.object({
+  // Exchange Rate Settings
+  buyRate: z.string()
+    .regex(/^\d+(\.\d{1,4})?$/, "Rate must be a valid number with up to 4 decimal places")
+    .transform(Number),
+  buyCommissionPercentage: z.string()
+    .regex(/^\d+(\.\d{1,2})?$/, "Commission must be a valid percentage with up to 2 decimal places")
+    .transform(Number)
+    .refine(value => value >= 0 && value <= 100, "Commission must be between 0 and 100"),
+  sellRate: z.string()
+    .regex(/^\d+(\.\d{1,4})?$/, "Rate must be a valid number with up to 4 decimal places")
+    .transform(Number),
+  sellCommissionPercentage: z.string()
+    .regex(/^\d+(\.\d{1,2})?$/, "Commission must be a valid percentage with up to 2 decimal places")
+    .transform(Number)
+    .refine(value => value >= 0 && value <= 100, "Commission must be between 0 and 100"),
+
   // USDT Settings
   usdtAddressTRC20: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
   usdtAddressBEP20: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
@@ -50,6 +66,10 @@ export default function AdminPaymentSettings() {
   const form = useForm<PaymentSettings>({
     resolver: zodResolver(paymentSettingsSchema),
     defaultValues: {
+      buyRate: "0.71",
+      buyCommissionPercentage: "1.00",
+      sellRate: "0.71",
+      sellCommissionPercentage: "1.00",
       usdtAddressTRC20: "",
       usdtAddressBEP20: "",
       cliqAlias: "",
@@ -131,6 +151,93 @@ export default function AdminPaymentSettings() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(data => updateSettingsMutation.mutate(data))} className="space-y-6">
+        {/* Exchange Rate Settings Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Exchange Rate Settings</CardTitle>
+            <CardDescription>
+              Configure exchange rates and commission percentages for Buy and Sell orders
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Buy Settings */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Buy USDT Settings</h3>
+                <FormField
+                  control={form.control}
+                  name="buyRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Exchange Rate (JOD/USDT)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.0001" min="0" placeholder="0.7100" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        The exchange rate for buying USDT with JOD
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="buyCommissionPercentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Commission Percentage</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" min="0" max="100" placeholder="1.00" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Commission percentage for buy orders (0-100)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Sell Settings */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Sell USDT Settings</h3>
+                <FormField
+                  control={form.control}
+                  name="sellRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Exchange Rate (JOD/USDT)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.0001" min="0" placeholder="0.7100" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        The exchange rate for selling USDT for JOD
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="sellCommissionPercentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Commission Percentage</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" min="0" max="100" placeholder="1.00" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Commission percentage for sell orders (0-100)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* USDT Settings Card */}
         <Card>
           <CardHeader>

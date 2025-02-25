@@ -64,6 +64,10 @@ export class MemStorage implements IStorage {
     });
 
     // Set default payment settings
+    this.settings.set("buyRate", "0.71");
+    this.settings.set("buyCommissionPercentage", "1.00");
+    this.settings.set("sellRate", "0.71");
+    this.settings.set("sellCommissionPercentage", "1.00");
     this.settings.set("cliqAlias", "");
     this.settings.set("cliqBankName", "Arab Bank");
     this.settings.set("cliqAccountHolder", "");

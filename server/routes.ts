@@ -323,6 +323,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const schema = z.object({
+        // Exchange Rate Settings
+        buyRate: z.number().min(0, "Buy rate must be positive"),
+        buyCommissionPercentage: z.number().min(0, "Buy commission must be positive").max(100, "Buy commission cannot exceed 100%"),
+        sellRate: z.number().min(0, "Sell rate must be positive"),
+        sellCommissionPercentage: z.number().min(0, "Sell commission must be positive").max(100, "Sell commission cannot exceed 100%"),
         // USDT Addresses
         usdtAddressTRC20: z.string().min(30, "TRC20 address is too short").max(50, "TRC20 address is too long"),
         usdtAddressBEP20: z.string().min(30, "BEP20 address is too short").max(50, "BEP20 address is too long"),
