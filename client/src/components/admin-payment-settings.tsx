@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -34,6 +34,7 @@ import { JORDANIAN_BANKS } from "@shared/schema";
 import { Check, Loader2, Copy } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+// Same schema as before
 const paymentSettingsSchema = z.object({
   // Rate Settings
   buyRate: z
@@ -107,14 +108,15 @@ export default function AdminPaymentSettings() {
     retry: 3,
   });
 
-  // React Hook Form
+  // React Hook Form - no 'values: settings' prop
+  // Provide minimal or empty defaultValues
   const form = useForm<PaymentSettings>({
     resolver: zodResolver(paymentSettingsSchema),
     defaultValues: {
-      buyRate: "0.71",
-      buyCommissionRate: "0.02",
-      sellRate: "0.69",
-      sellCommissionRate: "0.02",
+      buyRate: "",
+      buyCommissionRate: "",
+      sellRate: "",
+      sellCommissionRate: "",
       usdtAddressTRC20: "",
       usdtAddressBEP20: "",
       cliqAlias: "",
@@ -124,22 +126,61 @@ export default function AdminPaymentSettings() {
       walletType: WALLET_TYPES[0],
       walletHolderName: "",
     },
-    // Pre-populate with fetched settings
-    values: settings,
   });
 
+  // 1) On initial load (or refetch), populate fields
+  useEffect(() => {
+    if (settings) {
+      // Manually set each field
+      form.setValue("buyRate", settings.buyRate);
+      form.setValue("buyCommissionRate", settings.buyCommissionRate);
+      form.setValue("sellRate", settings.sellRate);
+      form.setValue("sellCommissionRate", settings.sellCommissionRate);
+      form.setValue("usdtAddressTRC20", settings.usdtAddressTRC20);
+      form.setValue("usdtAddressBEP20", settings.usdtAddressBEP20);
+      form.setValue("cliqAlias", settings.cliqAlias);
+      form.setValue("cliqBankName", settings.cliqBankName);
+      form.setValue("cliqAccountHolder", settings.cliqAccountHolder);
+      form.setValue("mobileWallet", settings.mobileWallet);
+      form.setValue("walletType", settings.walletType);
+      form.setValue("walletHolderName", settings.walletHolderName);
+    }
+  }, [settings, form]);
+
   // Mutation to update settings
-  const updateSettingsMutation = useMutation({
+  const updateSettingsMutation = useMutation<
+    PaymentSettings, // what onSuccess returns
+    Error,
+    PaymentSettings // the form data type
+  >({
     mutationFn: async (data: PaymentSettings) => {
+      // Save data to the server
       const res = await apiRequest("POST", "/api/admin/settings/payment", data);
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || "Failed to update settings");
       }
+      // Return newly updated settings from server
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedSettings) => {
+      // 2) After save, manually update fields with newly returned data
+      form.setValue("buyRate", updatedSettings.buyRate);
+      form.setValue("buyCommissionRate", updatedSettings.buyCommissionRate);
+      form.setValue("sellRate", updatedSettings.sellRate);
+      form.setValue("sellCommissionRate", updatedSettings.sellCommissionRate);
+      form.setValue("usdtAddressTRC20", updatedSettings.usdtAddressTRC20);
+      form.setValue("usdtAddressBEP20", updatedSettings.usdtAddressBEP20);
+      form.setValue("cliqAlias", updatedSettings.cliqAlias);
+      form.setValue("cliqBankName", updatedSettings.cliqBankName);
+      form.setValue("cliqAccountHolder", updatedSettings.cliqAccountHolder);
+      form.setValue("mobileWallet", updatedSettings.mobileWallet);
+      form.setValue("walletType", updatedSettings.walletType);
+      form.setValue("walletHolderName", updatedSettings.walletHolderName);
+
+      // Optionally, refetch from server if you want
       queryClient.invalidateQueries({ queryKey: ["/api/settings/payment"] });
+
       toast({
         title: "Settings updated successfully",
         description: "Payment settings have been saved and are now active",
@@ -179,6 +220,7 @@ export default function AdminPaymentSettings() {
   // Form submission
   const onSubmit = useCallback(
     (data: PaymentSettings) => {
+      // This calls the mutation to save data
       updateSettingsMutation.mutate(data);
     },
     [updateSettingsMutation],
