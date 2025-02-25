@@ -172,8 +172,8 @@ export default function TradeForm() {
   const network = form.watch("network");
 
   // Get the appropriate rate and commission based on trade type, converting strings to numbers
-  const currentRate = type === "buy" 
-    ? Number(paymentSettings?.buyRate || 0) 
+  const currentRate = type === "buy"
+    ? Number(paymentSettings?.buyRate || 0)
     : Number(paymentSettings?.sellRate || 0);
   const currentCommission = type === "buy"
     ? Number(paymentSettings?.buyCommissionPercentage || 0)
@@ -186,8 +186,8 @@ export default function TradeForm() {
   );
 
   const commission = useMemo(
-    () => (currentRate && currentCommission) 
-      ? calculateCommission(amount, type, currencyBasis, currentRate, currentCommission) 
+    () => (currentRate && currentCommission)
+      ? calculateCommission(amount, type, currencyBasis, currentRate, currentCommission)
       : "0.00",
     [amount, type, currencyBasis, currentRate, currentCommission]
   );
@@ -273,64 +273,19 @@ export default function TradeForm() {
     }
   };
 
-  /** Submit the trade (file upload) via XHR */
   const tradeMutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const xhr = new XMLHttpRequest();
-      let aborted = false;
-
-      const promise = new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          aborted = true;
-          xhr.abort();
-          reject(new Error("Upload timed out"));
-        }, 30000);
-
-        xhr.upload.addEventListener("progress", (event) => {
-          if (aborted) return;
-          if (event.lengthComputable) {
-            const progress = Math.round((event.loaded * 100) / event.total);
-            setUploadProgress(progress);
-          }
-        });
-
-        xhr.addEventListener("load", () => {
-          clearTimeout(timeout);
-          if (aborted) return;
-
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              resolve(JSON.parse(xhr.responseText));
-            } catch (e) {
-              reject(new Error("Invalid response from server"));
-            }
-          } else {
-            try {
-              const error = JSON.parse(xhr.responseText);
-              reject(new Error(error.message || "Trade submission failed"));
-            } catch (e) {
-              reject(new Error("Trade submission failed"));
-            }
-          }
-        });
-
-        xhr.addEventListener("error", () => {
-          clearTimeout(timeout);
-          if (aborted) return;
-          reject(new Error("Network error occurred"));
-        });
-
-        xhr.addEventListener("abort", () => {
-          clearTimeout(timeout);
-          reject(new Error("Upload was cancelled"));
-        });
-
-        xhr.open("POST", "/api/trade");
-        xhr.withCredentials = true;
-        xhr.send(formData);
+      return await fetch("/api/trade", {
+        method: "POST",
+        body: formData,
+        credentials: "include"
+      }).then(async (res) => {
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.message || "Failed to submit trade");
+        }
+        return res.json();
       });
-
-      return promise;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/transactions"] });
@@ -374,8 +329,17 @@ export default function TradeForm() {
   };
 
   /** Final form submission handler */
-  const onSubmit = (values: any) => {
-    if (values.type === "buy" && !(user?.cliqAlias || user?.cliqNumber)) {
+  const onSubmit = async (values: any) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to submit trades",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (values.type === "buy" && !(user.cliqAlias || user.cliqNumber)) {
       toast({
         title: "CliQ details not set",
         description:
@@ -385,7 +349,7 @@ export default function TradeForm() {
       return;
     }
 
-    if (values.type === "sell" && !user?.usdtAddress) {
+    if (values.type === "sell" && !user.usdtAddress) {
       toast({
         title: "USDT wallet not set",
         description:
@@ -404,19 +368,28 @@ export default function TradeForm() {
       return;
     }
 
-    // If the user typed the "foreign" currency, we use the already-converted 'equivalentAmount'
-    const finalInputAmount =
-      currencyBasis === "foreign" ? equivalentAmount : values.amount;
+    try {
+      // If the user typed the "foreign" currency, we use the already-converted 'equivalentAmount'
+      const finalInputAmount =
+        currencyBasis === "foreign" ? equivalentAmount : values.amount;
 
-    const formData = new FormData();
-    formData.append("type", values.type);
-    formData.append("amount", finalInputAmount);
-    formData.append("rate", currentRate ? currentRate.toString() : "0"); // Use dynamic rate
-    formData.append("commission", currentCommission ? currentCommission.toString(): "0"); //Append commission
-    formData.append("proofOfPayment", file);
-    formData.append("network", values.network);
+      const formData = new FormData();
+      formData.append("type", values.type);
+      formData.append("amount", finalInputAmount);
+      formData.append("rate", currentRate.toString());
+      formData.append("commission", currentCommission.toString());
+      formData.append("proofOfPayment", file);
+      formData.append("network", values.network);
 
-    tradeMutation.mutate(formData);
+      await tradeMutation.mutateAsync(formData);
+    } catch (error) {
+      console.error("Trade submission error:", error);
+      toast({
+        title: "Trade submission failed",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    }
   };
 
   // Basic checks
