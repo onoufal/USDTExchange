@@ -138,10 +138,10 @@ export default function TradeForm() {
 
   /** Query Payment Settings from the server */
   const { data: paymentSettings, isLoading: isLoadingSettings } = useQuery<{
-    buyRate: number;
-    buyCommissionPercentage: number;
-    sellRate: number;
-    sellCommissionPercentage: number;
+    buyRate: string;
+    buyCommissionPercentage: string;
+    sellRate: string;
+    sellCommissionPercentage: string;
     cliqAlias: string;
     mobileWallet: string;
     cliqBankName: string;
@@ -171,9 +171,13 @@ export default function TradeForm() {
   const amount = form.watch("amount");
   const network = form.watch("network");
 
-  // Get the appropriate rate and commission based on trade type
-  const currentRate = type === "buy" ? paymentSettings?.buyRate : paymentSettings?.sellRate;
-  const currentCommission = type === "buy" ? paymentSettings?.buyCommissionPercentage : paymentSettings?.sellCommissionPercentage;
+  // Get the appropriate rate and commission based on trade type, converting strings to numbers
+  const currentRate = type === "buy" 
+    ? Number(paymentSettings?.buyRate || 0) 
+    : Number(paymentSettings?.sellRate || 0);
+  const currentCommission = type === "buy"
+    ? Number(paymentSettings?.buyCommissionPercentage || 0)
+    : Number(paymentSettings?.sellCommissionPercentage || 0);
 
   // useMemo for calculations
   const equivalentAmount = useMemo(
