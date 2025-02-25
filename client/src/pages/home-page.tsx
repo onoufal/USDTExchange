@@ -93,7 +93,32 @@ export default function HomePage() {
                     {sortTransactions(transactions)?.map((tx) => (
                       <tr key={tx.id} className="hover:bg-muted/50">
                         <td className="px-3 py-2 text-xs sm:px-4 capitalize">{tx.type}</td>
-                        <td className="px-3 py-2 text-xs sm:px-4">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
+                        <td className="px-3 py-2 text-xs sm:px-4">
+                          <div className="space-y-1">
+                            <p className="whitespace-nowrap">
+                              {tx.type === 'buy' ? (
+                                <>
+                                  <span className="text-muted-foreground">Pay:</span> {tx.amount} JOD
+                                </>
+                              ) : (
+                                <>
+                                  <span className="text-muted-foreground">Send:</span> {tx.amount} USDT
+                                </>
+                              )}
+                            </p>
+                            <p className="whitespace-nowrap text-xs">
+                              {tx.type === 'buy' ? (
+                                <>
+                                  <span className="text-muted-foreground">Receive:</span> {(Number(tx.amount) / Number(tx.rate)).toFixed(2)} USDT
+                                </>
+                              ) : (
+                                <>
+                                  <span className="text-muted-foreground">Receive:</span> {(Number(tx.amount) * Number(tx.rate)).toFixed(2)} JOD
+                                </>
+                              )}
+                            </p>
+                          </div>
+                        </td>
                         <td className="px-3 py-2 text-xs sm:px-4">{tx.rate}</td>
                         <td className="px-3 py-2 text-xs sm:px-4 capitalize">{tx.status}</td>
                         <td className="px-3 py-2 text-xs sm:px-4">{new Date(tx.createdAt).toLocaleDateString()}</td>
