@@ -148,11 +148,7 @@ export default function AdminPaymentSettings() {
   }, [settings, form]);
 
   // Mutation to update settings
-  const updateSettingsMutation = useMutation<
-    PaymentSettings, // what onSuccess returns
-    Error,
-    PaymentSettings // the form data type
-  >({
+  const updateSettingsMutation = useMutation<PaymentSettings, Error, PaymentSettings>({
     mutationFn: async (data: PaymentSettings) => {
       // Save data to the server
       const res = await apiRequest("POST", "/api/admin/settings/payment", data);
@@ -164,7 +160,7 @@ export default function AdminPaymentSettings() {
       return res.json();
     },
     onSuccess: (updatedSettings) => {
-      // 2) After save, manually update fields with newly returned data
+      // After save, manually update fields with newly returned data
       form.setValue("buyRate", updatedSettings.buyRate);
       form.setValue("buyCommissionRate", updatedSettings.buyCommissionRate);
       form.setValue("sellRate", updatedSettings.sellRate);

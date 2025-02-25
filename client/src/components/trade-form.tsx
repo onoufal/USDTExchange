@@ -571,11 +571,9 @@ export default function TradeForm() {
                   </div>
                   <div className="flex flex-wrap justify-between gap-2 mb-2 text-xs sm:text-sm text-muted-foreground">
                     <span>
-                      Commission (
-                      {type === "buy"
+                      Commission ({type === "buy"
                         ? (buyCommission * 100).toFixed(1)
-                        : (sellCommission * 100).toFixed(1)}
-                      %)
+                        : (sellCommission * 100).toFixed(1)}%)
                     </span>
                     <span className="font-mono">{commissionValue}</span>
                   </div>
