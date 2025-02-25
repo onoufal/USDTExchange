@@ -35,42 +35,32 @@ async function comparePasswords(supplied: string, stored: string) {
     const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
     return timingSafeEqual(hashedBuf, suppliedBuf);
   } catch (err) {
+    console.error('Password comparison error:', err);
     return false;
   }
 }
 
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
-    secret: "your-secret-key",
-    resave: true,
-    saveUninitialized: true,
-    store: storage.sessionStore,
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
     cookie: {
-      maxAge: 24 * 60 * 60 * 1000,
-      secure: false,
-      sameSite: "lax"
-    }
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: 'lax'
+    },
+    store: storage.sessionStore
   };
+
+  if (app.get('env') === 'production') {
+    app.set('trust proxy', 1);
+  }
 
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
-
-  // Test route to verify session handling
-  app.get("/api/test-session", (req, res) => {
-    if (!req.session.views) {
-      req.session.views = 0;
-    }
-    req.session.views++;
-    log(`Session test - views: ${req.session.views}`);
-    log(`Session ID: ${req.sessionID}`);
-    log(`Full session data: ${JSON.stringify(req.session)}`);
-    res.json({ 
-      views: req.session.views,
-      sessionId: req.sessionID,
-      session: req.session
-    });
-  });
 
   passport.use(
     new LocalStrategy(async (username, password, done) => {
@@ -81,12 +71,6 @@ export function setupAuth(app: Express) {
         if (!user) {
           log(`Login failed: User not found - ${username}`);
           return done(null, false, { message: "Invalid username or password" });
-        }
-
-        // For the default admin user, do a direct comparison
-        if (username === "admin" && password === "admin123") {
-          log(`Admin login successful for ${username}`);
-          return done(null, user);
         }
 
         const isValid = await comparePasswords(password, user.password);
@@ -105,22 +89,17 @@ export function setupAuth(app: Express) {
   );
 
   passport.serializeUser((user, done) => {
-    log(`Serializing user: ${user.username}`);
     done(null, user.id);
   });
 
   passport.deserializeUser(async (id: number, done) => {
     try {
-      log(`Deserializing user ID: ${id}`);
       const user = await storage.getUser(id);
       if (!user) {
-        log(`Deserialization failed: User ${id} not found`);
         return done(null, false);
       }
-      log(`Deserialization successful for user: ${user.username}`);
       done(null, user);
     } catch (err) {
-      log(`Deserialization error for ID ${id}: ${err}`);
       done(err);
     }
   });
@@ -140,7 +119,6 @@ export function setupAuth(app: Express) {
 
       req.login(user, (err) => {
         if (err) return next(err);
-        log(`New user registered and logged in: ${user.username}`);
         res.status(201).json(user);
       });
     } catch (err) {
@@ -151,34 +129,27 @@ export function setupAuth(app: Express) {
   app.post("/api/login", (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
       if (err) {
-        log(`Login error: ${err}`);
         return next(err);
       }
       if (!user) {
-        log(`Login failed: ${info?.message}`);
         return res.status(401).json({ message: info?.message || "Authentication failed" });
       }
       req.login(user, (err) => {
         if (err) {
-          log(`Session creation error: ${err}`);
           return next(err);
         }
-        log(`User logged in successfully: ${user.username}`);
         res.json(user);
       });
     })(req, res, next);
   });
 
   app.post("/api/logout", (req, res, next) => {
-    const username = req.user?.username;
-    log(`Logout request received for user: ${username}`);
     req.logout((err) => {
-      if (err) {
-        log(`Logout error for ${username}: ${err}`);
-        return next(err);
-      }
-      log(`User logged out successfully: ${username}`);
-      res.sendStatus(200);
+      if (err) return next(err);
+      req.session.destroy((err) => {
+        if (err) return next(err);
+        res.sendStatus(200);
+      });
     });
   });
 
