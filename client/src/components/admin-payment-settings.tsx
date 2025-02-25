@@ -227,7 +227,7 @@ export default function AdminPaymentSettings() {
                     <FormItem>
                       <FormLabel>Buy Rate (JOD per USDT)</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" min="0" {...field} />
+                        <Input type="number" step="0.005" min="0" {...field} />
                       </FormControl>
                       <FormDescription>
                         The rate at which users can buy USDT (e.g., 0.71 means 1 USDT = 0.71 JOD)
@@ -244,7 +244,7 @@ export default function AdminPaymentSettings() {
                     <FormItem>
                       <FormLabel>Buy Commission Rate</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" min="0" max="1" {...field} />
+                        <Input type="number" step="0.005" min="0" max="1" {...field} />
                       </FormControl>
                       <FormDescription>
                         Commission rate for buy orders (e.g., 0.02 means 2%)
@@ -263,7 +263,7 @@ export default function AdminPaymentSettings() {
                     <FormItem>
                       <FormLabel>Sell Rate (JOD per USDT)</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" min="0" {...field} />
+                        <Input type="number" step="0.005" min="0" {...field} />
                       </FormControl>
                       <FormDescription>
                         The rate at which users can sell USDT (e.g., 0.69 means 1 USDT = 0.69 JOD)
@@ -280,7 +280,7 @@ export default function AdminPaymentSettings() {
                     <FormItem>
                       <FormLabel>Sell Commission Rate</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" min="0" max="1" {...field} />
+                        <Input type="number" step="0.005" min="0" max="1" {...field} />
                       </FormControl>
                       <FormDescription>
                         Commission rate for sell orders (e.g., 0.02 means 2%)
