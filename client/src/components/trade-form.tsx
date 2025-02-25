@@ -2,15 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertTransactionSchema } from "@shared/schema";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,27 +16,26 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 
-/** Mock rate and commission; in a real app, these might come from settings or an API. */
-const MOCK_RATE = 0.71;
-const COMMISSION_RATE = 0.02;
-
 /** Helper calculation functions */
 function calculateEquivalentAmount(
   amount: string,
   tradeType: "buy" | "sell",
   currencyBasis: "native" | "foreign",
+  rates: { buyRate: string; sellRate: string }
 ): string {
   const num = Number(amount) || 0;
+  const rate = tradeType === "buy" ? Number(rates.buyRate) : Number(rates.sellRate);
+
   if (tradeType === "buy") {
     // BUY scenario
     return currencyBasis === "foreign"
-      ? (num * MOCK_RATE).toFixed(2) // user typed USDT => convert to JOD
-      : (num / MOCK_RATE).toFixed(2); // user typed JOD => convert to USDT
+      ? (num * rate).toFixed(2) // user typed USDT => convert to JOD
+      : (num / rate).toFixed(2); // user typed JOD => convert to USDT
   } else {
     // SELL scenario
     return currencyBasis === "foreign"
-      ? (num / MOCK_RATE).toFixed(2) // user typed JOD => convert to USDT
-      : (num * MOCK_RATE).toFixed(2); // user typed USDT => convert to JOD
+      ? (num / rate).toFixed(2) // user typed JOD => convert to USDT
+      : (num * rate).toFixed(2); // user typed USDT => convert to JOD
   }
 }
 
@@ -52,33 +43,36 @@ function calculateCommission(
   amount: string,
   tradeType: "buy" | "sell",
   currencyBasis: "native" | "foreign",
+  rates: { buyRate: string; sellRate: string; buyCommissionRate: string; sellCommissionRate: string }
 ): string {
   const num = Number(amount) || 0;
+  const rate = tradeType === "buy" ? Number(rates.buyRate) : Number(rates.sellRate);
+  const commissionRate = tradeType === "buy" ? Number(rates.buyCommissionRate) : Number(rates.sellCommissionRate);
 
   if (tradeType === "buy") {
     // BUY
     if (currencyBasis === "foreign") {
       // user typed USDT => final is JOD + commission
-      const jodAmount = num * MOCK_RATE;
-      const commissionJOD = jodAmount * COMMISSION_RATE;
+      const jodAmount = num * rate;
+      const commissionJOD = jodAmount * commissionRate;
       return commissionJOD.toFixed(2) + " JOD";
     } else {
       // user typed JOD => final is USDT - commission
-      const baseUsdt = num / MOCK_RATE;
-      const commissionUsdt = baseUsdt * COMMISSION_RATE;
+      const baseUsdt = num / rate;
+      const commissionUsdt = baseUsdt * commissionRate;
       return commissionUsdt.toFixed(2) + " USDT";
     }
   } else {
     // SELL
     if (currencyBasis === "foreign") {
       // user typed JOD => final is USDT + commission
-      const baseUsdt = num / MOCK_RATE;
-      const commissionUsdt = baseUsdt * COMMISSION_RATE;
+      const baseUsdt = num / rate;
+      const commissionUsdt = baseUsdt * commissionRate;
       return commissionUsdt.toFixed(2) + " USDT";
     } else {
       // user typed USDT => final is JOD - commission
-      const baseJod = num * MOCK_RATE;
-      const commissionJod = baseJod * COMMISSION_RATE;
+      const baseJod = num * rate;
+      const commissionJod = baseJod * commissionRate;
       return commissionJod.toFixed(2) + " JOD";
     }
   }
@@ -88,30 +82,33 @@ function calculateFinalAmount(
   amount: string,
   tradeType: "buy" | "sell",
   currencyBasis: "native" | "foreign",
+  rates: { buyRate: string; sellRate: string; buyCommissionRate: string; sellCommissionRate: string }
 ): string {
   const num = Number(amount) || 0;
+  const rate = tradeType === "buy" ? Number(rates.buyRate) : Number(rates.sellRate);
+  const commissionRate = tradeType === "buy" ? Number(rates.buyCommissionRate) : Number(rates.sellCommissionRate);
 
   if (tradeType === "buy") {
     // BUY
     if (currencyBasis === "foreign") {
       // user typed USDT => total JOD = base + commission
-      const jodAmount = num * MOCK_RATE;
-      return (jodAmount * (1 + COMMISSION_RATE)).toFixed(2);
+      const jodAmount = num * rate;
+      return (jodAmount * (1 + commissionRate)).toFixed(2);
     } else {
       // user typed JOD => total USDT = base - commission
-      return ((num / MOCK_RATE) * (1 - COMMISSION_RATE)).toFixed(2);
+      return ((num / rate) * (1 - commissionRate)).toFixed(2);
     }
   } else {
     // SELL
     if (currencyBasis === "foreign") {
       // user typed JOD => total USDT = base + commission
-      const baseUsdt = num / MOCK_RATE;
-      const commissionUSDT = baseUsdt * COMMISSION_RATE;
+      const baseUsdt = num / rate;
+      const commissionUSDT = baseUsdt * commissionRate;
       return (baseUsdt + commissionUSDT).toFixed(2);
     } else {
       // user typed USDT => total JOD = base - commission
-      const baseJod = num * MOCK_RATE;
-      const commissionJod = baseJod * COMMISSION_RATE;
+      const baseJod = num * rate;
+      const commissionJod = baseJod * commissionRate;
       return (baseJod - commissionJod).toFixed(2);
     }
   }
@@ -127,9 +124,7 @@ export default function TradeForm() {
   /** 'native' means user is entering JOD when buying, or USDT when selling
    * 'foreign' means user is entering the other currency (USDT for buy, JOD for sell)
    */
-  const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">(
-    "native",
-  );
+  const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">("native");
 
   /** Single field to track which item is currently "copying" for the UI icon states. */
   const [copyingField, setCopyingField] = useState<null | string>(null);
@@ -147,6 +142,10 @@ export default function TradeForm() {
     walletHolderName: string;
     usdtAddressTRC20: string;
     usdtAddressBEP20: string;
+    buyRate: string;
+    buyCommissionRate: string;
+    sellRate: string;
+    sellCommissionRate: string;
   }>({
     queryKey: ["/api/settings/payment"],
     staleTime: 1000,
@@ -159,7 +158,7 @@ export default function TradeForm() {
     defaultValues: {
       type: "buy",
       amount: "",
-      rate: MOCK_RATE.toString(),
+      rate: "", //removed hardcoded rate
       network: "trc20",
     },
   });
@@ -169,18 +168,26 @@ export default function TradeForm() {
   const amount = form.watch("amount");
   const network = form.watch("network");
 
+  // Rates object for calculations
+  const rates = useMemo(() => ({
+    buyRate: paymentSettings?.buyRate || "0.71",
+    buyCommissionRate: paymentSettings?.buyCommissionRate || "0.02",
+    sellRate: paymentSettings?.sellRate || "0.69",
+    sellCommissionRate: paymentSettings?.sellCommissionRate || "0.02"
+  }), [paymentSettings]);
+
   // useMemo for calculations
   const equivalentAmount = useMemo(
-    () => calculateEquivalentAmount(amount, type, currencyBasis),
-    [amount, type, currencyBasis],
+    () => calculateEquivalentAmount(amount, type, currencyBasis, rates),
+    [amount, type, currencyBasis, rates],
   );
   const commission = useMemo(
-    () => calculateCommission(amount, type, currencyBasis),
-    [amount, type, currencyBasis],
+    () => calculateCommission(amount, type, currencyBasis, rates),
+    [amount, type, currencyBasis, rates],
   );
   const finalAmount = useMemo(
-    () => calculateFinalAmount(amount, type, currencyBasis),
-    [amount, type, currencyBasis],
+    () => calculateFinalAmount(amount, type, currencyBasis, rates),
+    [amount, type, currencyBasis, rates],
   );
 
   /** Copy text to clipboard with a single state for all fields */
@@ -342,8 +349,8 @@ export default function TradeForm() {
         ? "JOD"
         : "USDT"
       : currencyBasis === "native"
-        ? "USDT"
-        : "JOD";
+      ? "USDT"
+      : "JOD";
   };
 
   /** Label for the "other" currency displayed as the equivalent */
@@ -353,8 +360,8 @@ export default function TradeForm() {
         ? "USDT"
         : "JOD"
       : currencyBasis === "native"
-        ? "JOD"
-        : "USDT";
+      ? "JOD"
+      : "USDT";
   };
 
   /** Final form submission handler */
@@ -395,7 +402,7 @@ export default function TradeForm() {
     const formData = new FormData();
     formData.append("type", values.type);
     formData.append("amount", finalInputAmount);
-    formData.append("rate", values.rate.toString());
+    formData.append("rate", rates[`${values.type}Rate`]); //Use dynamic rate
     formData.append("proofOfPayment", file);
     formData.append("network", values.network);
 
@@ -500,7 +507,9 @@ export default function TradeForm() {
                 <Card className="p-3 sm:p-4">
                   <div className="flex flex-wrap justify-between gap-2 mb-2 text-sm">
                     <span>Exchange Rate</span>
-                    <span className="font-mono">1 USDT = {MOCK_RATE} JOD</span>
+                    <span className="font-mono">
+                      1 USDT = {rates.buyRate} JOD
+                    </span>
                   </div>
                   {amount && (
                     <>
@@ -511,7 +520,7 @@ export default function TradeForm() {
                         </span>
                       </div>
                       <div className="flex flex-wrap justify-between gap-2 mb-2 text-xs sm:text-sm text-muted-foreground">
-                        <span>Commission (2%)</span>
+                        <span>Commission ({(Number(rates[`${type}CommissionRate`]) * 100).toFixed(0)}%)</span>
                         <span className="font-mono">{commission}</span>
                       </div>
                       <div className="flex flex-wrap justify-between gap-2 pt-2 border-t text-sm font-medium">
@@ -521,8 +530,8 @@ export default function TradeForm() {
                               ? "Total to Pay"
                               : "Total to Receive"
                             : currencyBasis === "foreign"
-                              ? "Total to Pay"
-                              : "Total to Receive"}
+                            ? "Total to Pay"
+                            : "Total to Receive"}
                         </span>
                         <span className="font-mono">
                           {finalAmount} {getEquivalentCurrencyLabel()}

@@ -15,6 +15,12 @@ import { Check, Loader2, Copy } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const paymentSettingsSchema = z.object({
+  // Rate Settings
+  buyRate: z.string().refine(val => !isNaN(Number(val)) && Number(val) > 0, "Buy rate must be a positive number"),
+  buyCommissionRate: z.string().refine(val => !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1, "Buy commission must be between 0 and 1"),
+  sellRate: z.string().refine(val => !isNaN(Number(val)) && Number(val) > 0, "Sell rate must be a positive number"),
+  sellCommissionRate: z.string().refine(val => !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1, "Sell commission must be between 0 and 1"),
+
   // USDT Settings
   usdtAddressTRC20: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
   usdtAddressBEP20: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
@@ -50,6 +56,10 @@ export default function AdminPaymentSettings() {
   const form = useForm<PaymentSettings>({
     resolver: zodResolver(paymentSettingsSchema),
     defaultValues: {
+      buyRate: "0.71",
+      buyCommissionRate: "0.02",
+      sellRate: "0.69",
+      sellCommissionRate: "0.02",
       usdtAddressTRC20: "",
       usdtAddressBEP20: "",
       cliqAlias: "",
@@ -131,6 +141,91 @@ export default function AdminPaymentSettings() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(data => updateSettingsMutation.mutate(data))} className="space-y-6">
+        {/* Rate Settings Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Exchange Rate Settings</CardTitle>
+            <CardDescription>
+              Configure buy and sell rates with their respective commission percentages
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="buyRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Buy Rate (JOD per USDT)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" min="0" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        The rate at which users can buy USDT (e.g., 0.71 means 1 USDT = 0.71 JOD)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="buyCommissionRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Buy Commission Rate</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" min="0" max="1" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Commission rate for buy orders (e.g., 0.02 means 2%)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="sellRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sell Rate (JOD per USDT)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" min="0" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        The rate at which users can sell USDT (e.g., 0.69 means 1 USDT = 0.69 JOD)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="sellCommissionRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sell Commission Rate</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" min="0" max="1" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Commission rate for sell orders (e.g., 0.02 means 2%)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* USDT Settings Card */}
         <Card>
           <CardHeader>
