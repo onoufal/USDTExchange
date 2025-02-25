@@ -1,29 +1,79 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { JORDANIAN_BANKS } from "@shared/schema";
 import { Check, Loader2, Copy } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+// Commission rates are decimal, e.g., 0.02 = 2%
+// If you want to allow 2.5% = 0.025, adjust step or validations accordingly.
 const paymentSettingsSchema = z.object({
   // Rate Settings
-  buyRate: z.string().refine(val => !isNaN(Number(val)) && Number(val) > 0, "Buy rate must be a positive number"),
-  buyCommissionRate: z.string().refine(val => !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1, "Buy commission must be between 0 and 1"),
-  sellRate: z.string().refine(val => !isNaN(Number(val)) && Number(val) > 0, "Sell rate must be a positive number"),
-  sellCommissionRate: z.string().refine(val => !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1, "Sell commission must be between 0 and 1"),
+  buyRate: z
+    .string()
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) > 0,
+      "Buy rate must be a positive number"
+    ),
+  buyCommissionRate: z
+    .string()
+    .refine(
+      (val) =>
+        !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1,
+      "Buy commission must be between 0 and 1"
+    ),
+  sellRate: z
+    .string()
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) > 0,
+      "Sell rate must be a positive number"
+    ),
+  sellCommissionRate: z
+    .string()
+    .refine(
+      (val) =>
+        !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1,
+      "Sell commission must be between 0 and 1"
+    ),
 
   // USDT Settings
-  usdtAddressTRC20: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
-  usdtAddressBEP20: z.string().min(30, "USDT address is too short").max(50, "USDT address is too long"),
+  usdtAddressTRC20: z
+    .string()
+    .min(30, "USDT address is too short")
+    .max(50, "USDT address is too long"),
+  usdtAddressBEP20: z
+    .string()
+    .min(30, "USDT address is too short")
+    .max(50, "USDT address is too long"),
 
   // CliQ Settings
   cliqAlias: z.string().min(1, "CliQ alias is required"),
@@ -32,7 +82,7 @@ const paymentSettingsSchema = z.object({
 
   // Mobile Wallet Settings
   mobileWallet: z.string().regex(/^07[789]\d{7}$/, {
-    message: "Invalid Jordanian mobile number format"
+    message: "Invalid Jordanian mobile number format",
   }),
   walletType: z.string().min(1, "Wallet type is required"),
   walletHolderName: z.string().min(1, "Wallet holder name is required"),
@@ -44,15 +94,22 @@ const WALLET_TYPES = ["Orange Money", "Zain Cash", "U Wallet"];
 
 export default function AdminPaymentSettings() {
   const { toast } = useToast();
-  const [copyingCliqAlias, setCopyingCliqAlias] = useState(false);
-  const [copyingMobileWallet, setCopyingMobileWallet] = useState(false);
 
-  const { data: settings, isLoading, isError } = useQuery<PaymentSettings>({
+  // A single field to track which item is being copied (null = none)
+  const [copyingField, setCopyingField] = useState<null | "cliqAlias" | "mobileWallet">(null);
+
+  // Fetch current settings
+  const {
+    data: settings,
+    isLoading,
+    isError,
+  } = useQuery<PaymentSettings>({
     queryKey: ["/api/settings/payment"],
     staleTime: 1000,
-    retry: 3
+    retry: 3,
   });
 
+  // React Hook Form
   const form = useForm<PaymentSettings>({
     resolver: zodResolver(paymentSettingsSchema),
     defaultValues: {
@@ -69,9 +126,11 @@ export default function AdminPaymentSettings() {
       walletType: WALLET_TYPES[0],
       walletHolderName: "",
     },
-    values: settings
+    // Pre-populate with fetched settings
+    values: settings,
   });
 
+  // Mutation to update settings
   const updateSettingsMutation = useMutation({
     mutationFn: async (data: PaymentSettings) => {
       const res = await apiRequest("POST", "/api/admin/settings/payment", data);
@@ -92,34 +151,42 @@ export default function AdminPaymentSettings() {
       toast({
         title: "Failed to update settings",
         description: error.message,
-        variant: "destructive"
-      });
-    }
-  });
-
-  const copyToClipboard = async (text: string, field: 'cliqAlias' | 'mobileWallet') => {
-    try {
-      await navigator.clipboard.writeText(text);
-      if (field === 'cliqAlias') {
-        setCopyingCliqAlias(true);
-        setTimeout(() => setCopyingCliqAlias(false), 2000);
-      } else {
-        setCopyingMobileWallet(true);
-        setTimeout(() => setCopyingMobileWallet(false), 2000);
-      }
-      toast({
-        title: "Copied",
-        description: "Text has been copied to clipboard",
-      });
-    } catch (err) {
-      toast({
-        title: "Failed to copy",
-        description: "Please try copying manually",
         variant: "destructive",
       });
-    }
-  };
+    },
+  });
 
+  // Single function for copying to clipboard
+  const copyToClipboard = useCallback(
+    async (text: string, field: "cliqAlias" | "mobileWallet") => {
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopyingField(field);
+        setTimeout(() => setCopyingField(null), 2000);
+        toast({
+          title: "Copied",
+          description: "Text has been copied to clipboard",
+        });
+      } catch (err) {
+        toast({
+          title: "Failed to copy",
+          description: "Please try copying manually",
+          variant: "destructive",
+        });
+      }
+    },
+    [toast]
+  );
+
+  // Form submission
+  const onSubmit = useCallback(
+    (data: PaymentSettings) => {
+      updateSettingsMutation.mutate(data);
+    },
+    [updateSettingsMutation]
+  );
+
+  // If still loading data
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -128,6 +195,7 @@ export default function AdminPaymentSettings() {
     );
   }
 
+  // If error fetching data
   if (isError) {
     return (
       <Alert variant="destructive" className="mb-4">
@@ -140,7 +208,7 @@ export default function AdminPaymentSettings() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(data => updateSettingsMutation.mutate(data))} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Rate Settings Card */}
         <Card>
           <CardHeader>
@@ -242,7 +310,10 @@ export default function AdminPaymentSettings() {
                 <FormItem>
                   <FormLabel>USDT Address (TRC20)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your TRC20 USDT wallet address" {...field} />
+                    <Input
+                      placeholder="Enter your TRC20 USDT wallet address"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
                     USDT wallet address on the Tron (TRC20) network
@@ -265,7 +336,10 @@ export default function AdminPaymentSettings() {
                 <FormItem>
                   <FormLabel>USDT Address (BEP20)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your BEP20 USDT wallet address" {...field} />
+                    <Input
+                      placeholder="Enter your BEP20 USDT wallet address"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
                     USDT wallet address on the Binance Smart Chain (BEP20) network
@@ -307,9 +381,9 @@ export default function AdminPaymentSettings() {
                         variant="outline"
                         size="icon"
                         className="shrink-0"
-                        onClick={() => copyToClipboard(settings.cliqAlias, 'cliqAlias')}
+                        onClick={() => copyToClipboard(settings.cliqAlias, "cliqAlias")}
                       >
-                        {copyingCliqAlias ? (
+                        {copyingField === "cliqAlias" ? (
                           <Check className="h-4 w-4" />
                         ) : (
                           <Copy className="h-4 w-4" />
@@ -393,9 +467,9 @@ export default function AdminPaymentSettings() {
                         variant="outline"
                         size="icon"
                         className="shrink-0"
-                        onClick={() => copyToClipboard(settings.mobileWallet, 'mobileWallet')}
+                        onClick={() => copyToClipboard(settings.mobileWallet, "mobileWallet")}
                       >
-                        {copyingMobileWallet ? (
+                        {copyingField === "mobileWallet" ? (
                           <Check className="h-4 w-4" />
                         ) : (
                           <Copy className="h-4 w-4" />
@@ -458,8 +532,8 @@ export default function AdminPaymentSettings() {
           </CardContent>
         </Card>
 
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="w-full"
           disabled={updateSettingsMutation.isPending}
         >
