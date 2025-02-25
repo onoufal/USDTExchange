@@ -144,17 +144,17 @@ export default function TradeForm() {
   const [paymentMethod, setPaymentMethod] = useState<"cliq" | "wallet">("cliq");
 
   // Fetch dynamic admin settings for rates and commissions
-  const { data: adminSettings, isLoading: isLoadingSettings } = useQuery({
+  const { data: settings, isLoading: isLoadingSettings } = useQuery({
     queryKey: ["/api/settings/payment"],
     staleTime: 1000,
     retry: 3,
   });
 
   // Parse dynamic rates and commissions with fallbacks
-  const buyRate = parseFloat(adminSettings?.buyRate ?? "0.71");
-  const buyCommission = parseFloat(adminSettings?.buyCommissionRate ?? "0.02");
-  const sellRate = parseFloat(adminSettings?.sellRate ?? "0.69");
-  const sellCommission = parseFloat(adminSettings?.sellCommissionRate ?? "0.02");
+  const buyRate = parseFloat(settings?.buyRate ?? "0.71");
+  const buyCommission = parseFloat(settings?.buyCommissionRate ?? "0.02");
+  const sellRate = parseFloat(settings?.sellRate ?? "0.69");
+  const sellCommission = parseFloat(settings?.sellCommissionRate ?? "0.02");
 
   // Set up React Hook Form
   const form = useForm({
@@ -175,7 +175,7 @@ export default function TradeForm() {
     return calculateEquivalentAmount(amount, type, currencyBasis, buyRate, sellRate);
   }, [amount, type, currencyBasis, buyRate, sellRate]);
 
-  const commissionValue = useMemo(() => {
+  const commission = useMemo(() => {
     return calculateCommission(amount, type, currencyBasis, buyRate, buyCommission, sellRate, sellCommission);
   }, [amount, type, currencyBasis, buyRate, buyCommission, sellRate, sellCommission]);
 
@@ -468,9 +468,7 @@ export default function TradeForm() {
               <div className="flex flex-wrap justify-between gap-2 mb-2 text-sm">
                 <span>Exchange Rate</span>
                 <span className="font-mono">
-                  {type === "buy"
-                    ? `1 USDT = ${buyRate} JOD`
-                    : `1 USDT = ${sellRate} JOD`}
+                  1 USDT = {type === "buy" ? buyRate : sellRate} JOD
                 </span>
               </div>
               {amount && (
@@ -483,13 +481,11 @@ export default function TradeForm() {
                   </div>
                   <div className="flex flex-wrap justify-between gap-2 mb-2 text-xs sm:text-sm text-muted-foreground">
                     <span>
-                      Commission (
-                      {type === "buy"
+                      Commission ({type === "buy"
                         ? (buyCommission * 100).toFixed(1)
-                        : (sellCommission * 100).toFixed(1)}
-                      %)
+                        : (sellCommission * 100).toFixed(1)}%)
                     </span>
-                    <span className="font-mono">{commissionValue}</span>
+                    <span className="font-mono">{commission}</span>
                   </div>
                   <div className="flex flex-wrap justify-between gap-2 pt-2 border-t text-sm font-medium">
                     <span>
@@ -521,7 +517,7 @@ export default function TradeForm() {
                       value={paymentMethod}
                       onValueChange={(value: "cliq" | "wallet") => setPaymentMethod(value)}
                     >
-                      {adminSettings?.cliqAlias && (
+                      {settings?.cliqAlias && (
                         <div className="space-y-2">
                           <FormItem className="flex items-center space-x-3">
                             <FormControl>
@@ -534,14 +530,14 @@ export default function TradeForm() {
                               <div className="flex items-center justify-between">
                                 <p className="truncate mr-2">
                                   <span className="text-muted-foreground">Cliq Alias:</span>{" "}
-                                  {adminSettings.cliqAlias}
+                                  {settings.cliqAlias}
                                 </p>
                                 <Button
                                   variant="ghost"
                                   size="icon"
                                   className="h-6 w-6 shrink-0"
                                   onClick={() =>
-                                    copyToClipboard(adminSettings.cliqAlias, "cliqAlias")
+                                    copyToClipboard(settings.cliqAlias, "cliqAlias")
                                   }
                                 >
                                   {copyingField === "cliqAlias" ? (
@@ -553,17 +549,17 @@ export default function TradeForm() {
                               </div>
                               <p>
                                 <span className="text-muted-foreground">Bank:</span>{" "}
-                                {adminSettings.cliqBankName}
+                                {settings.cliqBankName}
                               </p>
                               <p>
                                 <span className="text-muted-foreground">Account Holder:</span>{" "}
-                                {adminSettings.cliqAccountHolder}
+                                {settings.cliqAccountHolder}
                               </p>
                             </div>
                           )}
                         </div>
                       )}
-                      {adminSettings?.mobileWallet && (
+                      {settings?.mobileWallet && (
                         <div className="space-y-2">
                           <FormItem className="flex items-center space-x-3">
                             <FormControl>
@@ -576,14 +572,14 @@ export default function TradeForm() {
                               <div className="flex items-center justify-between">
                                 <p>
                                   <span className="text-muted-foreground">Number:</span>{" "}
-                                  {adminSettings.mobileWallet}
+                                  {settings.mobileWallet}
                                 </p>
                                 <Button
                                   variant="ghost"
                                   size="icon"
                                   className="h-6 w-6 shrink-0"
                                   onClick={() =>
-                                    copyToClipboard(adminSettings.mobileWallet, "mobileWallet")
+                                    copyToClipboard(settings.mobileWallet, "mobileWallet")
                                   }
                                 >
                                   {copyingField === "mobileWallet" ? (
@@ -595,11 +591,11 @@ export default function TradeForm() {
                               </div>
                               <p>
                                 <span className="text-muted-foreground">Wallet Type:</span>{" "}
-                                {adminSettings.walletType}
+                                {settings.walletType}
                               </p>
                               <p>
                                 <span className="text-muted-foreground">Holder Name:</span>{" "}
-                                {adminSettings.walletHolderName}
+                                {settings.walletHolderName}
                               </p>
                             </div>
                           )}
@@ -632,21 +628,21 @@ export default function TradeForm() {
                                   </div>
                                   {network === "trc20" && (
                                     <div className="ml-7 text-xs bg-muted/50 p-2 sm:p-3 rounded-md">
-                                      {!adminSettings?.usdtAddressTRC20 ? (
+                                      {!settings?.usdtAddressTRC20 ? (
                                         <div className="text-muted-foreground">
                                           TRC20 address not set in admin settings
                                         </div>
                                       ) : (
                                         <div className="flex items-center justify-between">
                                           <p className="font-mono break-all mr-2">
-                                            {adminSettings.usdtAddressTRC20}
+                                            {settings.usdtAddressTRC20}
                                           </p>
                                           <Button
                                             variant="ghost"
                                             size="icon"
                                             className="h-6 w-6 shrink-0"
                                             onClick={() =>
-                                              copyToClipboard(adminSettings.usdtAddressTRC20, "trc20")
+                                              copyToClipboard(settings.usdtAddressTRC20, "trc20")
                                             }
                                           >
                                             {copyingField === "trc20" ? (
@@ -670,21 +666,21 @@ export default function TradeForm() {
                                   </div>
                                   {network === "bep20" && (
                                     <div className="ml-7 text-xs bg-muted/50 p-2 sm:p-3 rounded-md">
-                                      {!adminSettings?.usdtAddressBEP20 ? (
+                                      {!settings?.usdtAddressBEP20 ? (
                                         <div className="text-muted-foreground">
                                           BEP20 address not set in admin settings
                                         </div>
                                       ) : (
                                         <div className="flex items-center justify-between">
                                           <p className="font-mono break-all mr-2">
-                                            {adminSettings.usdtAddressBEP20}
+                                            {settings.usdtAddressBEP20}
                                           </p>
                                           <Button
                                             variant="ghost"
                                             size="icon"
                                             className="h-6 w-6 shrink-0"
                                             onClick={() =>
-                                              copyToClipboard(adminSettings.usdtAddressBEP20, "bep20")
+                                              copyToClipboard(settings.usdtAddressBEP20, "bep20")
                                             }
                                           >
                                             {copyingField === "bep20" ? (
