@@ -38,16 +38,28 @@ const paymentSettingsSchema = z.object({
   // Rate Settings
   buyRate: z
     .string()
-    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, "Buy rate must be a positive number"),
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) > 0,
+      "Buy rate must be a positive number",
+    ),
   buyCommissionRate: z
     .string()
-    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1, "Buy commission must be between 0 and 1"),
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1,
+      "Buy commission must be between 0 and 1",
+    ),
   sellRate: z
     .string()
-    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, "Sell rate must be a positive number"),
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) > 0,
+      "Sell rate must be a positive number",
+    ),
   sellCommissionRate: z
     .string()
-    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1, "Sell commission must be between 0 and 1"),
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1,
+      "Sell commission must be between 0 and 1",
+    ),
 
   // USDT Settings
   usdtAddressTRC20: z
@@ -79,9 +91,15 @@ const WALLET_TYPES = ["Orange Money", "Zain Cash", "U Wallet"];
 export default function AdminPaymentSettings() {
   const { toast } = useToast();
 
-  const [copyingField, setCopyingField] = useState<null | "cliqAlias" | "mobileWallet">(null);
+  const [copyingField, setCopyingField] = useState<
+    null | "cliqAlias" | "mobileWallet"
+  >(null);
 
-  const { data: settings, isLoading, isError } = useQuery<PaymentSettings>({
+  const {
+    data: settings,
+    isLoading,
+    isError,
+  } = useQuery<PaymentSettings>({
     queryKey: ["/api/settings/payment"],
     staleTime: 1000,
     retry: 3,
@@ -124,7 +142,11 @@ export default function AdminPaymentSettings() {
     }
   }, [settings, form]);
 
-  const updateSettingsMutation = useMutation<PaymentSettings, Error, PaymentSettings>({
+  const updateSettingsMutation = useMutation<
+    PaymentSettings,
+    Error,
+    PaymentSettings
+  >({
     mutationFn: async (data: PaymentSettings) => {
       const res = await apiRequest("POST", "/api/admin/settings/payment", data);
       if (!res.ok) {
@@ -181,14 +203,14 @@ export default function AdminPaymentSettings() {
         });
       }
     },
-    [toast]
+    [toast],
   );
 
   const onSubmit = useCallback(
     (data: PaymentSettings) => {
       updateSettingsMutation.mutate(data);
     },
-    [updateSettingsMutation]
+    [updateSettingsMutation],
   );
 
   if (isLoading) {
@@ -217,7 +239,8 @@ export default function AdminPaymentSettings() {
           <CardHeader>
             <CardTitle>Exchange Rate Settings</CardTitle>
             <CardDescription>
-              Configure buy and sell rates with their respective commission percentages
+              Configure buy and sell rates with their respective commission
+              percentages
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -233,7 +256,8 @@ export default function AdminPaymentSettings() {
                       <Input type="number" step="0.005" min="0" {...field} />
                     </FormControl>
                     <FormDescription>
-                      The rate at which users can buy USDT (e.g., 0.71 means 1 USDT = 0.71 JOD)
+                      The rate at which users can buy USDT (e.g., 0.71 means 1
+                      USDT = 0.71 JOD)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -247,7 +271,13 @@ export default function AdminPaymentSettings() {
                   <FormItem>
                     <FormLabel>Buy Commission Rate</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.005" min="0" max="1" {...field} />
+                      <Input
+                        type="number"
+                        step="0.005"
+                        min="0"
+                        max="1"
+                        {...field}
+                      />
                     </FormControl>
                     <FormDescription>
                       Commission rate for buy orders (e.g., 0.02 means 2%)
@@ -270,7 +300,8 @@ export default function AdminPaymentSettings() {
                       <Input type="number" step="0.005" min="0" {...field} />
                     </FormControl>
                     <FormDescription>
-                      The rate at which users can sell USDT (e.g., 0.69 means 1 USDT = 0.69 JOD)
+                      The rate at which users can sell USDT (e.g., 0.69 means 1
+                      USDT = 0.69 JOD)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -284,7 +315,13 @@ export default function AdminPaymentSettings() {
                   <FormItem>
                     <FormLabel>Sell Commission Rate</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.005" min="0" max="1" {...field} />
+                      <Input
+                        type="number"
+                        step="0.005"
+                        min="0"
+                        max="1"
+                        {...field}
+                      />
                     </FormControl>
                     <FormDescription>
                       Commission rate for sell orders (e.g., 0.02 means 2%)
@@ -313,7 +350,10 @@ export default function AdminPaymentSettings() {
                 <FormItem>
                   <FormLabel>USDT Address (TRC20)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your TRC20 USDT wallet address" {...field} />
+                    <Input
+                      placeholder="Enter your TRC20 USDT wallet address"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
                     USDT wallet address on the Tron (TRC20) network
@@ -336,10 +376,14 @@ export default function AdminPaymentSettings() {
                 <FormItem>
                   <FormLabel>USDT Address (BEP20)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your BEP20 USDT wallet address" {...field} />
+                    <Input
+                      placeholder="Enter your BEP20 USDT wallet address"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
-                    USDT wallet address on the Binance Smart Chain (BEP20) network
+                    USDT wallet address on the Binance Smart Chain (BEP20)
+                    network
                   </FormDescription>
                   <FormMessage />
                   {settings?.usdtAddressBEP20 && (
@@ -378,7 +422,9 @@ export default function AdminPaymentSettings() {
                         variant="outline"
                         size="icon"
                         className="shrink-0"
-                        onClick={() => copyToClipboard(settings.cliqAlias, "cliqAlias")}
+                        onClick={() =>
+                          copyToClipboard(settings.cliqAlias, "cliqAlias")
+                        }
                       >
                         {copyingField === "cliqAlias" ? (
                           <Check className="h-4 w-4" />
@@ -464,7 +510,9 @@ export default function AdminPaymentSettings() {
                         variant="outline"
                         size="icon"
                         className="shrink-0"
-                        onClick={() => copyToClipboard(settings.mobileWallet, "mobileWallet")}
+                        onClick={() =>
+                          copyToClipboard(settings.mobileWallet, "mobileWallet")
+                        }
                       >
                         {copyingField === "mobileWallet" ? (
                           <Check className="h-4 w-4" />

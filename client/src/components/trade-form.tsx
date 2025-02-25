@@ -139,22 +139,26 @@ export default function TradeForm() {
   const [uploadProgress, setUploadProgress] = useState(0);
   // "native" means user enters JOD when buying, or USDT when selling.
   // "foreign" means the opposite.
-  const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">("native");
+  const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">(
+    "native",
+  );
   const [copyingField, setCopyingField] = useState<null | string>(null);
   const [paymentMethod, setPaymentMethod] = useState<"cliq" | "wallet">("cliq");
 
   // Fetch dynamic admin settings for rates and commissions
-  const { data: settings, isLoading: isLoadingSettings } = useQuery({
+  const { data: adminSettings, isLoading: isLoadingSettings } = useQuery({
     queryKey: ["/api/settings/payment"],
     staleTime: 1000,
     retry: 3,
   });
 
   // Parse dynamic rates and commissions with fallbacks
-  const buyRate = parseFloat(settings?.buyRate ?? "0.71");
-  const buyCommission = parseFloat(settings?.buyCommissionRate ?? "0.02");
-  const sellRate = parseFloat(settings?.sellRate ?? "0.69");
-  const sellCommission = parseFloat(settings?.sellCommissionRate ?? "0.02");
+  const buyRate = parseFloat(adminSettings?.buyRate ?? "0.71");
+  const buyCommission = parseFloat(adminSettings?.buyCommissionRate ?? "0.02");
+  const sellRate = parseFloat(adminSettings?.sellRate ?? "0.69");
+  const sellCommission = parseFloat(
+    adminSettings?.sellCommissionRate ?? "0.02",
+  );
 
   // Set up React Hook Form
   const form = useForm({
@@ -172,16 +176,54 @@ export default function TradeForm() {
 
   // Memoize calculations with dynamic values
   const equivalentAmount = useMemo(() => {
-    return calculateEquivalentAmount(amount, type, currencyBasis, buyRate, sellRate);
+    return calculateEquivalentAmount(
+      amount,
+      type,
+      currencyBasis,
+      buyRate,
+      sellRate,
+    );
   }, [amount, type, currencyBasis, buyRate, sellRate]);
 
-  const commission = useMemo(() => {
-    return calculateCommission(amount, type, currencyBasis, buyRate, buyCommission, sellRate, sellCommission);
-  }, [amount, type, currencyBasis, buyRate, buyCommission, sellRate, sellCommission]);
+  const commissionValue = useMemo(() => {
+    return calculateCommission(
+      amount,
+      type,
+      currencyBasis,
+      buyRate,
+      buyCommission,
+      sellRate,
+      sellCommission,
+    );
+  }, [
+    amount,
+    type,
+    currencyBasis,
+    buyRate,
+    buyCommission,
+    sellRate,
+    sellCommission,
+  ]);
 
   const finalAmount = useMemo(() => {
-    return calculateFinalAmount(amount, type, currencyBasis, buyRate, buyCommission, sellRate, sellCommission);
-  }, [amount, type, currencyBasis, buyRate, buyCommission, sellRate, sellCommission]);
+    return calculateFinalAmount(
+      amount,
+      type,
+      currencyBasis,
+      buyRate,
+      buyCommission,
+      sellRate,
+      sellCommission,
+    );
+  }, [
+    amount,
+    type,
+    currencyBasis,
+    buyRate,
+    buyCommission,
+    sellRate,
+    sellCommission,
+  ]);
 
   const copyToClipboard = async (text: string, field: string) => {
     try {
@@ -243,7 +285,9 @@ export default function TradeForm() {
     form.reset();
     setFile(null);
     setUploadProgress(0);
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
     if (fileInput) {
       fileInput.value = "";
     }
@@ -391,14 +435,20 @@ export default function TradeForm() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <Tabs defaultValue="buy" onValueChange={(value) => form.setValue("type", value)}>
+      <Tabs
+        defaultValue="buy"
+        onValueChange={(value) => form.setValue("type", value)}
+      >
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="buy">Buy USDT</TabsTrigger>
           <TabsTrigger value="sell">Sell USDT</TabsTrigger>
         </TabsList>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmitHandler)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmitHandler)}
+            className="space-y-4"
+          >
             {type === "sell" && !hasUsdtAddress && (
               <Alert variant="destructive">
                 <AlertDescription className="text-sm">
@@ -424,7 +474,9 @@ export default function TradeForm() {
                   <div className="space-y-3">
                     <RadioGroup
                       value={currencyBasis}
-                      onValueChange={(value: "native" | "foreign") => setCurrencyBasis(value)}
+                      onValueChange={(value: "native" | "foreign") =>
+                        setCurrencyBasis(value)
+                      }
                       className="flex flex-col space-y-2 sm:flex-row sm:space-x-4 sm:space-y-0"
                     >
                       <FormItem className="flex items-center space-x-2">
@@ -456,7 +508,8 @@ export default function TradeForm() {
                     </FormControl>
                   </div>
                   <FormDescription className="text-xs">
-                    Enter the amount you want to {type} in {getCurrentCurrencyLabel()}
+                    Enter the amount you want to {type} in{" "}
+                    {getCurrentCurrencyLabel()}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -468,7 +521,9 @@ export default function TradeForm() {
               <div className="flex flex-wrap justify-between gap-2 mb-2 text-sm">
                 <span>Exchange Rate</span>
                 <span className="font-mono">
-                  1 USDT = {type === "buy" ? buyRate : sellRate} JOD
+                  {type === "buy"
+                    ? `1 USDT = ${buyRate} JOD`
+                    : `1 USDT = ${sellRate} JOD`}
                 </span>
               </div>
               {amount && (
@@ -481,11 +536,13 @@ export default function TradeForm() {
                   </div>
                   <div className="flex flex-wrap justify-between gap-2 mb-2 text-xs sm:text-sm text-muted-foreground">
                     <span>
-                      Commission ({type === "buy"
+                      Commission (
+                      {type === "buy"
                         ? (buyCommission * 100).toFixed(1)
-                        : (sellCommission * 100).toFixed(1)}%)
+                        : (sellCommission * 100).toFixed(1)}
+                      %)
                     </span>
-                    <span className="font-mono">{commission}</span>
+                    <span className="font-mono">{commissionValue}</span>
                   </div>
                   <div className="flex flex-wrap justify-between gap-2 pt-2 border-t text-sm font-medium">
                     <span>
@@ -510,34 +567,45 @@ export default function TradeForm() {
               <AlertDescription className="text-xs sm:text-sm">
                 {type === "buy" ? (
                   <>
-                    <p className="mb-2">Choose your preferred payment method:</p>
+                    <p className="mb-2">
+                      Choose your preferred payment method:
+                    </p>
                     <RadioGroup
                       defaultValue="cliq"
                       className="mb-4 space-y-3"
                       value={paymentMethod}
-                      onValueChange={(value: "cliq" | "wallet") => setPaymentMethod(value)}
+                      onValueChange={(value: "cliq" | "wallet") =>
+                        setPaymentMethod(value)
+                      }
                     >
-                      {settings?.cliqAlias && (
+                      {adminSettings?.cliqAlias && (
                         <div className="space-y-2">
                           <FormItem className="flex items-center space-x-3">
                             <FormControl>
                               <RadioGroupItem value="cliq" />
                             </FormControl>
-                            <FormLabel className="font-medium">CliQ Payment</FormLabel>
+                            <FormLabel className="font-medium">
+                              CliQ Payment
+                            </FormLabel>
                           </FormItem>
                           {paymentMethod === "cliq" && (
                             <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 sm:p-3 rounded-md">
                               <div className="flex items-center justify-between">
                                 <p className="truncate mr-2">
-                                  <span className="text-muted-foreground">Cliq Alias:</span>{" "}
-                                  {settings.cliqAlias}
+                                  <span className="text-muted-foreground">
+                                    Cliq Alias:
+                                  </span>{" "}
+                                  {adminSettings.cliqAlias}
                                 </p>
                                 <Button
                                   variant="ghost"
                                   size="icon"
                                   className="h-6 w-6 shrink-0"
                                   onClick={() =>
-                                    copyToClipboard(settings.cliqAlias, "cliqAlias")
+                                    copyToClipboard(
+                                      adminSettings.cliqAlias,
+                                      "cliqAlias",
+                                    )
                                   }
                                 >
                                   {copyingField === "cliqAlias" ? (
@@ -548,38 +616,49 @@ export default function TradeForm() {
                                 </Button>
                               </div>
                               <p>
-                                <span className="text-muted-foreground">Bank:</span>{" "}
-                                {settings.cliqBankName}
+                                <span className="text-muted-foreground">
+                                  Bank:
+                                </span>{" "}
+                                {adminSettings.cliqBankName}
                               </p>
                               <p>
-                                <span className="text-muted-foreground">Account Holder:</span>{" "}
-                                {settings.cliqAccountHolder}
+                                <span className="text-muted-foreground">
+                                  Account Holder:
+                                </span>{" "}
+                                {adminSettings.cliqAccountHolder}
                               </p>
                             </div>
                           )}
                         </div>
                       )}
-                      {settings?.mobileWallet && (
+                      {adminSettings?.mobileWallet && (
                         <div className="space-y-2">
                           <FormItem className="flex items-center space-x-3">
                             <FormControl>
                               <RadioGroupItem value="wallet" />
                             </FormControl>
-                            <FormLabel className="font-medium">Mobile Wallet</FormLabel>
+                            <FormLabel className="font-medium">
+                              Mobile Wallet
+                            </FormLabel>
                           </FormItem>
                           {paymentMethod === "wallet" && (
                             <div className="ml-7 text-xs space-y-1 bg-muted/50 p-2 sm:p-3 rounded-md">
                               <div className="flex items-center justify-between">
                                 <p>
-                                  <span className="text-muted-foreground">Number:</span>{" "}
-                                  {settings.mobileWallet}
+                                  <span className="text-muted-foreground">
+                                    Number:
+                                  </span>{" "}
+                                  {adminSettings.mobileWallet}
                                 </p>
                                 <Button
                                   variant="ghost"
                                   size="icon"
                                   className="h-6 w-6 shrink-0"
                                   onClick={() =>
-                                    copyToClipboard(settings.mobileWallet, "mobileWallet")
+                                    copyToClipboard(
+                                      adminSettings.mobileWallet,
+                                      "mobileWallet",
+                                    )
                                   }
                                 >
                                   {copyingField === "mobileWallet" ? (
@@ -590,12 +669,16 @@ export default function TradeForm() {
                                 </Button>
                               </div>
                               <p>
-                                <span className="text-muted-foreground">Wallet Type:</span>{" "}
-                                {settings.walletType}
+                                <span className="text-muted-foreground">
+                                  Wallet Type:
+                                </span>{" "}
+                                {adminSettings.walletType}
                               </p>
                               <p>
-                                <span className="text-muted-foreground">Holder Name:</span>{" "}
-                                {settings.walletHolderName}
+                                <span className="text-muted-foreground">
+                                  Holder Name:
+                                </span>{" "}
+                                {adminSettings.walletHolderName}
                               </p>
                             </div>
                           )}
@@ -603,14 +686,17 @@ export default function TradeForm() {
                       )}
                     </RadioGroup>
                     <p className="text-xs text-muted-foreground">
-                      Please send {amount} JOD using your selected payment method and upload the proof below.
+                      Please send {amount} JOD using your selected payment
+                      method and upload the proof below.
                       <br />
                       You will receive {finalAmount} USDT after approval.
                     </p>
                   </>
                 ) : (
                   <>
-                    <p className="mb-4 font-medium">Select USDT network for payment:</p>
+                    <p className="mb-4 font-medium">
+                      Select USDT network for payment:
+                    </p>
                     <div className="space-y-4 sm:space-y-6">
                       <FormField
                         control={form.control}
@@ -618,31 +704,42 @@ export default function TradeForm() {
                         render={({ field }) => (
                           <FormItem className="space-y-4 sm:space-y-6">
                             <FormControl>
-                              <RadioGroup onValueChange={field.onChange} value={field.value} className="space-y-4 sm:space-y-6">
+                              <RadioGroup
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                className="space-y-4 sm:space-y-6"
+                              >
                                 <div className="space-y-3">
                                   <div className="flex items-center space-x-3">
                                     <RadioGroupItem value="trc20" id="trc20" />
-                                    <FormLabel htmlFor="trc20" className="font-medium">
+                                    <FormLabel
+                                      htmlFor="trc20"
+                                      className="font-medium"
+                                    >
                                       TRC20 Network
                                     </FormLabel>
                                   </div>
                                   {network === "trc20" && (
                                     <div className="ml-7 text-xs bg-muted/50 p-2 sm:p-3 rounded-md">
-                                      {!settings?.usdtAddressTRC20 ? (
+                                      {!adminSettings?.usdtAddressTRC20 ? (
                                         <div className="text-muted-foreground">
-                                          TRC20 address not set in admin settings
+                                          TRC20 address not set in admin
+                                          settings
                                         </div>
                                       ) : (
                                         <div className="flex items-center justify-between">
                                           <p className="font-mono break-all mr-2">
-                                            {settings.usdtAddressTRC20}
+                                            {adminSettings.usdtAddressTRC20}
                                           </p>
                                           <Button
                                             variant="ghost"
                                             size="icon"
                                             className="h-6 w-6 shrink-0"
                                             onClick={() =>
-                                              copyToClipboard(settings.usdtAddressTRC20, "trc20")
+                                              copyToClipboard(
+                                                adminSettings.usdtAddressTRC20,
+                                                "trc20",
+                                              )
                                             }
                                           >
                                             {copyingField === "trc20" ? (
@@ -660,27 +757,34 @@ export default function TradeForm() {
                                 <div className="space-y-3">
                                   <div className="flex items-center space-x-3">
                                     <RadioGroupItem value="bep20" id="bep20" />
-                                    <FormLabel htmlFor="bep20" className="font-medium">
+                                    <FormLabel
+                                      htmlFor="bep20"
+                                      className="font-medium"
+                                    >
                                       BEP20 Network
                                     </FormLabel>
                                   </div>
                                   {network === "bep20" && (
                                     <div className="ml-7 text-xs bg-muted/50 p-2 sm:p-3 rounded-md">
-                                      {!settings?.usdtAddressBEP20 ? (
+                                      {!adminSettings?.usdtAddressBEP20 ? (
                                         <div className="text-muted-foreground">
-                                          BEP20 address not set in admin settings
+                                          BEP20 address not set in admin
+                                          settings
                                         </div>
                                       ) : (
                                         <div className="flex items-center justify-between">
                                           <p className="font-mono break-all mr-2">
-                                            {settings.usdtAddressBEP20}
+                                            {adminSettings.usdtAddressBEP20}
                                           </p>
                                           <Button
                                             variant="ghost"
                                             size="icon"
                                             className="h-6 w-6 shrink-0"
                                             onClick={() =>
-                                              copyToClipboard(settings.usdtAddressBEP20, "bep20")
+                                              copyToClipboard(
+                                                adminSettings.usdtAddressBEP20,
+                                                "bep20",
+                                              )
                                             }
                                           >
                                             {copyingField === "bep20" ? (
@@ -702,7 +806,8 @@ export default function TradeForm() {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground mt-4 sm:mt-6">
-                      Please send {amount} USDT to the selected network address and upload the transaction proof below.
+                      Please send {amount} USDT to the selected network address
+                      and upload the transaction proof below.
                       <br />
                       You will receive {finalAmount} JOD after approval.
                     </p>
