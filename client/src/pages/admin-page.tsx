@@ -17,6 +17,18 @@ import {
 } from "@/components/ui/collapsible";
 import AdminPaymentSettings from "@/components/admin-payment-settings";
 
+function sortTransactions(transactions: Transaction[] = []) {
+  const pendingTransactions = transactions
+    .filter(tx => tx.status === 'pending')
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()); // Ascending order - oldest first
+
+  const approvedTransactions = transactions
+    .filter(tx => tx.status === 'approved')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // Descending order - newest first
+
+  return [...pendingTransactions, ...approvedTransactions];
+}
+
 export default function AdminPage() {
   const { toast } = useToast();
   const [selectedUser, setSelectedUser] = useState<{ id: number; username: string } | null>(null);
@@ -26,7 +38,6 @@ export default function AdminPage() {
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [openPaymentDetails, setOpenPaymentDetails] = useState<number | null>(null);
 
-  // Add new states for tracking approval success
   const [approvedKycIds, setApprovedKycIds] = useState<number[]>([]);
   const [approvedTxIds, setApprovedTxIds] = useState<number[]>([]);
 
@@ -133,13 +144,13 @@ export default function AdminPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <DocumentPreviewModal 
+      <DocumentPreviewModal
         isOpen={!!selectedUser}
         onClose={() => setSelectedUser(null)}
         userId={selectedUser?.id || null}
         username={selectedUser?.username || ''}
       />
-      <PaymentProofModal 
+      <PaymentProofModal
         isOpen={!!selectedTransaction}
         onClose={() => setSelectedTransaction(null)}
         transactionId={selectedTransaction?.id || null}
@@ -267,7 +278,7 @@ export default function AdminPage() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
-                          {transactions?.map((tx) => {
+                          {sortTransactions(transactions)?.map((tx) => {
                             const user = users?.find(u => u.id === tx.userId);
                             return (
                               <tr key={tx.id} className="transition-colors hover:bg-muted/50">
@@ -395,9 +406,9 @@ export default function AdminPage() {
                                       <Button
                                         size="sm"
                                         variant="outline"
-                                        onClick={() => setSelectedTransaction({ 
-                                          id: tx.id, 
-                                          username: user?.username || '' 
+                                        onClick={() => setSelectedTransaction({
+                                          id: tx.id,
+                                          username: user?.username || ''
                                         })}
                                       >
                                         <Eye className="h-4 w-4 mr-1" />
