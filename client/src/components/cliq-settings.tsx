@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
 export default function CliqSettings() {
   const { user } = useAuth();
@@ -44,9 +45,14 @@ export default function CliqSettings() {
   const mutation = useMutation({
     mutationFn: async (data: UpdateUserCliq) => {
       const res = await apiRequest("POST", "/api/settings/cliq", data);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to save CliQ settings");
+      }
       return await res.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
         title: "Success",
         description: "Your CliQ settings have been updated.",
@@ -62,6 +68,23 @@ export default function CliqSettings() {
   });
 
   const onSubmit = (data: UpdateUserCliq) => {
+    // Clear the field that's not being used based on cliqType
+    if (data.cliqType === "alias") {
+      data.cliqNumber = ""; // Clear number when using alias
+    } else {
+      data.cliqAlias = ""; // Clear alias when using number
+    }
+
+    // Validate that at least one of alias or number is set
+    if (!data.cliqAlias && !data.cliqNumber) {
+      toast({
+        title: "Error",
+        description: "Please provide either a CliQ alias or number",
+        variant: "destructive",
+      });
+      return;
+    }
+
     mutation.mutate(data);
   };
 
@@ -136,8 +159,8 @@ export default function CliqSettings() {
               <FormItem>
                 <FormLabel>CliQ Alias/Username</FormLabel>
                 <FormControl>
-                  <Input 
-                    {...field} 
+                  <Input
+                    {...field}
                     placeholder="Enter your CliQ alias"
                     onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                   />

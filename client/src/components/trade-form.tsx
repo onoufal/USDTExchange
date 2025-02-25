@@ -312,7 +312,7 @@ export default function TradeForm() {
     if (values.type === "buy" && !(user?.cliqAlias || user?.cliqNumber)) {
       toast({
         title: "CliQ details not set",
-        description: "Please set your CliQ account details in settings before buying",
+        description: "Please set either your CliQ alias or number in settings before buying",
         variant: "destructive",
       });
       return;
@@ -349,7 +349,7 @@ export default function TradeForm() {
 
   const isLoading = isLoadingUser || isLoadingSettings;
   const hasUsdtAddress = user?.usdtAddress || false;
-  const hasCliqSettings = user?.cliqAlias || user?.cliqNumber || false;
+  const hasCliqSettings = user?.cliqAlias || user?.cliqNumber || false; 
   const type = form.watch("type");
   const amount = form.watch("amount");
 
