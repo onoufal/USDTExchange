@@ -34,35 +34,31 @@ import { JORDANIAN_BANKS } from "@shared/schema";
 import { Check, Loader2, Copy } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-// Commission rates are decimal, e.g., 0.02 = 2%
-// If you want to allow 2.5% = 0.025, adjust step or validations accordingly.
 const paymentSettingsSchema = z.object({
   // Rate Settings
   buyRate: z
     .string()
     .refine(
       (val) => !isNaN(Number(val)) && Number(val) > 0,
-      "Buy rate must be a positive number"
+      "Buy rate must be a positive number",
     ),
   buyCommissionRate: z
     .string()
     .refine(
-      (val) =>
-        !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1,
-      "Buy commission must be between 0 and 1"
+      (val) => !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1,
+      "Buy commission must be between 0 and 1",
     ),
   sellRate: z
     .string()
     .refine(
       (val) => !isNaN(Number(val)) && Number(val) > 0,
-      "Sell rate must be a positive number"
+      "Sell rate must be a positive number",
     ),
   sellCommissionRate: z
     .string()
     .refine(
-      (val) =>
-        !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1,
-      "Sell commission must be between 0 and 1"
+      (val) => !isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 1,
+      "Sell commission must be between 0 and 1",
     ),
 
   // USDT Settings
@@ -96,7 +92,9 @@ export default function AdminPaymentSettings() {
   const { toast } = useToast();
 
   // A single field to track which item is being copied (null = none)
-  const [copyingField, setCopyingField] = useState<null | "cliqAlias" | "mobileWallet">(null);
+  const [copyingField, setCopyingField] = useState<
+    null | "cliqAlias" | "mobileWallet"
+  >(null);
 
   // Fetch current settings
   const {
@@ -175,7 +173,7 @@ export default function AdminPaymentSettings() {
         });
       }
     },
-    [toast]
+    [toast],
   );
 
   // Form submission
@@ -183,7 +181,7 @@ export default function AdminPaymentSettings() {
     (data: PaymentSettings) => {
       updateSettingsMutation.mutate(data);
     },
-    [updateSettingsMutation]
+    [updateSettingsMutation],
   );
 
   // If still loading data
@@ -214,82 +212,97 @@ export default function AdminPaymentSettings() {
           <CardHeader>
             <CardTitle>Exchange Rate Settings</CardTitle>
             <CardDescription>
-              Configure buy and sell rates with their respective commission percentages
+              Configure buy and sell rates with their respective commission
+              percentages
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="buyRate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Buy Rate (JOD per USDT)</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.005" min="0" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        The rate at which users can buy USDT (e.g., 0.71 means 1 USDT = 0.71 JOD)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {/* Buy Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="buyRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Buy Rate (JOD per USDT)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.005" min="0" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      The rate at which users can buy USDT (e.g., 0.71 means 1
+                      USDT = 0.71 JOD)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={form.control}
-                  name="buyCommissionRate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Buy Commission Rate</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.005" min="0" max="1" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Commission rate for buy orders (e.g., 0.02 means 2%)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="buyCommissionRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Buy Commission Rate</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.005"
+                        min="0"
+                        max="1"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Commission rate for buy orders (e.g., 0.02 means 2%)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="sellRate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sell Rate (JOD per USDT)</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.005" min="0" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        The rate at which users can sell USDT (e.g., 0.69 means 1 USDT = 0.69 JOD)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {/* Sell Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="sellRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sell Rate (JOD per USDT)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.005" min="0" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      The rate at which users can sell USDT (e.g., 0.69 means 1
+                      USDT = 0.69 JOD)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={form.control}
-                  name="sellCommissionRate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sell Commission Rate</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.005" min="0" max="1" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Commission rate for sell orders (e.g., 0.02 means 2%)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="sellCommissionRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sell Commission Rate</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.005"
+                        min="0"
+                        max="1"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Commission rate for sell orders (e.g., 0.02 means 2%)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </CardContent>
         </Card>
@@ -342,7 +355,8 @@ export default function AdminPaymentSettings() {
                     />
                   </FormControl>
                   <FormDescription>
-                    USDT wallet address on the Binance Smart Chain (BEP20) network
+                    USDT wallet address on the Binance Smart Chain (BEP20)
+                    network
                   </FormDescription>
                   <FormMessage />
                   {settings?.usdtAddressBEP20 && (
@@ -381,7 +395,9 @@ export default function AdminPaymentSettings() {
                         variant="outline"
                         size="icon"
                         className="shrink-0"
-                        onClick={() => copyToClipboard(settings.cliqAlias, "cliqAlias")}
+                        onClick={() =>
+                          copyToClipboard(settings.cliqAlias, "cliqAlias")
+                        }
                       >
                         {copyingField === "cliqAlias" ? (
                           <Check className="h-4 w-4" />
@@ -467,7 +483,9 @@ export default function AdminPaymentSettings() {
                         variant="outline"
                         size="icon"
                         className="shrink-0"
-                        onClick={() => copyToClipboard(settings.mobileWallet, "mobileWallet")}
+                        onClick={() =>
+                          copyToClipboard(settings.mobileWallet, "mobileWallet")
+                        }
                       >
                         {copyingField === "mobileWallet" ? (
                           <Check className="h-4 w-4" />
