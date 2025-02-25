@@ -199,6 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rate: z.string()
           .regex(/^\d+(\.\d{1,2})?$/, "Rate must be a valid number with up to 2 decimal places")
           .transform(Number),
+        network: z.enum(["trc20", "bep20"]),
       });
 
       const data = schema.parse(req.body);
@@ -212,6 +213,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "pending",
         proofOfPayment: req.file.buffer.toString("base64"),
         createdAt: new Date(),
+        network: data.network,
       });
 
       res.json(transaction);

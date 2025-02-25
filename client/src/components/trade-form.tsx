@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { insertTransactionSchema } from "@shared/schema";
 import {
   Form,
@@ -120,6 +121,14 @@ function calculateFinalAmount(
   }
 }
 
+const tradeFormSchema = z.object({
+  type: z.enum(["buy", "sell"]),
+  amount: z.string()
+    .min(1, "Amount is required")
+    .regex(/^\d+(\.\d{1,2})?$/, "Amount must be a valid number with up to 2 decimal places"),
+  network: z.enum(["trc20", "bep20"]),
+});
+
 export default function TradeForm() {
   const { toast } = useToast();
   const { user, isLoading: isLoadingUser } = useAuth();
@@ -158,7 +167,7 @@ export default function TradeForm() {
 
   /** React Hook Form Setup */
   const form = useForm({
-    resolver: zodResolver(insertTransactionSchema),
+    resolver: zodResolver(tradeFormSchema),
     defaultValues: {
       type: "buy",
       amount: "",
@@ -329,7 +338,7 @@ export default function TradeForm() {
   };
 
   /** Final form submission handler */
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: z.infer<typeof tradeFormSchema>) => {
     if (!user) {
       toast({
         title: "Authentication required",
@@ -342,8 +351,7 @@ export default function TradeForm() {
     if (values.type === "buy" && !(user.cliqAlias || user.cliqNumber)) {
       toast({
         title: "CliQ details not set",
-        description:
-          "Please set either your CliQ alias or number in settings before buying",
+        description: "Please set either your CliQ alias or number in settings before buying",
         variant: "destructive",
       });
       return;
@@ -352,8 +360,7 @@ export default function TradeForm() {
     if (values.type === "sell" && !user.usdtAddress) {
       toast({
         title: "USDT wallet not set",
-        description:
-          "Please set your USDT wallet address in settings before selling",
+        description: "Please set your USDT wallet address in settings before selling",
         variant: "destructive",
       });
       return;
@@ -370,18 +377,26 @@ export default function TradeForm() {
 
     try {
       // If the user typed the "foreign" currency, we use the already-converted 'equivalentAmount'
-      const finalInputAmount =
-        currencyBasis === "foreign" ? equivalentAmount : values.amount;
+      const finalInputAmount = currencyBasis === "foreign" ? equivalentAmount : values.amount;
 
       const formData = new FormData();
       formData.append("type", values.type);
       formData.append("amount", finalInputAmount);
       formData.append("rate", currentRate.toString());
-      formData.append("commission", currentCommission.toString());
       formData.append("proofOfPayment", file);
       formData.append("network", values.network);
 
       await tradeMutation.mutateAsync(formData);
+
+      // Clear form after successful submission
+      form.reset();
+      setFile(null);
+      setUploadProgress(0);
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = "";
+      }
+
     } catch (error) {
       console.error("Trade submission error:", error);
       toast({
