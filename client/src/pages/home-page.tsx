@@ -7,6 +7,18 @@ import KYCForm from "@/components/kyc-form";
 import { useQuery } from "@tanstack/react-query";
 import { Transaction } from "@shared/schema";
 
+function sortTransactions(transactions: Transaction[] = []) {
+  const pendingTransactions = transactions
+    .filter(tx => tx.status === 'pending')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // Descending order - newest first
+
+  const approvedTransactions = transactions
+    .filter(tx => tx.status === 'approved')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // Descending order - newest first
+
+  return [...pendingTransactions, ...approvedTransactions];
+}
+
 export default function HomePage() {
   const { user } = useAuth();
   const { data: transactions } = useQuery<Transaction[]>({
@@ -78,7 +90,7 @@ export default function HomePage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {transactions?.map((tx) => (
+                    {sortTransactions(transactions)?.map((tx) => (
                       <tr key={tx.id} className="hover:bg-muted/50">
                         <td className="px-3 py-2 text-xs sm:px-4 capitalize">{tx.type}</td>
                         <td className="px-3 py-2 text-xs sm:px-4">{tx.amount} {tx.type === 'buy' ? 'JOD' : 'USDT'}</td>
