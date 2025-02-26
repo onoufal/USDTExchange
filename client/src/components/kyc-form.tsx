@@ -280,8 +280,10 @@ export default function KYCForm() {
             </div>
 
             {user?.kycStatus === "approved" ? (
-              <Alert variant="success" className="bg-primary/5 text-primary border-primary/20 flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
+              <Alert variant="success" className="bg-primary/5 text-primary border-primary/20 flex items-center gap-3">
+                <div className="shrink-0">
+                  <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+                </div>
                 <AlertDescription className="text-sm font-medium">
                   Your ID has been verified successfully
                 </AlertDescription>
