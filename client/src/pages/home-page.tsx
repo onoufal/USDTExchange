@@ -31,24 +31,30 @@ export default function HomePage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        {/* Welcome Section */}
-        <div className="flex flex-col gap-2 mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Welcome back, {user.fullName}
-          </h1>
-          <p className="text-muted-foreground">
-            Your trusted platform for USDT-JOD exchange
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {/* Welcome Section with improved styling */}
+        <div className="mb-10 relative">
+          <div className="max-w-2xl">
+            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent mb-3">
+              Welcome back, {user.fullName}
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              Your trusted platform for USDT-JOD exchange
+            </p>
+          </div>
+          {/* Decorative elements */}
+          <div className="absolute right-0 top-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10" />
+          <div className="absolute left-1/4 bottom-0 w-48 h-48 bg-primary/3 rounded-full blur-2xl -z-10" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Trading Section */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur">
-              <CardHeader className="space-y-2 pb-6">
-                <CardTitle className="text-xl sm:text-2xl font-bold">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Main Content Area */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Trading Card */}
+            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur overflow-hidden">
+              <CardHeader className="space-y-1 pb-6">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                   Trade USDT
                 </CardTitle>
                 <CardDescription className="text-base">
@@ -72,7 +78,7 @@ export default function HomePage() {
             {/* Transaction History */}
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur">
               <CardHeader>
-                <CardTitle className="text-xl">Recent Transactions</CardTitle>
+                <CardTitle className="text-xl font-semibold">Recent Transactions</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto -mx-4 sm:mx-0">
@@ -81,22 +87,22 @@ export default function HomePage() {
                       <table className="min-w-full divide-y divide-border">
                         <thead>
                           <tr className="bg-muted/50">
-                            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Type</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Rate</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Status</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider">Date</th>
+                            <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider">Type</th>
+                            <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
+                            <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider">Rate</th>
+                            <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider">Status</th>
+                            <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider">Date</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
                           {sortTransactions(transactions)?.map((tx) => (
                             <tr key={tx.id} className="hover:bg-muted/50 transition-colors">
-                              <td className="px-4 py-3 text-sm font-medium capitalize">
-                                <span className={tx.type === 'buy' ? 'text-green-600' : 'text-blue-600'}>
+                              <td className="px-4 py-3.5 text-sm font-medium capitalize">
+                                <span className={tx.type === 'buy' ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}>
                                   {tx.type}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-sm">
+                              <td className="px-4 py-3.5 text-sm">
                                 <div className="space-y-1">
                                   <p className="whitespace-nowrap font-mono">
                                     {tx.type === 'buy' ? (
@@ -130,8 +136,8 @@ export default function HomePage() {
                                   </p>
                                 </div>
                               </td>
-                              <td className="px-4 py-3 text-sm font-mono">{tx.rate}</td>
-                              <td className="px-4 py-3 text-sm">
+                              <td className="px-4 py-3.5 text-sm font-mono">{tx.rate}</td>
+                              <td className="px-4 py-3.5 text-sm">
                                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                   tx.status === 'approved' 
                                     ? 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400'
@@ -140,7 +146,7 @@ export default function HomePage() {
                                   {tx.status}
                                 </span>
                               </td>
-                              <td className="px-4 py-3 text-sm text-muted-foreground">
+                              <td className="px-4 py-3.5 text-sm text-muted-foreground">
                                 {new Date(tx.createdAt).toLocaleDateString()}
                               </td>
                             </tr>
@@ -161,11 +167,12 @@ export default function HomePage() {
             </Card>
           </div>
 
-          {/* KYC & Status Section */}
-          <div className="space-y-6">
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur">
+          {/* Sidebar - KYC & Status Section */}
+          <div className="lg:col-span-4 space-y-6">
+            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur sticky top-6">
               <CardHeader>
-                <CardTitle className="text-xl">Verification Status</CardTitle>
+                <CardTitle className="text-xl font-semibold">Verification Status</CardTitle>
+                <CardDescription>Complete verification to start trading</CardDescription>
               </CardHeader>
               <CardContent>
                 <KYCForm />
