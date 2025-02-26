@@ -66,7 +66,7 @@ export default function AuthPage() {
               {t('common.welcome')}
             </CardTitle>
             <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <span className="italic">[Your Brand Name]</span> - {t('common.brandDescription')}
+              <span className="italic">[Your Brand]</span> - {t('common.brandDescription')}
             </p>
           </CardHeader>
           <CardContent>
