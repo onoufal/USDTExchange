@@ -10,7 +10,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Clock, Upload, PhoneCall, FileText, Info } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Upload, PhoneCall, FileText, Info, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
@@ -194,14 +194,16 @@ export default function KYCForm() {
 
             {!user?.mobileVerified && (
               <>
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertTitle>Verification Steps</AlertTitle>
-                  <AlertDescription className="text-sm space-y-1.5">
-                    <p>1. Enter your Jordanian mobile number</p>
-                    <p>2. Receive verification code via SMS</p>
-                    <p>3. Enter code to complete verification</p>
-                  </AlertDescription>
+                <Alert className="flex items-start gap-2">
+                  <Info className="h-4 w-4 mt-1 shrink-0" />
+                  <div className="flex-1">
+                    <AlertTitle>Verification Steps</AlertTitle>
+                    <AlertDescription className="text-sm space-y-1.5 mt-1">
+                      <p>1. Enter your Jordanian mobile number</p>
+                      <p>2. Receive verification code via SMS</p>
+                      <p>3. Enter code to complete verification</p>
+                    </AlertDescription>
+                  </div>
                 </Alert>
 
                 <Form {...mobileForm}>
@@ -276,8 +278,8 @@ export default function KYCForm() {
             </div>
 
             {user?.kycStatus === "approved" ? (
-              <Alert variant="success" className="bg-primary/5 text-primary border-primary/20">
-                <CheckCircle2 className="h-4 w-4" />
+              <Alert variant="success" className="bg-primary/5 text-primary border-primary/20 flex items-start gap-2">
+                <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
                 <AlertDescription className="text-sm font-medium">
                   Your ID has been verified successfully
                 </AlertDescription>
@@ -285,7 +287,8 @@ export default function KYCForm() {
             ) : (
               <>
                 {!user?.mobileVerified ? (
-                  <Alert variant="warning">
+                  <Alert variant="warning" className="flex items-start gap-2">
+                    <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                     <AlertDescription className="text-sm">
                       Please verify your mobile number first
                     </AlertDescription>
@@ -293,20 +296,22 @@ export default function KYCForm() {
                 ) : (
                   <>
                     {!user?.kycDocument && (
-                      <Alert>
-                        <Info className="h-4 w-4" />
-                        <AlertTitle>Document Requirements</AlertTitle>
-                        <AlertDescription className="space-y-2">
-                          <ul className="text-sm space-y-1.5 list-disc pl-4">
-                            <li>Valid government-issued ID</li>
-                            <li>Clearly visible full name</li>
-                            <li>Not expired</li>
-                            <li>Well-lit and readable</li>
-                          </ul>
-                          <p className="text-sm text-muted-foreground">
-                            Supported formats: JPG, PNG, or PDF
-                          </p>
-                        </AlertDescription>
+                      <Alert className="flex items-start gap-2">
+                        <Info className="h-4 w-4 mt-0.5 shrink-0" />
+                        <div className="flex-1">
+                          <AlertTitle>Document Requirements</AlertTitle>
+                          <AlertDescription className="space-y-2 mt-1">
+                            <ul className="text-sm space-y-1.5 list-disc pl-4">
+                              <li>Valid government-issued ID</li>
+                              <li>Clearly visible full name</li>
+                              <li>Not expired</li>
+                              <li>Well-lit and readable</li>
+                            </ul>
+                            <p className="text-sm text-muted-foreground">
+                              Supported formats: JPG, PNG, or PDF
+                            </p>
+                          </AlertDescription>
+                        </div>
                       </Alert>
                     )}
 
@@ -341,8 +346,8 @@ export default function KYCForm() {
                         />
 
                         {user?.kycStatus === "pending" && (
-                          <Alert variant="warning" className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
+                          <Alert variant="warning" className="flex items-start gap-2">
+                            <Clock className="h-4 w-4 mt-0.5 shrink-0" />
                             <AlertDescription className="text-sm">
                               Your document is under review. We'll notify you once approved.
                             </AlertDescription>
