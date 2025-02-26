@@ -80,8 +80,7 @@ export default function AuthPage() {
                     data-[state=active]:bg-background 
                     data-[state=active]:text-primary 
                     data-[state=active]:shadow-sm 
-                    data-[state=active]:font-medium
-                    transition-all duration-300
+                    transition-colors duration-200
                     hover:text-primary/80"
                 >
                   Login
@@ -92,8 +91,7 @@ export default function AuthPage() {
                     data-[state=active]:bg-background 
                     data-[state=active]:text-primary 
                     data-[state=active]:shadow-sm 
-                    data-[state=active]:font-medium
-                    transition-all duration-300
+                    transition-colors duration-200
                     hover:text-primary/80"
                 >
                   Register
