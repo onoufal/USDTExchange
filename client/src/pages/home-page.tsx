@@ -96,7 +96,7 @@ export default function HomePage() {
           <div className="lg:col-span-8 space-y-6">
             {/* Trading Card */}
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up">
-              <CardHeader>
+              <CardHeader className="px-6 py-5">
                 <div className="flex items-center gap-2">
                   <CardTitle className="text-xl sm:text-2xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                     Trade USDT
@@ -119,7 +119,7 @@ export default function HomePage() {
                 </div>
                 <CardDescription>Buy or sell USDT for Jordanian Dinar (JOD)</CardDescription>
               </CardHeader>
-              <CardContent id="trade-form">
+              <CardContent id="trade-form" className="px-6 pb-6">
                 {showKYCWarning ? (
                   <Alert variant="warning" className="flex items-start gap-3">
                     <AlertCircle className="mt-0.5" />
@@ -135,7 +135,7 @@ export default function HomePage() {
 
             {/* Transaction History */}
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up [--animation-delay:400ms]">
-              <CardHeader>
+              <CardHeader className="px-6 py-5">
                 <div className="flex items-center gap-2">
                   <CardTitle className="text-xl sm:text-2xl">Recent Transactions</CardTitle>
                   <TooltipProvider>
@@ -156,7 +156,7 @@ export default function HomePage() {
                 </div>
                 <CardDescription>View and track your USDT trades</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-6 pb-6">
                 <div className="overflow-x-auto -mx-4 sm:mx-0">
                   <div className="min-w-full inline-block align-middle">
                     <div className="overflow-hidden rounded-lg border bg-card dark:bg-card/50">
@@ -285,11 +285,11 @@ export default function HomePage() {
           {/* Sidebar - Verification Status */}
           <div className="lg:col-span-4 space-y-6 animate-fade-left [--animation-delay:200ms]">
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
-              <CardHeader>
+              <CardHeader className="px-6 py-5">
                 <CardTitle className="text-xl sm:text-2xl">Verification Status</CardTitle>
                 <CardDescription>Complete verification to start trading</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-6 pb-6">
                 <KYCForm />
               </CardContent>
             </Card>
