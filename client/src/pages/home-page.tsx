@@ -90,22 +90,10 @@ export default function HomePage() {
           </Card>
         </div>
 
+        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Sidebar - KYC & Status Section */}
-          <div className="lg:order-2 lg:col-span-4 space-y-6 animate-fade-left [--animation-delay:200ms]">
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
-              <CardHeader>
-                <CardTitle className="text-xl sm:text-2xl">Verification Status</CardTitle>
-                <CardDescription>Complete verification to start trading</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <KYCForm />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content Area */}
-          <div className="lg:order-1 lg:col-span-8 space-y-6">
+          {/* Main Trading and Transactions Column */}
+          <div className="lg:col-span-8 space-y-6">
             {/* Trading Card */}
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up">
               <CardHeader>
@@ -290,6 +278,19 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar - Verification Status */}
+          <div className="lg:col-span-4 space-y-6 animate-fade-left [--animation-delay:200ms]">
+            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
+              <CardHeader>
+                <CardTitle className="text-xl sm:text-2xl">Verification Status</CardTitle>
+                <CardDescription>Complete verification to start trading</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <KYCForm />
               </CardContent>
             </Card>
           </div>
