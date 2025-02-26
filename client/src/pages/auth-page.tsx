@@ -32,10 +32,11 @@ export default function AuthPage() {
     },
   });
 
-  // Initialize registration form with full user schema
+  // Update the registration form initialization
   const registerForm = useForm({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
+      email: "",
       username: "",
       password: "",
       fullName: "",

@@ -8,6 +8,9 @@ import { updateUserWalletSchema } from "@shared/schema";
 import { updateUserCliqSchema } from "@shared/schema";
 import { randomBytes } from "crypto";
 import { sendVerificationEmail } from "./services/email";
+import { insertUserSchema } from "@shared/schema"; // Assuming this schema is defined elsewhere
+import { hashPassword } from "./services/password"; // Assuming this function is defined elsewhere
+
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -51,19 +54,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Registration endpoint (added)
+  // Registration endpoint (updated)
   app.post("/api/register", async (req, res) => {
     try {
-      const schema = z.object({
-        email: z.string().email(),
-        password: z.string().min(8),
-        // ... other registration fields
-      });
-      const { email, password, ...rest } = schema.parse(req.body);
+      // Validate registration data using our schema
+      const validatedData = insertUserSchema.parse(req.body);
+
+      // Check if email already exists
+      const existingUser = await storage.getUserByEmail(validatedData.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+
+      // Generate verification token
       const token = randomBytes(20).toString('hex');
-      const user = await storage.createUser({ email, password, verificationToken: token, isVerified: false, ...rest });
-      await sendVerificationEmail(email, token);
-      res.json({ message: "Registration successful. Please check your email for verification." });
+
+      // Create user with verification token
+      const user = await storage.createUser({
+        ...validatedData,
+        verificationToken: token,
+        password: await hashPassword(validatedData.password)
+      });
+
+      // Send verification email
+      const success = await sendVerificationEmail({
+        to: validatedData.email,
+        verificationToken: token
+      });
+
+      if (!success) {
+        // If email fails, still create the account but inform the user
+        return res.status(200).json({ 
+          message: "Account created but verification email could not be sent. Please contact support."
+        });
+      }
+
+      res.json({ 
+        message: "Registration successful. Please check your email to verify your account." 
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: error.errors[0].message });

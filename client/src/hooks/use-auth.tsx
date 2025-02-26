@@ -14,7 +14,7 @@ type AuthContextType = {
   error: Error | null;
   loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
+  registerMutation: UseMutationResult<{ message: string }, Error, InsertUser>;
 };
 
 type LoginData = Pick<InsertUser, "username" | "password">;
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
       toast({
         title: "Login successful",
-        description: `Welcome back, ${user.username}!`,
+        description: `Welcome back, ${user.username || user.email}!`,
       });
     },
     onError: (error: Error) => {
@@ -71,13 +71,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return res.json();
     },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
-      // Invalidate any user-related queries
-      queryClient.invalidateQueries({ queryKey: ["/api/settings"] });
+    onSuccess: (response: { message: string }) => {
       toast({
         title: "Registration successful",
-        description: "Your account has been created successfully!",
+        description: response.message || "Please check your email for verification instructions.",
       });
     },
     onError: (error: Error) => {

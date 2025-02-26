@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import type { UseMutationResult } from "@tanstack/react-query";
-import type { InsertUser } from "@shared/types";
+import type { InsertUser } from "@shared/schema";
 import { useCallback } from "react";
 
 interface RegisterFormProps {
@@ -47,18 +47,40 @@ export function RegisterForm({ form, mutation }: RegisterFormProps) {
           )}
         />
 
-        {/* Username Field */}
+        {/* Email Field */}
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem className="space-y-2.5">
+              <FormLabel className="text-sm sm:text-base font-medium">Email</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="email"
+                  autoComplete="email"
+                  aria-required="true"
+                  aria-invalid={!!form.formState.errors.email}
+                  aria-describedby={form.formState.errors.email ? "email-error" : undefined}
+                  className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary transition-colors"
+                />
+              </FormControl>
+              <FormMessage className="text-sm" id="email-error" role="alert" />
+            </FormItem>
+          )}
+        />
+
+        {/* Optional Username Field */}
         <FormField
           control={form.control}
           name="username"
           render={({ field }) => (
             <FormItem className="space-y-2.5">
-              <FormLabel className="text-sm sm:text-base font-medium">Username</FormLabel>
+              <FormLabel className="text-sm sm:text-base font-medium">Username (Optional)</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   autoComplete="username"
-                  aria-required="true"
                   aria-invalid={!!form.formState.errors.username}
                   aria-describedby={form.formState.errors.username ? "username-error" : undefined}
                   className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary transition-colors"
