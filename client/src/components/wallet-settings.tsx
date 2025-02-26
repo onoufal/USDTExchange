@@ -54,16 +54,12 @@ export default function WalletSettings() {
     <Card>
       <CardHeader>
         <CardTitle>USDT Wallet Settings</CardTitle>
-        <CardDescription className="flex items-center gap-3">
-          <Alert className="flex items-start gap-3 mt-2">
-            <div className="shrink-0 mt-0.5">
-              <Info className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
-            </div>
-            <AlertDescription className="text-sm">
-              Please set your USDT wallet address to receive USDT from buy orders.
-            </AlertDescription>
-          </Alert>
-        </CardDescription>
+        <Alert className="mt-2 flex items-center gap-3">
+          <Info className="h-5 w-5 text-muted-foreground shrink-0" aria-hidden="true" />
+          <AlertDescription className="text-sm">
+            Please set your USDT wallet address to receive USDT from buy orders.
+          </AlertDescription>
+        </Alert>
       </CardHeader>
       <CardContent>
         <Form {...form}>
