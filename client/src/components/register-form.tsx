@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import type { UseMutationResult } from "@tanstack/react-query";
 import type { InsertUser } from "@shared/types";
+import { useCallback } from "react";
 
 interface RegisterFormProps {
   form: UseFormReturn<InsertUser>;
@@ -12,9 +13,13 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({ form, mutation }: RegisterFormProps) {
+  const onSubmit = useCallback((data: InsertUser) => {
+    mutation.mutate(data);
+  }, [mutation]);
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="fullName"

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import type { UseMutationResult } from "@tanstack/react-query";
 import type { LoginData } from "@shared/types";
+import { useCallback } from "react";
 
 interface LoginFormProps {
   form: UseFormReturn<LoginData>;
@@ -12,9 +13,13 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ form, mutation }: LoginFormProps) {
+  const onSubmit = useCallback((data: LoginData) => {
+    mutation.mutate(data);
+  }, [mutation]);
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="username"
@@ -33,7 +38,6 @@ export function LoginForm({ form, mutation }: LoginFormProps) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="password"
@@ -53,7 +57,6 @@ export function LoginForm({ form, mutation }: LoginFormProps) {
             </FormItem>
           )}
         />
-
         <Button
           type="submit"
           size="lg"
