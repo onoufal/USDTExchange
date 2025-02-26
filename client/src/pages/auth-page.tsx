@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { insertUserSchema } from "@shared/schema";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, CreditCard } from "lucide-react";
 
 const loginSchema = insertUserSchema.pick({
   username: true,
@@ -47,10 +47,19 @@ export default function AuthPage() {
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
         {/* Auth Form Section */}
         <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur">
-          <CardHeader className="space-y-1">
+          <CardHeader className="space-y-4 items-center text-center">
+            {/* Logo Placeholder */}
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+              <CreditCard className="w-6 h-6 text-primary" />
+              <span className="sr-only">Your Logo Here</span>
+            </div>
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Welcome Back
+              Welcome to ExchangePro
             </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              {/* Brand Name Placeholder */}
+              <span className="italic">[Your Brand Name]</span> - Your trusted USDT exchange platform
+            </p>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="space-y-4">
@@ -171,8 +180,17 @@ export default function AuthPage() {
 
         {/* Hero Section */}
         <div className="text-center lg:text-left lg:order-1 space-y-6">
+          {/* Brand Image Placeholder */}
+          <div className="w-24 h-24 mx-auto lg:mx-0 mb-6 rounded-xl bg-primary/10 flex items-center justify-center">
+            <span className="text-xs text-center text-muted-foreground p-2">
+              [Your Brand Logo]
+            </span>
+          </div>
+
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Trusted USDT Exchange Platform
+            {/* Brand Name Placeholder */}
+            <span className="italic">[Your Brand]</span><br />
+            USDT Exchange Platform
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0">
             Exchange USDT for Jordanian Dinars securely and efficiently. Experience competitive rates and fast transactions.
