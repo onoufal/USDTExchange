@@ -9,13 +9,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { insertUserSchema } from "@shared/schema";
 import { z } from "zod";
-import { Loader2, CreditCard } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { BrandLogo } from "@/components/ui/brand-logo";
+import { FeatureCard } from "@/components/ui/feature-card";
 
+// Validation schema for login form
 const loginSchema = insertUserSchema.pick({
   username: true,
   password: true,
 });
 
+/**
+ * Authentication page component that handles both login and registration
+ * with a responsive layout and animated transitions.
+ */
 export default function AuthPage() {
   const { loginMutation, registerMutation, user } = useAuth();
   const [, setLocation] = useLocation();
@@ -37,6 +44,7 @@ export default function AuthPage() {
     },
   });
 
+  // Redirect if already authenticated
   if (user) {
     setLocation("/");
     return null;
@@ -48,165 +56,29 @@ export default function AuthPage() {
         {/* Auth Form Section */}
         <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur transition-all duration-300 hover:shadow-2xl">
           <CardHeader className="space-y-4 items-center text-center">
-            {/* Logo Placeholder */}
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2 transition-transform hover:scale-105 duration-300">
-              <CreditCard className="w-6 h-6 text-primary" />
-              <span className="sr-only">Your Logo Here</span>
-            </div>
+            <BrandLogo size="md" />
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent animate-in fade-in zoom-in-95 duration-300">
               Welcome to ExchangePro
             </CardTitle>
             <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-300">
-              {/* Brand Name Placeholder */}
               <span className="italic">[Your Brand Name]</span> - Your trusted USDT exchange platform
             </p>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-2 transition-colors">
-                <TabsTrigger value="login" className="data-[state=active]:animate-in data-[state=active]:fade-in">Login</TabsTrigger>
-                <TabsTrigger value="register" className="data-[state=active]:animate-in data-[state=active]:fade-in">Register</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="login" className="space-y-4 animate-in fade-in-50 duration-300">
-                <Form {...loginForm}>
-                  <form 
-                    onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))} 
-                    className="space-y-4"
-                    aria-label="Login form"
-                  >
-                    <FormField
-                      control={loginForm.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Username</FormLabel>
-                          <FormControl>
-                            <Input {...field} autoComplete="username" aria-required="true" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={loginForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="password" 
-                              {...field} 
-                              autoComplete="current-password" 
-                              aria-required="true"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button 
-                      type="submit" 
-                      className="w-full transition-all hover:bg-blue-700 hover:scale-105 duration-200"
-                      disabled={loginMutation.isPending}
-                    >
-                      {loginMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          <span>Signing in...</span>
-                        </>
-                      ) : (
-                        "Sign In"
-                      )}
-                    </Button>
-                  </form>
-                </Form>
-              </TabsContent>
-
-              <TabsContent value="register" className="space-y-4 animate-in fade-in-50 duration-300">
-                <Form {...registerForm}>
-                  <form 
-                    onSubmit={registerForm.handleSubmit((data) => registerMutation.mutate(data))} 
-                    className="space-y-4"
-                    aria-label="Registration form"
-                  >
-                    <FormField
-                      control={registerForm.control}
-                      name="fullName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Full Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} autoComplete="name" aria-required="true" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Username</FormLabel>
-                          <FormControl>
-                            <Input {...field} autoComplete="username" aria-required="true" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="password" 
-                              {...field} 
-                              autoComplete="new-password" 
-                              aria-required="true"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button 
-                      type="submit" 
-                      className="w-full transition-all hover:bg-blue-700 hover:scale-105 duration-200"
-                      disabled={registerMutation.isPending}
-                    >
-                      {registerMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          <span>Creating Account...</span>
-                        </>
-                      ) : (
-                        "Create Account"
-                      )}
-                    </Button>
-                  </form>
-                </Form>
-              </TabsContent>
-            </Tabs>
+            <AuthTabs 
+              loginForm={loginForm}
+              registerForm={registerForm}
+              loginMutation={loginMutation}
+              registerMutation={registerMutation}
+            />
           </CardContent>
         </Card>
 
         {/* Hero Section */}
         <div className="text-center lg:text-left lg:order-1 space-y-6 animate-in slide-in-from-left-8 duration-700">
-          {/* Brand Image Placeholder */}
-          <div className="w-24 h-24 mx-auto lg:mx-0 mb-6 rounded-xl bg-primary/10 flex items-center justify-center transition-transform hover:scale-105 duration-300">
-            <span className="text-xs text-center text-muted-foreground p-2">
-              [Your Brand Logo]
-            </span>
-          </div>
+          <BrandLogo size="lg" withText={false} />
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent animate-in fade-in slide-in-from-left duration-500">
-            {/* Brand Name Placeholder */}
             <span className="italic">[Your Brand]</span><br />
             USDT Exchange Platform
           </h1>
@@ -214,21 +86,168 @@ export default function AuthPage() {
             Exchange USDT for Jordanian Dinars securely and efficiently. Experience competitive rates and fast transactions.
           </p>
           <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto lg:mx-0">
-            <div className="p-4 rounded-lg bg-card/50 backdrop-blur border border-border/50 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
-              <h3 className="font-semibold text-lg mb-2">Secure Trading</h3>
-              <p className="text-muted-foreground">
-                Advanced security measures protect your transactions and personal information
-              </p>
-            </div>
-            <div className="p-4 rounded-lg bg-card/50 backdrop-blur border border-border/50 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
-              <h3 className="font-semibold text-lg mb-2">Fast Processing</h3>
-              <p className="text-muted-foreground">
-                Quick verification and speedy transaction processing
-              </p>
-            </div>
+            <FeatureCard
+              title="Secure Trading"
+              description="Advanced security measures protect your transactions and personal information"
+            />
+            <FeatureCard
+              title="Fast Processing"
+              description="Quick verification and speedy transaction processing"
+            />
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+// Separate component for auth tabs to improve readability
+function AuthTabs({ loginForm, registerForm, loginMutation, registerMutation }) {
+  return (
+    <Tabs defaultValue="login" className="space-y-4">
+      <TabsList className="grid w-full grid-cols-2 transition-colors">
+        <TabsTrigger value="login" className="data-[state=active]:animate-in data-[state=active]:fade-in">Login</TabsTrigger>
+        <TabsTrigger value="register" className="data-[state=active]:animate-in data-[state=active]:fade-in">Register</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="login" className="space-y-4 animate-in fade-in-50 duration-300">
+        <LoginForm form={loginForm} mutation={loginMutation} />
+      </TabsContent>
+
+      <TabsContent value="register" className="space-y-4 animate-in fade-in-50 duration-300">
+        <RegisterForm form={registerForm} mutation={registerMutation} />
+      </TabsContent>
+    </Tabs>
+  );
+}
+
+// Separate login form component
+function LoginForm({ form, mutation }) {
+  return (
+    <Form {...form}>
+      <form 
+        onSubmit={form.handleSubmit((data) => mutation.mutate(data))} 
+        className="space-y-4"
+        aria-label="Login form"
+      >
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Username</FormLabel>
+              <FormControl>
+                <Input {...field} autoComplete="username" aria-required="true" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input 
+                  type="password" 
+                  {...field} 
+                  autoComplete="current-password" 
+                  aria-required="true"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button 
+          type="submit" 
+          className="w-full transition-all hover:bg-blue-700 hover:scale-105 duration-200"
+          disabled={mutation.isPending}
+        >
+          {mutation.isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <span>Signing in...</span>
+            </>
+          ) : (
+            "Sign In"
+          )}
+        </Button>
+      </form>
+    </Form>
+  );
+}
+
+// Separate registration form component
+function RegisterForm({ form, mutation }) {
+  return (
+    <Form {...form}>
+      <form 
+        onSubmit={form.handleSubmit((data) => mutation.mutate(data))} 
+        className="space-y-4"
+        aria-label="Registration form"
+      >
+        <FormField
+          control={form.control}
+          name="fullName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <Input {...field} autoComplete="name" aria-required="true" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Username</FormLabel>
+              <FormControl>
+                <Input {...field} autoComplete="username" aria-required="true" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input 
+                  type="password" 
+                  {...field} 
+                  autoComplete="new-password" 
+                  aria-required="true"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button 
+          type="submit" 
+          className="w-full transition-all hover:bg-blue-700 hover:scale-105 duration-200"
+          disabled={mutation.isPending}
+        >
+          {mutation.isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <span>Creating Account...</span>
+            </>
+          ) : (
+            "Create Account"
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 }
