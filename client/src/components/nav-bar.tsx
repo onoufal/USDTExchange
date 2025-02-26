@@ -11,6 +11,7 @@ import {
 import { UserCircle, LogOut, Shield, Settings, CreditCard, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
+import { ThemeToggle } from "./theme-toggle";
 
 export default function NavBar() {
   const { user, logoutMutation } = useAuth();
@@ -60,6 +61,8 @@ export default function NavBar() {
         <LogOut className="h-4 w-4" />
         <span>Sign Out</span>
       </Button>
+
+      <ThemeToggle />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

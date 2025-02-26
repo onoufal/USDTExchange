@@ -10,6 +10,7 @@ import AdminPage from "@/pages/admin-page";
 import SettingsPage from "@/pages/settings-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import NavBar from "./components/nav-bar";
+import { ThemeProvider } from "./components/theme-provider";
 
 function Router() {
   return (
@@ -38,13 +39,15 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-background">
-        <AuthProvider>
-          <NavBar />
-          <Router />
-        </AuthProvider>
-        <Toaster />
-      </div>
+      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+        <div className="min-h-screen bg-background">
+          <AuthProvider>
+            <NavBar />
+            <Router />
+          </AuthProvider>
+          <Toaster />
+        </div>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
