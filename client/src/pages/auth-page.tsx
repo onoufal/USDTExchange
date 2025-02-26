@@ -66,32 +66,34 @@ export default function AuthPage() {
       <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mt-4 sm:mt-8 lg:mt-0">
         {/* Auth Form Section - Glassmorphic card with responsive padding */}
         <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
+          {/* Card Header with improved contrast */}
           <CardHeader className="space-y-4 sm:space-y-6 items-center text-center pb-6 sm:pb-8">
             {/* Show logo only on mobile/tablet */}
             <div className="lg:hidden">
               <BrandLogo size="md" className="transform-gpu transition-transform hover:scale-105 duration-300" />
             </div>
             <div className="space-y-2">
-              <CardTitle className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <CardTitle className="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                 Welcome to ExchangePro
               </CardTitle>
-              <p className="text-base sm:text-lg text-muted-foreground/90 leading-relaxed">
+              <p className="text-base sm:text-lg text-foreground/80 leading-relaxed">
                 Your trusted USDT exchange platform
               </p>
             </div>
           </CardHeader>
 
+          {/* Card content with improved contrast and readability */}
           <CardContent>
             {/* Auth Forms with Tab Navigation */}
             <Tabs defaultValue="login" className="space-y-6 sm:space-y-8" role="tablist" aria-label="Authentication forms">
               {/* Tab Headers */}
               <TabsList
-                className="h-[52px] grid w-full grid-cols-2 rounded-lg bg-muted/30 backdrop-blur supports-[backdrop-filter]:bg-muted/20 mt-1 p-0.5"
+                className="h-[52px] grid w-full grid-cols-2 rounded-lg bg-muted/50 backdrop-blur supports-[backdrop-filter]:bg-muted/40 mt-1 p-0.5"
                 role="tablist"
               >
                 <TabsTrigger
                   value="login"
-                  className="h-[50px] text-sm sm:text-base font-semibold flex items-center justify-center data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  className="h-[50px] min-text-[14px] text-sm sm:text-base font-semibold flex items-center justify-center data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   role="tab"
                   aria-controls="login-tab"
                   aria-selected="true"
@@ -100,7 +102,7 @@ export default function AuthPage() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="register"
-                  className="h-[50px] text-sm sm:text-base font-semibold flex items-center justify-center data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  className="h-[50px] min-text-[14px] text-sm sm:text-base font-semibold flex items-center justify-center data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   role="tab"
                   aria-controls="register-tab"
                   aria-selected="false"
@@ -139,23 +141,23 @@ export default function AuthPage() {
         <div className="hidden lg:block lg:order-1 space-y-8">
           <BrandLogo size="lg" withText={false} />
           <div className="space-y-6">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent relative drop-shadow-sm">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent relative drop-shadow-sm">
               USDT Exchange Platform
               <div className="absolute -right-8 -top-8 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
               <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
             </h1>
-            <p className="text-xl sm:text-2xl text-muted-foreground/90 leading-relaxed max-w-2xl relative z-10">
+            <p className="text-lg sm:text-xl lg:text-2xl text-foreground/80 leading-relaxed max-w-2xl relative z-10">
               Exchange USDT for Jordanian Dinars securely and efficiently. Experience competitive rates and fast transactions.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 gap-6 max-w-2xl relative pt-4">
-            <FeatureCard 
-              title="Secure Trading" 
-              description="Advanced security measures protect your transactions and personal information" 
+            <FeatureCard
+              title="Secure Trading"
+              description="Advanced security measures protect your transactions and personal information"
             />
-            <FeatureCard 
-              title="Fast Processing" 
-              description="Quick verification and speedy transaction processing" 
+            <FeatureCard
+              title="Fast Processing"
+              description="Quick verification and speedy transaction processing"
             />
           </div>
         </div>
