@@ -137,7 +137,12 @@ function LoginForm({ form, mutation }) {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input {...field} autoComplete="username" aria-required="true" />
+                <Input 
+                  {...field} 
+                  autoComplete="username" 
+                  aria-required="true"
+                  className="bg-background text-foreground"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -155,6 +160,7 @@ function LoginForm({ form, mutation }) {
                   {...field} 
                   autoComplete="current-password" 
                   aria-required="true"
+                  className="bg-background text-foreground"
                 />
               </FormControl>
               <FormMessage />
@@ -196,7 +202,12 @@ function RegisterForm({ form, mutation }) {
             <FormItem>
               <FormLabel>Full Name</FormLabel>
               <FormControl>
-                <Input {...field} autoComplete="name" aria-required="true" />
+                <Input 
+                  {...field} 
+                  autoComplete="name" 
+                  aria-required="true"
+                  className="bg-background text-foreground"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -209,7 +220,12 @@ function RegisterForm({ form, mutation }) {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input {...field} autoComplete="username" aria-required="true" />
+                <Input 
+                  {...field} 
+                  autoComplete="username" 
+                  aria-required="true"
+                  className="bg-background text-foreground"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -227,6 +243,7 @@ function RegisterForm({ form, mutation }) {
                   {...field} 
                   autoComplete="new-password" 
                   aria-required="true"
+                  className="bg-background text-foreground"
                 />
               </FormControl>
               <FormMessage />
