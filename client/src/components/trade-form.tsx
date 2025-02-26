@@ -386,6 +386,11 @@ export default function TradeForm() {
       formData.append("proofOfPayment", file);
       formData.append("network", values.network);
 
+      // Add payment method for buy orders
+      if (values.type === "buy") {
+        formData.append("paymentMethod", paymentMethod);
+      }
+
       await tradeMutation.mutateAsync(formData);
 
       // Clear form after successful submission

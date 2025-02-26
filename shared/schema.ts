@@ -69,7 +69,9 @@ export const transactions = pgTable("transactions", {
   proofOfPayment: text("proof_of_payment"),
   createdAt: timestamp("created_at").defaultNow(),
   commission: decimal("commission").default('0'),
-  fee: decimal("fee").default('0')
+  fee: decimal("fee").default('0'),
+  network: text("network"), // For USDT network (TRC20/BEP20)
+  paymentMethod: text("payment_method"), // For JOD payment method (cliq/wallet)
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -141,7 +143,8 @@ export const insertTransactionSchema = createInsertSchema(transactions)
       .transform(Number),
     commission: z.number().default(0),
     fee: z.number().default(0),
-    network: z.enum(["trc20", "bep20"]).optional()
+    network: z.enum(["trc20", "bep20"]).optional(),
+    paymentMethod: z.enum(["cliq", "wallet"]).optional()
   });
 
 // Add the bank settings schema
@@ -157,9 +160,9 @@ export const updateUserBankSchema = z.object({
 });
 
 export type UpdateUserBank = z.infer<typeof updateUserBankSchema>;
-
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;
 export type UpdateUserWallet = z.infer<typeof updateUserWalletSchema>;
 export type UpdateUserCliq = z.infer<typeof updateUserCliqSchema>;
+export type InsertTransaction = z.infer<typeof insertTransactionSchema>;

@@ -272,6 +272,7 @@ export default function AdminPage() {
                             <th className="px-4 py-3 text-left text-sm font-medium">User</th>
                             <th className="px-4 py-3 text-left text-sm font-medium">Type</th>
                             <th className="px-4 py-3 text-left text-sm font-medium">Amount</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium">Payment Method</th>
                             <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
                             <th className="px-4 py-3 text-left text-sm font-medium">Payment Details</th>
                             <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
@@ -310,6 +311,21 @@ export default function AdminPage() {
                                     </p>
                                   </div>
                                 </td>
+                                <td className="px-4 py-3 text-sm capitalize whitespace-nowrap">
+                                  {tx.type === 'buy' ? (
+                                    <div className="flex items-center gap-1">
+                                      {tx.paymentMethod === 'cliq' ? (
+                                        <span>CliQ Payment</span>
+                                      ) : (
+                                        <span>Mobile Wallet</span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-1">
+                                      <span>{tx.network?.toUpperCase() || 'N/A'}</span>
+                                    </div>
+                                  )}
+                                </td>
                                 <td className="px-4 py-3 text-sm">
                                   <span className={`inline-flex items-center gap-1.5 capitalize ${tx.status === 'approved' ? 'text-green-600' : ''}`}>
                                     {tx.status}
@@ -317,31 +333,42 @@ export default function AdminPage() {
                                   </span>
                                 </td>
                                 <td className="px-4 py-3 text-sm">
-                                  {tx.type === 'buy' && user?.usdtAddress && (
+                                  {tx.type === 'buy' ? (
                                     <div className="flex items-center gap-2">
                                       <span className="font-mono text-xs sm:text-sm">
-                                        {user.usdtAddress.slice(0, 6)}...{user.usdtAddress.slice(-4)}
+                                        {user?.usdtAddress ? (
+                                          <>
+                                            {user.usdtAddress.slice(0, 6)}...{user.usdtAddress.slice(-4)}
+                                          </>
+                                        ) : (
+                                          'No USDT address set'
+                                        )}
                                       </span>
-                                      <TooltipProvider>
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <Button
-                                              variant="ghost"
-                                              size="icon"
-                                              className="h-8 w-8"
-                                              onClick={() => copyToClipboard(user.usdtAddress!)}
-                                            >
-                                              <Copy className="h-4 w-4" />
-                                            </Button>
-                                          </TooltipTrigger>
-                                          <TooltipContent>
-                                            <p>Copy USDT address</p>
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </TooltipProvider>
+                                      {user?.usdtAddress && (
+                                        <TooltipProvider>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                                onClick={() => copyToClipboard(user.usdtAddress!)}
+                                              >
+                                                {copiedAddress === user.usdtAddress ? (
+                                                  <Check className="h-4 w-4" />
+                                                ) : (
+                                                  <Copy className="h-4 w-4" />
+                                                )}
+                                              </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                              <p>Copy USDT address</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
+                                      )}
                                     </div>
-                                  )}
-                                  {tx.type === 'sell' && user && (
+                                  ) : (
                                     <Collapsible
                                       open={openPaymentDetails === tx.id}
                                       onOpenChange={(open) => setOpenPaymentDetails(open ? tx.id : null)}
@@ -358,7 +385,7 @@ export default function AdminPage() {
                                       </CollapsibleTrigger>
                                       <CollapsibleContent className="space-y-2 mt-2">
                                         <div className="text-xs sm:text-sm space-y-1 bg-muted/50 p-2 rounded-md">
-                                          {user.cliqAlias && (
+                                          {user?.cliqAlias && (
                                             <div className="flex items-center justify-between">
                                               <p className="flex items-center gap-1">
                                                 <span className="font-medium whitespace-nowrap">CliQ Alias:</span>
@@ -389,11 +416,11 @@ export default function AdminPage() {
                                           )}
                                           <p className="flex items-center gap-1">
                                             <span className="font-medium whitespace-nowrap">Account Holder:</span>
-                                            <span>{user.accountHolderName}</span>
+                                            <span>{user?.accountHolderName}</span>
                                           </p>
                                           <p className="flex items-center gap-1">
                                             <span className="font-medium whitespace-nowrap">Bank:</span>
-                                            <span>{user.bankName}</span>
+                                            <span>{user?.bankName}</span>
                                           </p>
                                         </div>
                                       </CollapsibleContent>
