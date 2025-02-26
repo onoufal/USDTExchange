@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { insertUserSchema } from "@shared/schema";
 import { z } from "zod";
+import { Loader2 } from "lucide-react";
 
 const loginSchema = insertUserSchema.pick({
   username: true,
@@ -16,7 +17,6 @@ const loginSchema = insertUserSchema.pick({
 });
 
 export default function AuthPage() {
-  // All hooks at the top
   const { loginMutation, registerMutation, user } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -37,146 +37,157 @@ export default function AuthPage() {
     },
   });
 
-  // Handle navigation after all hooks
   if (user) {
     setLocation("/");
     return null;
   }
 
   return (
-    <div className="min-h-screen flex">
-      <div className="flex-1 flex items-center justify-center">
-        <Card className="w-[400px]">
-          <CardHeader>
-            <CardTitle>USDT Exchange Platform</CardTitle>
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background flex items-center justify-center p-4 sm:p-8">
+      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
+        {/* Auth Form Section */}
+        <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Welcome Back
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login">
+            <Tabs defaultValue="login" className="space-y-4">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Register</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="login">
+              <TabsContent value="login" className="space-y-4">
                 <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))}>
-                    <div className="space-y-4">
-                      <FormField
-                        control={loginForm.control}
-                        name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Username</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={loginForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                              <Input type="password" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button 
-                        type="submit" 
-                        className="w-full"
-                        disabled={loginMutation.isPending}
-                      >
-                        {loginMutation.isPending ? "Logging in..." : "Login"}
-                      </Button>
-                    </div>
+                  <form onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))} className="space-y-4">
+                    <FormField
+                      control={loginForm.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <Input {...field} autoComplete="username" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={loginForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <Input type="password" {...field} autoComplete="current-password" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="submit" 
+                      className="w-full transition-all"
+                      disabled={loginMutation.isPending}
+                    >
+                      {loginMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Signing in...
+                        </>
+                      ) : (
+                        "Sign In"
+                      )}
+                    </Button>
                   </form>
                 </Form>
               </TabsContent>
 
-              <TabsContent value="register">
+              <TabsContent value="register" className="space-y-4">
                 <Form {...registerForm}>
-                  <form onSubmit={registerForm.handleSubmit((data) => registerMutation.mutate(data))}>
-                    <div className="space-y-4">
-                      <FormField
-                        control={registerForm.control}
-                        name="fullName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Full Name</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={registerForm.control}
-                        name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Username</FormLabel>
-                            <FormControl>
-                              <Input {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={registerForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                              <Input type="password" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button 
-                        type="submit" 
-                        className="w-full"
-                        disabled={registerMutation.isPending}
-                      >
-                        {registerMutation.isPending ? "Creating Account..." : "Create Account"}
-                      </Button>
-                    </div>
+                  <form onSubmit={registerForm.handleSubmit((data) => registerMutation.mutate(data))} className="space-y-4">
+                    <FormField
+                      control={registerForm.control}
+                      name="fullName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} autoComplete="name" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerForm.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <Input {...field} autoComplete="username" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <Input type="password" {...field} autoComplete="new-password" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="submit" 
+                      className="w-full transition-all"
+                      disabled={registerMutation.isPending}
+                    >
+                      {registerMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        "Create Account"
+                      )}
+                    </Button>
                   </form>
                 </Form>
               </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
-      </div>
 
-      <div className="hidden lg:flex flex-1 bg-gray-50 items-center justify-center p-12">
-        <div className="max-w-lg">
-          <h1 className="text-4xl font-bold mb-6">
-            Trade USDT for JOD Safely and Securely
+        {/* Hero Section */}
+        <div className="text-center lg:text-left lg:order-1 space-y-6">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Trusted USDT Exchange Platform
           </h1>
-          <p className="text-lg text-gray-600 mb-8">
-            Join our trusted platform to exchange USDT for Jordanian Dinars. Enjoy competitive rates, quick transactions, and earn rewards with our loyalty program.
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0">
+            Exchange USDT for Jordanian Dinars securely and efficiently. Experience competitive rates and fast transactions.
           </p>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h3 className="font-semibold mb-2">Secure Trading</h3>
-              <p className="text-sm text-gray-600">
-                Your transactions are protected with industry-standard security measures
+          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto lg:mx-0">
+            <div className="p-4 rounded-lg bg-card/50 backdrop-blur border border-border/50">
+              <h3 className="font-semibold text-lg mb-2">Secure Trading</h3>
+              <p className="text-muted-foreground">
+                Advanced security measures protect your transactions and personal information
               </p>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h3 className="font-semibold mb-2">Loyalty Rewards</h3>
-              <p className="text-sm text-gray-600">
-                Earn points with every trade and enjoy exclusive benefits
+            <div className="p-4 rounded-lg bg-card/50 backdrop-blur border border-border/50">
+              <h3 className="font-semibold text-lg mb-2">Fast Processing</h3>
+              <p className="text-muted-foreground">
+                Quick verification and speedy transaction processing
               </p>
             </div>
           </div>
