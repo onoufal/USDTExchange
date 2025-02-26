@@ -34,9 +34,9 @@ export default function NavBar() {
   const navigationItems = (isMobile: boolean) => (
     <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
       {/* Points Display */}
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20">
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/15 transition-colors duration-200">
         <Wallet className="h-4 w-4" />
-        <span className="text-sm font-medium">{user.loyaltyPoints} points</span>
+        <span className="text-sm font-medium tracking-tight">{user.loyaltyPoints} points</span>
       </div>
 
       {/* Admin Panel Button */}
@@ -44,7 +44,7 @@ export default function NavBar() {
         <Button 
           variant="ghost"
           size="sm"
-          className={`flex items-center gap-2 hover:bg-primary/10 transition-all duration-300 ${
+          className={`flex items-center gap-2 font-medium transition-all duration-200 hover:bg-primary/10 ${
             isMobile ? 'w-full justify-start' : ''
           }`}
           onClick={() => {
@@ -62,7 +62,7 @@ export default function NavBar() {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start"
+          className="w-full justify-start font-medium transition-all duration-200"
           onClick={() => {
             setLocation('/settings');
             setMobileMenuOpen(false);
@@ -84,7 +84,7 @@ export default function NavBar() {
           variant="ghost"
           size="sm"
           onClick={handleLogout}
-          className="w-full justify-start text-destructive hover:text-destructive focus:text-destructive transition-colors hover:bg-destructive/10"
+          className="w-full justify-start text-destructive hover:text-destructive focus:text-destructive hover:bg-destructive/10 transition-all duration-200"
         >
           <LogOut className="h-4 w-4 mr-2" />
           Sign Out
@@ -98,7 +98,7 @@ export default function NavBar() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="flex items-center gap-2 hover:bg-primary/10 transition-all duration-300"
+              className="flex items-center gap-2 font-medium hover:bg-primary/10 transition-all duration-200"
             >
               <UserCircle className="h-4 w-4" />
               <span className="hidden sm:inline">{user.fullName}</span>
@@ -108,7 +108,7 @@ export default function NavBar() {
             <DropdownMenuItem asChild>
               <Link 
                 href="/settings" 
-                className="flex items-center gap-2 cursor-pointer transition-colors hover:bg-primary/10"
+                className="flex items-center gap-2 cursor-pointer font-medium transition-colors hover:bg-primary/10"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Settings className="h-4 w-4" />
@@ -117,7 +117,7 @@ export default function NavBar() {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
-              className="flex items-center gap-2 cursor-pointer text-destructive hover:text-destructive focus:text-destructive transition-colors hover:bg-destructive/10"
+              className="flex items-center gap-2 cursor-pointer font-medium text-destructive hover:text-destructive focus:text-destructive transition-colors hover:bg-destructive/10"
               onClick={handleLogout}
             >
               <LogOut className="h-4 w-4" />
@@ -142,7 +142,7 @@ export default function NavBar() {
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
               <CreditCard className="w-5 h-5 text-primary" />
             </div>
-            <span className="text-lg font-semibold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <span className="text-lg font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               USDT Exchange
             </span>
           </Link>
@@ -156,21 +156,30 @@ export default function NavBar() {
           <div className="md:hidden">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9 transition-colors hover:bg-primary/10">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-9 w-9 transition-colors hover:bg-primary/10"
+                >
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[85%] max-w-sm">
+              <SheetContent 
+                side="right" 
+                className="w-[85%] max-w-sm border-l border-border/40"
+              >
                 <div className="mt-6 flex flex-col gap-6">
-                  <div className="flex items-center gap-2">
-                    <UserCircle className="h-8 w-8" />
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <UserCircle className="h-6 w-6 text-primary" />
+                    </div>
                     <div className="flex flex-col">
-                      <span className="font-medium">{user.fullName}</span>
+                      <span className="font-medium tracking-tight">{user.fullName}</span>
                       <span className="text-sm text-muted-foreground">{user.username}</span>
                     </div>
                   </div>
-                  <div className="border-t" />
+                  <div className="border-t border-border/40" />
                   {navigationItems(true)}
                 </div>
               </SheetContent>
