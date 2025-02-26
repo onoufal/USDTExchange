@@ -48,10 +48,19 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background flex flex-col justify-center px-4 sm:px-6 py-8 sm:py-12 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background flex flex-col justify-center px-4 sm:px-6 py-8 sm:py-12 overflow-hidden relative">
       {/* Theme Toggle - Fixed position with responsive spacing */}
       <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50">
         <ThemeToggle />
+      </div>
+
+      {/* Decorative Background Elements */}
+      <div className="absolute inset-0 bg-grid-slate-900/[0.04] bg-[size:75px_75px] dark:bg-grid-slate-400/[0.05] -z-10" />
+      <div className="absolute inset-0 flex items-center justify-center -z-10">
+        <div className="w-full h-full max-w-7xl mx-auto">
+          <div className="absolute right-0 top-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute left-0 bottom-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        </div>
       </div>
 
       <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mt-4 sm:mt-8 lg:mt-0">
@@ -76,7 +85,7 @@ export default function AuthPage() {
             {/* Auth Forms with Tab Navigation */}
             <Tabs defaultValue="login" className="space-y-6 sm:space-y-8" role="tablist" aria-label="Authentication forms">
               {/* Tab Headers */}
-              <TabsList 
+              <TabsList
                 className="h-[52px] grid w-full grid-cols-2 rounded-lg bg-muted/30 backdrop-blur supports-[backdrop-filter]:bg-muted/20 mt-1 p-0.5"
                 role="tablist"
               >
@@ -130,14 +139,16 @@ export default function AuthPage() {
         <div className="hidden lg:block lg:order-1 space-y-8">
           <BrandLogo size="lg" withText={false} />
           <div className="space-y-4">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent relative">
               USDT Exchange Platform
+              <div className="absolute -right-8 -top-8 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
+              <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl">
+            <p className="text-xl text-muted-foreground max-w-2xl relative z-10">
               Exchange USDT for Jordanian Dinars securely and efficiently. Experience competitive rates and fast transactions.
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl">
+          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl relative">
             <FeatureCard title="Secure Trading" description="Advanced security measures protect your transactions and personal information" />
             <FeatureCard title="Fast Processing" description="Quick verification and speedy transaction processing" />
           </div>
