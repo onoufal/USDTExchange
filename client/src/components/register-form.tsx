@@ -19,7 +19,11 @@ export function RegisterForm({ form, mutation }: RegisterFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form 
+        onSubmit={form.handleSubmit(onSubmit)} 
+        className="space-y-6"
+        aria-label="Registration form"
+      >
         <FormField
           control={form.control}
           name="fullName"
@@ -31,10 +35,12 @@ export function RegisterForm({ form, mutation }: RegisterFormProps) {
                   {...field}
                   autoComplete="name"
                   aria-required="true"
+                  aria-invalid={!!form.formState.errors.fullName}
+                  aria-describedby={form.formState.errors.fullName ? "fullName-error" : undefined}
                   className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary transition-colors"
                 />
               </FormControl>
-              <FormMessage className="text-sm" />
+              <FormMessage className="text-sm" id="fullName-error" role="alert" />
             </FormItem>
           )}
         />
@@ -50,10 +56,12 @@ export function RegisterForm({ form, mutation }: RegisterFormProps) {
                   {...field}
                   autoComplete="username"
                   aria-required="true"
+                  aria-invalid={!!form.formState.errors.username}
+                  aria-describedby={form.formState.errors.username ? "username-error" : undefined}
                   className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary transition-colors"
                 />
               </FormControl>
-              <FormMessage className="text-sm" />
+              <FormMessage className="text-sm" id="username-error" role="alert" />
             </FormItem>
           )}
         />
@@ -70,10 +78,12 @@ export function RegisterForm({ form, mutation }: RegisterFormProps) {
                   {...field}
                   autoComplete="new-password"
                   aria-required="true"
+                  aria-invalid={!!form.formState.errors.password}
+                  aria-describedby={form.formState.errors.password ? "password-error" : undefined}
                   className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary transition-colors"
                 />
               </FormControl>
-              <FormMessage className="text-sm" />
+              <FormMessage className="text-sm" id="password-error" role="alert" />
             </FormItem>
           )}
         />
@@ -83,10 +93,11 @@ export function RegisterForm({ form, mutation }: RegisterFormProps) {
           size="lg"
           className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium transition-all hover:bg-primary/90 active:scale-[0.98]"
           disabled={mutation.isPending}
+          aria-live="polite"
         >
           {mutation.isPending ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
               <span>Creating Account...</span>
             </>
           ) : (

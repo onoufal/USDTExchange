@@ -68,55 +68,23 @@ export default function AuthPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" className="space-y-8">
+            <Tabs defaultValue="login" className="space-y-8" role="tablist" aria-label="Authentication forms">
               <TabsList className="grid w-full grid-cols-2 p-1 bg-muted/30 backdrop-blur supports-[backdrop-filter]:bg-muted/20 rounded-lg">
-                <TabsTrigger 
-                  value="login" 
-                  className="text-sm sm:text-base py-3.5 px-2 font-medium 
-                    data-[state=active]:bg-background 
-                    data-[state=active]:text-primary 
-                    data-[state=active]:shadow-sm 
-                    transition-colors duration-200
-                    hover:text-primary/80"
-                >
+                <TabsTrigger value="login" className="text-sm sm:text-base py-3.5 px-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" role="tab" aria-controls="login-tab" aria-selected="true">
                   Login
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="register" 
-                  className="text-sm sm:text-base py-3.5 px-2 font-medium 
-                    data-[state=active]:bg-background 
-                    data-[state=active]:text-primary 
-                    data-[state=active]:shadow-sm 
-                    transition-colors duration-200
-                    hover:text-primary/80"
-                >
+                <TabsTrigger value="register" className="text-sm sm:text-base py-3.5 px-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" role="tab" aria-controls="register-tab" aria-selected="false">
                   Register
                 </TabsTrigger>
               </TabsList>
 
               {/* Simplified tab content transitions */}
-              <div className="min-h-[320px]"> {/* Fixed minimum height to prevent content jumping */}
-                <TabsContent 
-                  value="login" 
-                  className="space-y-6
-                    data-[state=active]:animate-in
-                    data-[state=active]:fade-in-0
-                    data-[state=inactive]:animate-out
-                    data-[state=inactive]:fade-out-0
-                    duration-200"
-                >
+              <div className="min-h-[320px]">
+                <TabsContent value="login" id="login-tab" role="tabpanel" tabIndex={0} className="space-y-6 data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0 duration-200">
                   <LoginForm form={loginForm} mutation={loginMutation} />
                 </TabsContent>
 
-                <TabsContent 
-                  value="register" 
-                  className="space-y-6
-                    data-[state=active]:animate-in
-                    data-[state=active]:fade-in-0
-                    data-[state=inactive]:animate-out
-                    data-[state=inactive]:fade-out-0
-                    duration-200"
-                >
+                <TabsContent value="register" id="register-tab" role="tabpanel" tabIndex={0} className="space-y-6 data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0 duration-200">
                   <RegisterForm form={registerForm} mutation={registerMutation} />
                 </TabsContent>
               </div>
@@ -136,14 +104,8 @@ export default function AuthPage() {
             </p>
           </div>
           <div className="grid sm:grid-cols-2 gap-4 max-w-2xl">
-            <FeatureCard
-              title="Secure Trading"
-              description="Advanced security measures protect your transactions and personal information"
-            />
-            <FeatureCard
-              title="Fast Processing"
-              description="Quick verification and speedy transaction processing"
-            />
+            <FeatureCard title="Secure Trading" description="Advanced security measures protect your transactions and personal information" />
+            <FeatureCard title="Fast Processing" description="Quick verification and speedy transaction processing" />
           </div>
         </div>
       </div>
