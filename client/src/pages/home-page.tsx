@@ -43,7 +43,7 @@ export default function HomePage() {
               Your trusted platform for USDT-JOD exchange
             </p>
           </div>
-          {/* Decorative elements remain unchanged */}
+          {/* Decorative elements */}
           <div className="absolute right-0 top-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10" />
           <div className="absolute left-1/4 bottom-0 w-48 h-48 bg-primary/3 rounded-full blur-2xl -z-10" />
         </div>
@@ -52,8 +52,8 @@ export default function HomePage() {
           {/* Main Content Area */}
           <div className="lg:col-span-8 space-y-8">
             {/* Trading Card */}
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur overflow-hidden">
-              <CardHeader className="space-y-3 p-6">
+            <Card className="border border-border/40 shadow-lg shadow-primary/5 bg-card/50 backdrop-blur-sm rounded-xl overflow-hidden transition-shadow hover:shadow-xl">
+              <CardHeader className="space-y-3 p-6 border-b border-border/40">
                 <CardTitle asChild>
                   <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent tracking-tight">
                     Trade USDT
@@ -63,7 +63,7 @@ export default function HomePage() {
                   Buy or sell USDT for Jordanian Dinar (JOD)
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-6 pt-0">
+              <CardContent className="p-6">
                 {showKYCWarning ? (
                   <Alert variant="destructive" className="bg-destructive/10 border-destructive/30">
                     <AlertCircle className="h-5 w-5" />
@@ -78,17 +78,17 @@ export default function HomePage() {
             </Card>
 
             {/* Transaction History */}
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur">
-              <CardHeader className="p-6">
+            <Card className="border border-border/40 shadow-lg shadow-primary/5 bg-card/50 backdrop-blur-sm rounded-xl overflow-hidden transition-shadow hover:shadow-xl">
+              <CardHeader className="p-6 border-b border-border/40">
                 <CardTitle asChild>
                   <h2 className="text-2xl font-bold tracking-tight">Recent Transactions</h2>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 pt-0">
+              <CardContent className="p-6">
                 <div className="overflow-x-auto -mx-6">
                   <div className="min-w-full inline-block align-middle">
-                    <div className="overflow-hidden rounded-lg border bg-background/50">
-                      <table className="min-w-full divide-y divide-border">
+                    <div className="overflow-hidden rounded-lg border border-border/40 bg-background/50">
+                      <table className="min-w-full divide-y divide-border/40">
                         <thead>
                           <tr className="bg-muted/50">
                             <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type</th>
@@ -98,7 +98,7 @@ export default function HomePage() {
                             <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-border text-[15px]">
+                        <tbody className="divide-y divide-border/40 text-[15px]">
                           {sortTransactions(transactions)?.map((tx) => (
                             <tr key={tx.id} className="hover:bg-muted/50 transition-colors">
                               <td className="px-6 py-4 font-medium capitalize">
@@ -143,7 +143,7 @@ export default function HomePage() {
                               <td className="px-6 py-4 font-mono">{tx.rate}</td>
                               <td className="px-6 py-4">
                                 <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                                  tx.status === 'approved' 
+                                  tx.status === 'approved'
                                     ? 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400'
                                     : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400'
                                 }`}>
@@ -173,8 +173,8 @@ export default function HomePage() {
 
           {/* Sidebar - KYC & Status Section */}
           <div className="lg:col-span-4 space-y-8">
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur sticky top-6">
-              <CardHeader className="p-6">
+            <Card className="border border-border/40 shadow-lg shadow-primary/5 bg-card/50 backdrop-blur-sm rounded-xl overflow-hidden transition-shadow hover:shadow-xl sticky top-6">
+              <CardHeader className="p-6 border-b border-border/40">
                 <CardTitle asChild>
                   <h2 className="text-2xl font-bold tracking-tight">Verification Status</h2>
                 </CardTitle>
@@ -182,7 +182,7 @@ export default function HomePage() {
                   Complete verification to start trading
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-6 pt-0">
+              <CardContent className="p-6">
                 <KYCForm />
               </CardContent>
             </Card>
