@@ -49,7 +49,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <div className="container mx-auto px-4 sm:px-6 py-8">
         {/* Welcome Section */}
-        <div className="mb-8 animate-fade-up">
+        <div className="mb-8 animate-fade-up [--animation-delay:0ms]">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Welcome back, {user.fullName}
           </h1>
@@ -59,8 +59,8 @@ export default function HomePage() {
         </div>
 
         {/* Quick Actions Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 animate-fade-up [--animation-delay:200ms]">
-          <Link href="#trade-form" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          <Link href="#trade-form" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300 animate-fade-up [--animation-delay:100ms]">
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
               <CardContent className="p-6 flex items-center gap-4">
                 <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
@@ -74,7 +74,7 @@ export default function HomePage() {
             </Card>
           </Link>
 
-          <Link href="/settings" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300">
+          <Link href="/settings" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300 animate-fade-up [--animation-delay:200ms]">
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
               <CardContent className="p-6 flex items-center gap-4">
                 <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
@@ -88,7 +88,7 @@ export default function HomePage() {
             </Card>
           </Link>
 
-          <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 cursor-pointer">
+          <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 cursor-pointer animate-fade-up [--animation-delay:300ms]">
             <CardContent className="p-6 flex items-center gap-4">
               <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
                 <Share2 className="w-5 h-5 text-primary" />
@@ -106,7 +106,7 @@ export default function HomePage() {
           {/* Main Trading and Transactions Column */}
           <div className="lg:col-span-8 space-y-6">
             {/* Trading Card */}
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up">
+            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up [--animation-delay:400ms]">
               <CardHeader className="px-6 py-5">
                 <div className="flex items-center gap-2">
                   <ClipboardList className="w-5 h-5 text-primary" />
@@ -121,7 +121,7 @@ export default function HomePage() {
                           <span className="sr-only">Trade info</span>
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent side="right" align="center" className="max-w-[300px] p-3">
+                      <TooltipContent side="right" align="center" className="p-3 max-w-[300px]">
                         <p className="text-sm">
                           Exchange USDT for JOD or vice versa at competitive rates. Trades are processed within 24 hours after verification.
                         </p>
@@ -147,8 +147,8 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            {/* Transaction History - REPLACED with edited code */}
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up [--animation-delay:400ms]">
+            {/* Transaction History */}
+            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up [--animation-delay:500ms]">
               <CardHeader className="px-6 py-5">
                 <div className="flex items-center gap-2">
                   <History className="w-5 h-5 text-primary" />
