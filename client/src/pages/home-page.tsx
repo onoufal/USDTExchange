@@ -161,8 +161,10 @@ export default function HomePage() {
                 </CardHeader>
                 <CardContent id="trade-form" className="px-4 sm:px-6 pb-4 sm:pb-6">
                   {showKYCWarning ? (
-                    <Alert variant="warning" className="flex items-start gap-3">
-                      <AlertCircle className="mt-0.5" aria-hidden="true" />
+                    <Alert variant="warning" className="flex items-center gap-3">
+                      <div className="shrink-0">
+                        <AlertCircle className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
+                      </div>
                       <AlertDescription className="text-sm sm:text-base font-medium">
                         Please complete mobile verification and KYC before trading
                       </AlertDescription>

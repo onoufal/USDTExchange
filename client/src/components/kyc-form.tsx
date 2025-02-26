@@ -194,11 +194,13 @@ export default function KYCForm() {
 
             {!user?.mobileVerified && (
               <>
-                <Alert className="flex items-start gap-2">
-                  <Info className="h-4 w-4 mt-1 shrink-0" />
-                  <div className="flex-1">
-                    <AlertTitle>Verification Steps</AlertTitle>
-                    <AlertDescription className="text-sm space-y-1.5 mt-1">
+                <Alert variant="default" className="flex items-start gap-3 bg-muted/50">
+                  <div className="shrink-0 mt-0.5">
+                    <Info className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+                  </div>
+                  <div className="space-y-1">
+                    <AlertTitle className="text-base font-semibold">Verification Steps</AlertTitle>
+                    <AlertDescription className="text-sm space-y-2">
                       <p>1. Enter your Jordanian mobile number</p>
                       <p>2. Receive verification code via SMS</p>
                       <p>3. Enter code to complete verification</p>
@@ -207,8 +209,8 @@ export default function KYCForm() {
                 </Alert>
 
                 <Form {...mobileForm}>
-                  <form 
-                    onSubmit={mobileForm.handleSubmit((data) => mobileVerificationMutation.mutate(data))} 
+                  <form
+                    onSubmit={mobileForm.handleSubmit((data) => mobileVerificationMutation.mutate(data))}
                     className="space-y-4"
                   >
                     <FormField
@@ -255,11 +257,11 @@ export default function KYCForm() {
                 </div>
                 <h3 className="text-lg font-medium">ID Verification</h3>
               </div>
-              <Badge 
+              <Badge
                 variant={
                   user?.kycStatus === "approved" ? "default" :
-                  user?.kycStatus === "pending" ? "secondary" : "destructive"
-                } 
+                    user?.kycStatus === "pending" ? "secondary" : "destructive"
+                }
                 className="font-medium"
               >
                 {user?.kycStatus === "approved" ? (
@@ -269,11 +271,11 @@ export default function KYCForm() {
                 ) : (
                   <XCircle className="w-4 h-4 mr-1.5" />
                 )}
-                {user?.kycStatus === "approved" 
-                  ? "Verified" 
-                  : user?.kycStatus === "pending" 
-                  ? "Pending Review" 
-                  : "Required"}
+                {user?.kycStatus === "approved"
+                  ? "Verified"
+                  : user?.kycStatus === "pending"
+                    ? "Pending Review"
+                    : "Required"}
               </Badge>
             </div>
 
