@@ -187,23 +187,23 @@ export default function AdminPage() {
                 ) : (
                   <div className="overflow-x-auto -mx-4 sm:mx-0">
                     <div className="min-w-full inline-block align-middle">
-                      <div className="overflow-hidden rounded-lg border bg-background/50">
-                        <table className="min-w-full divide-y divide-border">
+                      <div className="overflow-hidden rounded-lg border bg-card dark:bg-card/50">
+                        <table className="min-w-full divide-y divide-border dark:divide-border/50">
                           <thead>
-                            <tr className="bg-muted/50">
-                              <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium">Username</th>
-                              <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium hidden sm:table-cell">Full Name</th>
-                              <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium hidden sm:table-cell">Mobile</th>
-                              <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium">KYC Status</th>
-                              <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium">Actions</th>
+                            <tr className="bg-muted/50 dark:bg-muted/20">
+                              <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium text-muted-foreground dark:text-muted-foreground/70">Username</th>
+                              <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium text-muted-foreground dark:text-muted-foreground/70 hidden sm:table-cell">Full Name</th>
+                              <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium text-muted-foreground dark:text-muted-foreground/70 hidden sm:table-cell">Mobile</th>
+                              <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium text-muted-foreground dark:text-muted-foreground/70">KYC Status</th>
+                              <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium text-muted-foreground dark:text-muted-foreground/70">Actions</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-border bg-background">
+                          <tbody className="divide-y divide-border dark:divide-border/50">
                             {users?.map((user) => (
-                              <tr key={user.id} className="hover:bg-muted/50 transition-colors">
-                                <td className="whitespace-nowrap px-4 py-4 text-sm">{user.username}</td>
-                                <td className="whitespace-nowrap px-4 py-4 text-sm hidden sm:table-cell">{user.fullName}</td>
-                                <td className="whitespace-nowrap px-4 py-4 text-sm hidden sm:table-cell">{user.mobileNumber || 'Not verified'}</td>
+                              <tr key={user.id} className="hover:bg-muted/50 dark:hover:bg-muted/10 transition-colors">
+                                <td className="whitespace-nowrap px-4 py-4 text-sm text-muted-foreground dark:text-muted-foreground/70">{user.username}</td>
+                                <td className="whitespace-nowrap px-4 py-4 text-sm text-muted-foreground dark:text-muted-foreground/70 hidden sm:table-cell">{user.fullName}</td>
+                                <td className="whitespace-nowrap px-4 py-4 text-sm text-muted-foreground dark:text-muted-foreground/70 hidden sm:table-cell">{user.mobileNumber || 'Not verified'}</td>
                                 <td className="whitespace-nowrap px-4 py-4 text-sm">
                                   <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                     user.kycStatus === 'approved'
@@ -277,25 +277,25 @@ export default function AdminPage() {
                 ) : (
                   <div className="overflow-x-auto -mx-4 sm:mx-0">
                     <div className="min-w-full inline-block align-middle">
-                      <div className="overflow-hidden rounded-lg border bg-background/50">
-                        <table className="min-w-full divide-y divide-border">
+                      <div className="overflow-hidden rounded-lg border bg-card dark:bg-card/50">
+                        <table className="min-w-full divide-y divide-border dark:divide-border/50">
                           <thead>
-                            <tr className="bg-muted/50">
-                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider">User</th>
-                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider">Type</th>
-                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
-                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider">Payment Method</th>
-                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider">Status</th>
-                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider">Payment Details</th>
-                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+                            <tr className="bg-muted/50 dark:bg-muted/20">
+                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">User</th>
+                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">Type</th>
+                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">Amount</th>
+                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">Payment Method</th>
+                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">Status</th>
+                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">Payment Details</th>
+                              <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">Actions</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-border">
+                          <tbody className="divide-y divide-border dark:divide-border/50">
                             {sortTransactions(transactions)?.map((tx) => {
                               const user = users?.find(u => u.id === tx.userId);
                               return (
-                                <tr key={tx.id} className="transition-colors hover:bg-muted/50">
-                                  <td className="px-4 py-4 text-sm">{user?.username}</td>
+                                <tr key={tx.id} className="transition-colors hover:bg-muted/50 dark:hover:bg-muted/10">
+                                  <td className="px-4 py-4 text-sm text-muted-foreground dark:text-muted-foreground/70">{user?.username}</td>
                                   <td className="px-4 py-4 text-sm capitalize">
                                     <span className={tx.type === 'buy' ? 'text-green-600' : 'text-blue-600'}>
                                       {tx.type}
@@ -335,7 +335,7 @@ export default function AdminPage() {
                                       </p>
                                     </div>
                                   </td>
-                                  <td className="px-4 py-4 text-sm capitalize whitespace-nowrap">
+                                  <td className="px-4 py-4 text-sm capitalize whitespace-nowrap text-muted-foreground dark:text-muted-foreground/70">
                                     {tx.type === 'buy' ? (
                                       <div className="flex items-center gap-1">
                                         {tx.paymentMethod === 'cliq' ? (
@@ -364,7 +364,7 @@ export default function AdminPage() {
                                       {tx.status === 'approved' && <Check className="h-3 w-3" />}
                                     </span>
                                   </td>
-                                  <td className="px-4 py-4 text-sm">
+                                  <td className="px-4 py-4 text-sm text-muted-foreground dark:text-muted-foreground/70">
                                     {tx.type === 'buy' ? (
                                       <div className="flex items-center gap-2">
                                         <span className="font-mono text-xs sm:text-sm">
@@ -416,7 +416,7 @@ export default function AdminPage() {
                                           </Button>
                                         </CollapsibleTrigger>
                                         <CollapsibleContent className="space-y-2 mt-2">
-                                          <div className="text-xs sm:text-sm space-y-1 bg-muted/50 p-2 rounded-md">
+                                          <div className="text-xs sm:text-sm space-y-1 bg-muted/50 p-2 rounded-md text-muted-foreground dark:text-muted-foreground/70">
                                             {user?.cliqAlias && (
                                               <div className="flex items-center justify-between">
                                                 <p className="flex items-center gap-1">
@@ -448,18 +448,18 @@ export default function AdminPage() {
                                             )}
                                             <p className="flex items-center gap-1">
                                               <span className="font-medium whitespace-nowrap">Account Holder:</span>
-                                              <span>{user?.accountHolderName}</span>
+                                              <span className="text-muted-foreground dark:text-muted-foreground/70">{user?.accountHolderName}</span>
                                             </p>
                                             <p className="flex items-center gap-1">
                                               <span className="font-medium whitespace-nowrap">Bank:</span>
-                                              <span>{user?.bankName}</span>
+                                              <span className="text-muted-foreground dark:text-muted-foreground/70">{user?.bankName}</span>
                                             </p>
                                           </div>
                                         </CollapsibleContent>
                                       </Collapsible>
                                     )}
                                   </td>
-                                  <td className="px-4 py-4">
+                                  <td className="px-4 py-4 text-muted-foreground dark:text-muted-foreground/70">
                                     {tx.status === 'pending' && (
                                       <div className="flex flex-col sm:flex-row gap-2">
                                         <Button
