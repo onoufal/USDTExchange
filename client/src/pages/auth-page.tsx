@@ -77,12 +77,12 @@ export default function AuthPage() {
             <Tabs defaultValue="login" className="space-y-6 sm:space-y-8" role="tablist" aria-label="Authentication forms">
               {/* Tab Headers */}
               <TabsList 
-                className="h-[52px] items-center justify-center text-muted-foreground grid w-full grid-cols-2 p-1 bg-muted/30 backdrop-blur supports-[backdrop-filter]:bg-muted/20 rounded-lg"
+                className="h-[52px] grid w-full grid-cols-2 rounded-lg bg-muted/30 backdrop-blur supports-[backdrop-filter]:bg-muted/20 p-1"
                 role="tablist"
               >
                 <TabsTrigger
                   value="login"
-                  className="text-sm sm:text-base h-[52px] py-0 px-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  className="h-[50px] flex items-center justify-center text-sm sm:text-base font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   role="tab"
                   aria-controls="login-tab"
                   aria-selected="true"
@@ -91,7 +91,7 @@ export default function AuthPage() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="register"
-                  className="text-sm sm:text-base h-[52px] py-0 px-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  className="h-[50px] flex items-center justify-center text-sm sm:text-base font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   role="tab"
                   aria-controls="register-tab"
                   aria-selected="false"
