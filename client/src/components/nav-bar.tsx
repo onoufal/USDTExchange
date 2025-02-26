@@ -31,8 +31,8 @@ export default function NavBar() {
     return null;
   }
 
-  const navigationItems = (
-    <div className="flex items-center gap-4">
+  const navigationItems = (isMobile: boolean) => (
+    <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
       {/* Points Display */}
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20">
         <Wallet className="h-4 w-4" />
@@ -44,7 +44,9 @@ export default function NavBar() {
         <Button 
           variant="ghost"
           size="sm"
-          className="flex items-center gap-2 hover:bg-primary/10 transition-all duration-300"
+          className={`flex items-center gap-2 hover:bg-primary/10 transition-all duration-300 ${
+            isMobile ? 'w-full justify-start' : ''
+          }`}
           onClick={() => {
             setLocation('/admin');
             setMobileMenuOpen(false);
@@ -55,42 +57,75 @@ export default function NavBar() {
         </Button>
       )}
 
-      {/* Theme Toggle */}
-      <ThemeToggle />
+      {/* Settings Link - Only show in mobile menu */}
+      {isMobile && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start"
+          onClick={() => {
+            setLocation('/settings');
+            setMobileMenuOpen(false);
+          }}
+        >
+          <Settings className="h-4 w-4 mr-2" />
+          Settings
+        </Button>
+      )}
 
-      {/* User Menu */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="flex items-center gap-2 hover:bg-primary/10 transition-all duration-300"
-          >
-            <UserCircle className="h-4 w-4" />
-            <span className="hidden sm:inline">{user.fullName}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem asChild>
-            <Link 
-              href="/settings" 
-              className="flex items-center gap-2 cursor-pointer transition-colors hover:bg-primary/10"
-              onClick={() => setMobileMenuOpen(false)}
+      {/* Theme Toggle */}
+      <div className={isMobile ? 'w-full' : ''}>
+        <ThemeToggle />
+      </div>
+
+      {/* Sign Out Button - Only show in mobile menu */}
+      {isMobile && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleLogout}
+          className="w-full justify-start text-destructive hover:text-destructive focus:text-destructive transition-colors hover:bg-destructive/10"
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Sign Out
+        </Button>
+      )}
+
+      {/* User Menu - Only show on desktop */}
+      {!isMobile && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="flex items-center gap-2 hover:bg-primary/10 transition-all duration-300"
             >
-              <Settings className="h-4 w-4" />
-              Settings
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem 
-            className="flex items-center gap-2 cursor-pointer text-destructive hover:text-destructive focus:text-destructive transition-colors hover:bg-destructive/10"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+              <UserCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">{user.fullName}</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem asChild>
+              <Link 
+                href="/settings" 
+                className="flex items-center gap-2 cursor-pointer transition-colors hover:bg-primary/10"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem 
+              className="flex items-center gap-2 cursor-pointer text-destructive hover:text-destructive focus:text-destructive transition-colors hover:bg-destructive/10"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 
@@ -114,7 +149,7 @@ export default function NavBar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-4">
-            {navigationItems}
+            {navigationItems(false)}
           </div>
 
           {/* Mobile Navigation */}
@@ -123,11 +158,20 @@ export default function NavBar() {
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-9 w-9 transition-colors hover:bg-primary/10">
                   <Menu className="h-5 w-5" />
+                  <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-3/4 max-w-sm">
-                <div className="flex flex-col gap-4 mt-8">
-                  {navigationItems}
+              <SheetContent side="right" className="w-[85%] max-w-sm">
+                <div className="mt-6 flex flex-col gap-6">
+                  <div className="flex items-center gap-2">
+                    <UserCircle className="h-8 w-8" />
+                    <div className="flex flex-col">
+                      <span className="font-medium">{user.fullName}</span>
+                      <span className="text-sm text-muted-foreground">{user.username}</span>
+                    </div>
+                  </div>
+                  <div className="border-t" />
+                  {navigationItems(true)}
                 </div>
               </SheetContent>
             </Sheet>
