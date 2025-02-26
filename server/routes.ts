@@ -190,8 +190,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.file) return res.status(400).json({ message: "No payment proof uploaded" });
 
     try {
-      // Add request body logging
-      console.log('Trade request body:', req.body);
+      // Debug logging for request body
+      console.log('Trade request body:', {
+        type: req.body.type,
+        amount: req.body.amount,
+        network: req.body.network,
+        paymentMethod: req.body.paymentMethod
+      });
 
       const schema = z.object({
         type: z.enum(["buy", "sell"]),
@@ -205,7 +210,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         network: z.enum(["trc20", "bep20"]).optional(),
         paymentMethod: z.enum(["cliq", "wallet"]).optional(),
       }).refine((data) => {
-        // Require network field for sell orders
         if (data.type === "sell" && !data.network) {
           return false;
         }
@@ -217,11 +221,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const data = schema.parse(req.body);
 
-      // Log parsed data
-      console.log('Parsed trade data:', data);
+      // Debug logging for parsed data
+      console.log('Parsed trade data:', {
+        ...data,
+        network: data.network,
+        paymentMethod: data.paymentMethod
+      });
 
-      // Create transaction with required fields
-      const transaction = await storage.createTransaction({
+      const transactionData = {
         userId: req.user.id,
         type: data.type,
         amount: data.amount.toString(),
@@ -229,12 +236,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "pending",
         proofOfPayment: req.file.buffer.toString("base64"),
         createdAt: new Date(),
-        network: data.type === "sell" ? data.network : undefined,
-        paymentMethod: data.type === "buy" ? data.paymentMethod : undefined,
+        network: data.type === "sell" ? data.network : null,
+        paymentMethod: data.type === "buy" ? data.paymentMethod : null,
+      };
+
+      // Debug logging for transaction data before storage
+      console.log('Transaction data before storage:', {
+        ...transactionData,
+        network: transactionData.network,
+        paymentMethod: transactionData.paymentMethod
       });
 
-      // Log created transaction
-      console.log('Created transaction:', transaction);
+      const transaction = await storage.createTransaction(transactionData);
+
+      // Debug logging for created transaction
+      console.log('Created transaction:', {
+        ...transaction,
+        network: transaction.network,
+        paymentMethod: transaction.paymentMethod
+      });
 
       res.json(transaction);
     } catch (error) {
