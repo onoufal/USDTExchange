@@ -6,13 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { insertUserSchema } from "@shared/schema";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { FeatureCard } from "@/components/ui/feature-card";
 import { ThemeToggle } from "@/components/theme-toggle";
+import type { UseMutationResult } from "@tanstack/react-query";
+import type { LoginData, InsertUser } from "@shared/types"; // Assuming these types are defined elsewhere
+
 
 // Validation schema for login form
 const loginSchema = insertUserSchema.pick({
@@ -100,6 +103,7 @@ export default function AuthPage() {
 
               <TabsContent 
                 value="login" 
+                role="tabpanel"
                 className="space-y-6 
                   data-[state=active]:animate-in 
                   data-[state=active]:fade-in-50 
@@ -114,6 +118,7 @@ export default function AuthPage() {
 
               <TabsContent 
                 value="register" 
+                role="tabpanel"
                 className="space-y-6 
                   data-[state=active]:animate-in 
                   data-[state=active]:fade-in-50 
@@ -156,7 +161,10 @@ export default function AuthPage() {
   );
 }
 
-function LoginForm({ form, mutation }) {
+function LoginForm({ form, mutation }: { 
+  form: UseFormReturn<LoginData>;
+  mutation: UseMutationResult<any, Error, LoginData>;
+}) {
   return (
     <Form {...form}>
       <form
@@ -220,7 +228,10 @@ function LoginForm({ form, mutation }) {
   );
 }
 
-function RegisterForm({ form, mutation }) {
+function RegisterForm({ form, mutation }: {
+  form: UseFormReturn<InsertUser>;
+  mutation: UseMutationResult<any, Error, InsertUser>;
+}) {
   return (
     <Form {...form}>
       <form
