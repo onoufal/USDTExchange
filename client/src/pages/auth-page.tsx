@@ -72,10 +72,10 @@ export default function AuthPage() {
               <BrandLogo size="md" className="transform-gpu transition-transform hover:scale-105 duration-300" />
             </div>
             <div className="space-y-2">
-              <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <CardTitle className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                 Welcome to ExchangePro
               </CardTitle>
-              <p className="text-sm sm:text-base text-muted-foreground">
+              <p className="text-base sm:text-lg text-muted-foreground/90 leading-relaxed">
                 Your trusted USDT exchange platform
               </p>
             </div>
@@ -91,7 +91,7 @@ export default function AuthPage() {
               >
                 <TabsTrigger
                   value="login"
-                  className="h-[50px] flex items-center justify-center text-sm sm:text-base font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  className="h-[50px] text-sm sm:text-base font-semibold flex items-center justify-center data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   role="tab"
                   aria-controls="login-tab"
                   aria-selected="true"
@@ -100,7 +100,7 @@ export default function AuthPage() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="register"
-                  className="h-[50px] flex items-center justify-center text-sm sm:text-base font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  className="h-[50px] text-sm sm:text-base font-semibold flex items-center justify-center data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   role="tab"
                   aria-controls="register-tab"
                   aria-selected="false"
@@ -138,21 +138,28 @@ export default function AuthPage() {
         {/* Hero Section - Only visible on desktop */}
         <div className="hidden lg:block lg:order-1 space-y-8">
           <BrandLogo size="lg" withText={false} />
-          <div className="space-y-4">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent relative">
+          <div className="space-y-6">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent relative drop-shadow-sm">
               USDT Exchange Platform
               <div className="absolute -right-8 -top-8 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
               <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl relative z-10">
+            <p className="text-xl sm:text-2xl text-muted-foreground/90 leading-relaxed max-w-2xl relative z-10">
               Exchange USDT for Jordanian Dinars securely and efficiently. Experience competitive rates and fast transactions.
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl relative">
-            <FeatureCard title="Secure Trading" description="Advanced security measures protect your transactions and personal information" />
-            <FeatureCard title="Fast Processing" description="Quick verification and speedy transaction processing" />
+          <div className="grid sm:grid-cols-2 gap-6 max-w-2xl relative pt-4">
+            <FeatureCard 
+              title="Secure Trading" 
+              description="Advanced security measures protect your transactions and personal information" 
+            />
+            <FeatureCard 
+              title="Fast Processing" 
+              description="Quick verification and speedy transaction processing" 
+            />
           </div>
         </div>
+
       </div>
     </div>
   );
