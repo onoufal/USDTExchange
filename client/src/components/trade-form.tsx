@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -392,37 +392,33 @@ export default function TradeForm() {
     }
 
     try {
-      // If the user typed the "foreign" currency, we use the already-converted 'equivalentAmount'
       const finalInputAmount = currencyBasis === "foreign" ? equivalentAmount : values.amount;
-
       const formData = new FormData();
       formData.append("type", values.type);
       formData.append("amount", finalInputAmount);
       formData.append("rate", currentRate.toString());
       formData.append("proofOfPayment", file);
 
-      // Always include network for sell orders
-      if (values.type === "sell" && values.network) {
+      // For sell orders, always include the network
+      if (values.type === "sell") {
+        if (!values.network) {
+          toast({
+            title: "Network required",
+            description: "Please select a network for sell orders",
+            variant: "destructive",
+          });
+          return;
+        }
         formData.append("network", values.network);
-        console.log('Network value being sent:', values.network); // Debug log
+        console.log('Sending sell order with network:', values.network); // Debug log
       }
 
-      // Add payment method for buy orders
+      // For buy orders, include payment method
       if (values.type === "buy") {
         formData.append("paymentMethod", paymentMethod);
       }
 
       await tradeMutation.mutateAsync(formData);
-
-      // Clear form after successful submission
-      form.reset();
-      setFile(null);
-      setUploadProgress(0);
-      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = "";
-      }
-
     } catch (error) {
       console.error("Trade submission error:", error);
       toast({
