@@ -100,35 +100,41 @@ export default function AuthPage() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent 
-                value="login" 
-                role="tabpanel"
-                className="space-y-6 
-                  data-[state=active]:animate-in 
-                  data-[state=active]:fade-in-50 
-                  data-[state=active]:slide-in-from-left-1 
-                  data-[state=inactive]:animate-out 
-                  data-[state=inactive]:fade-out-0 
-                  data-[state=inactive]:slide-out-to-right-1
-                  duration-200"
-              >
-                <LoginForm form={loginForm} mutation={loginMutation} />
-              </TabsContent>
+              <div className="relative">
+                <TabsContent 
+                  value="login" 
+                  role="tabpanel"
+                  className="space-y-6 absolute top-0 left-0 right-0
+                    data-[state=active]:relative
+                    data-[state=active]:animate-in
+                    data-[state=active]:fade-in-0
+                    data-[state=active]:zoom-in-95
+                    data-[state=inactive]:animate-out
+                    data-[state=inactive]:fade-out-0
+                    data-[state=inactive]:zoom-out-95
+                    data-[state=inactive]:absolute
+                    duration-200"
+                >
+                  <LoginForm form={loginForm} mutation={loginMutation} />
+                </TabsContent>
 
-              <TabsContent 
-                value="register" 
-                role="tabpanel"
-                className="space-y-6 
-                  data-[state=active]:animate-in 
-                  data-[state=active]:fade-in-50 
-                  data-[state=active]:slide-in-from-right-1 
-                  data-[state=inactive]:animate-out 
-                  data-[state=inactive]:fade-out-0 
-                  data-[state=inactive]:slide-out-to-left-1
-                  duration-200"
-              >
-                <RegisterForm form={registerForm} mutation={registerMutation} />
-              </TabsContent>
+                <TabsContent 
+                  value="register" 
+                  role="tabpanel"
+                  className="space-y-6 absolute top-0 left-0 right-0
+                    data-[state=active]:relative
+                    data-[state=active]:animate-in
+                    data-[state=active]:fade-in-0
+                    data-[state=active]:zoom-in-95
+                    data-[state=inactive]:animate-out
+                    data-[state=inactive]:fade-out-0
+                    data-[state=inactive]:zoom-out-95
+                    data-[state=inactive]:absolute
+                    duration-200"
+                >
+                  <RegisterForm form={registerForm} mutation={registerMutation} />
+                </TabsContent>
+              </div>
             </Tabs>
           </CardContent>
         </Card>
