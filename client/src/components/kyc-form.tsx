@@ -352,8 +352,10 @@ export default function KYCForm() {
                         />
 
                         {user?.kycStatus === "pending" && (
-                          <Alert variant="warning" className="flex items-start gap-2">
-                            <Clock className="h-4 w-4 mt-0.5 shrink-0" />
+                          <Alert variant="warning" className="flex items-start gap-3">
+                            <div className="shrink-0 mt-0.5">
+                              <Clock className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
+                            </div>
                             <AlertDescription className="text-sm">
                               Your document is under review. We'll notify you once approved.
                             </AlertDescription>
