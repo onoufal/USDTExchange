@@ -66,7 +66,7 @@ export default function AuthPage() {
 
       <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center">
         {/* Auth Form Section - Glassmorphic card with responsive padding */}
-        <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <Card className="w-full max-w-md mx-auto lg:order-2 border-border/50 shadow-2xl bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           {/* Card Header with improved contrast and consistent spacing */}
           <CardHeader className="space-y-6 sm:space-y-8 items-center text-center pb-8 sm:pb-10">
             {/* Show logo only on mobile/tablet */}
