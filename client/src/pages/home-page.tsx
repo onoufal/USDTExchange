@@ -49,10 +49,10 @@ export default function HomePage() {
 
         {/* Quick Actions Section */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 animate-fade-up [--animation-delay:200ms]">
-          <Link href="#trade-form" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
-            <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-primary/20">
+          <Link href="#trade-form" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300">
+            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
               <CardContent className="p-6 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-200">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
                   <CreditCard className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -63,10 +63,10 @@ export default function HomePage() {
             </Card>
           </Link>
 
-          <Link href="/settings" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
-            <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-primary/20">
+          <Link href="/settings" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300">
+            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
               <CardContent className="p-6 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-200">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
                   <Settings className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -77,9 +77,9 @@ export default function HomePage() {
             </Card>
           </Link>
 
-          <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-primary/20">
+          <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 cursor-pointer">
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-200">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
                 <Share2 className="w-5 h-5 text-primary" />
               </div>
               <div>
@@ -296,6 +296,7 @@ export default function HomePage() {
               </CardContent>
             </Card>
           </div>
+
         </div>
       </div>
     </div>
