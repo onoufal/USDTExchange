@@ -63,7 +63,7 @@ export default function AuthPage() {
         </div>
       </div>
 
-      <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mt-4 sm:mt-8 lg:mt-0">
+      <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center mt-4 sm:mt-8 lg:mt-0">
         {/* Auth Form Section - Glassmorphic card with responsive padding */}
         <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           {/* Card Header with improved contrast and consistent spacing */}
@@ -93,7 +93,7 @@ export default function AuthPage() {
               >
                 <TabsTrigger
                   value="login"
-                  className="h-[50px] min-text-[14px] text-sm sm:text-base font-semibold flex items-center justify-center data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  className="h-[50px] flex items-center justify-center text-sm sm:text-base font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   role="tab"
                   aria-controls="login-tab"
                   aria-selected="true"
@@ -102,7 +102,7 @@ export default function AuthPage() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="register"
-                  className="h-[50px] min-text-[14px] text-sm sm:text-base font-semibold flex items-center justify-center data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  className="h-[50px] flex items-center justify-center text-sm sm:text-base font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   role="tab"
                   aria-controls="register-tab"
                   aria-selected="false"
