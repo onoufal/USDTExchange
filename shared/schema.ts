@@ -30,9 +30,12 @@ export const JORDANIAN_BANKS = [
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
+  username: text("username"),
   password: text("password").notNull(),
   fullName: text("full_name").notNull(),
+  verificationToken: text("verification_token"),
+  isVerified: boolean("is_verified").default(false),
   mobileNumber: text("mobile_number"),
   mobileVerified: boolean("mobile_verified").default(false),
   kycStatus: text("kyc_status").default("pending"),
@@ -42,7 +45,7 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
   usdtAddress: text("usdt_address"), 
   usdtNetwork: text("usdt_network"),
-  cliqType: text("cliq_type"), // 'alias' or 'number'
+  cliqType: text("cliq_type"),
   cliqAlias: text("cliq_alias"),
   cliqNumber: text("cliq_number"),
   accountHolderName: text("account_holder_name"),
@@ -70,15 +73,32 @@ export const transactions = pgTable("transactions", {
   createdAt: timestamp("created_at").defaultNow(),
   commission: decimal("commission").default('0'),
   fee: decimal("fee").default('0'),
-  network: text("network"), // For USDT network (TRC20/BEP20)
-  paymentMethod: text("payment_method"), // For JOD payment method (cliq/wallet)
+  network: text("network"), 
+  paymentMethod: text("payment_method"), 
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  fullName: true
-});
+export const insertUserSchema = createInsertSchema(users)
+  .pick({
+    email: true,
+    password: true,
+    fullName: true,
+    username: true,
+  })
+  .extend({
+    email: z.string()
+      .email("Please enter a valid email address")
+      .min(1, "Email is required"),
+    password: z.string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number"),
+    username: z.string()
+      .min(3, "Username must be at least 3 characters")
+      .optional(),
+    fullName: z.string()
+      .min(1, "Full name is required")
+  });
 
 export const updateUserWalletSchema = z.object({
   usdtAddress: z.string().min(1, "USDT address is required"),
@@ -147,7 +167,6 @@ export const insertTransactionSchema = createInsertSchema(transactions)
     paymentMethod: z.enum(["cliq", "wallet"]).optional()
   });
 
-// Add the bank settings schema
 export const updateUserBankSchema = z.object({
   bankName: z.enum(JORDANIAN_BANKS, {
     errorMap: () => ({ message: "Please select a bank from the list" })

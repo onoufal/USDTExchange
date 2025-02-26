@@ -10,7 +10,9 @@ export interface IStorage {
   sessionStore: Store;
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  verifyEmail(id: number): Promise<void>;
   updateUserMobile(id: number, mobile: string): Promise<void>;
   updateUserKYC(id: number, document: string): Promise<void>;
   approveKYC(id: number): Promise<void>;
@@ -52,18 +54,20 @@ export class MemStorage implements IStorage {
 
     // Create a default admin user
     this.createUser({
+      email: "admin@exchangepro.com",
       username: "admin",
       password: "admin123", // In real app, this would be hashed
       fullName: "Admin User"
     }).then(user => {
       const updatedUser = {
         ...user,
+        isVerified: true,
         role: "admin"
       };
       this.users.set(user.id, updatedUser);
     });
 
-    // Set default payment settings
+    // Default payment settings remain unchanged
     this.settings.set("buyRate", "0.71");
     this.settings.set("buyCommissionPercentage", "1.00");
     this.settings.set("sellRate", "0.71");
@@ -91,11 +95,19 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.email === email
+    );
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
     const user: User = {
       id,
       ...insertUser,
+      verificationToken: null,
+      isVerified: false,
       mobileNumber: null,
       mobileVerified: false,
       kycStatus: "pending",
@@ -116,6 +128,18 @@ export class MemStorage implements IStorage {
     };
     this.users.set(id, user);
     return user;
+  }
+
+  async verifyEmail(id: number): Promise<void> {
+    const user = this.users.get(id);
+    if (user) {
+      const updatedUser = {
+        ...user,
+        isVerified: true,
+        verificationToken: null
+      };
+      this.users.set(id, updatedUser);
+    }
   }
 
   async updateUserMobile(id: number, mobile: string): Promise<void> {

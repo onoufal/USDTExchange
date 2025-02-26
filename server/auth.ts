@@ -73,6 +73,11 @@ export function setupAuth(app: Express) {
           return done(null, false, { message: "Invalid username or password" });
         }
 
+        if (!user.isVerified) {
+          log(`Login failed: Email not verified - ${username}`);
+          return done(null, false, { message: "Please verify your email before logging in" });
+        }
+
         const isValid = await comparePasswords(password, user.password);
         if (!isValid) {
           log(`Login failed: Invalid password for ${username}`);
@@ -101,28 +106,6 @@ export function setupAuth(app: Express) {
       done(null, user);
     } catch (err) {
       done(err);
-    }
-  });
-
-  app.post("/api/register", async (req, res, next) => {
-    try {
-      const existingUser = await storage.getUserByUsername(req.body.username);
-      if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
-      }
-
-      const hashedPassword = await hashPassword(req.body.password);
-      const user = await storage.createUser({
-        ...req.body,
-        password: hashedPassword
-      });
-
-      req.login(user, (err) => {
-        if (err) return next(err);
-        res.status(201).json(user);
-      });
-    } catch (err) {
-      next(err);
     }
   });
 

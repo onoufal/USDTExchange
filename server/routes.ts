@@ -6,6 +6,8 @@ import multer from "multer";
 import { z } from "zod";
 import { updateUserWalletSchema } from "@shared/schema";
 import { updateUserCliqSchema } from "@shared/schema";
+import { randomBytes } from "crypto";
+import { sendVerificationEmail } from "./services/email";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -22,7 +24,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup auth first
   setupAuth(app);
 
-  // KYC Routes
+  // Email verification endpoint
+  app.get("/api/auth/verify", async (req, res) => {
+    const token = req.query.token as string;
+    if (!token) {
+      return res.status(400).json({ message: "Verification token is required" });
+    }
+
+    try {
+      const users = await storage.getAllUsers();
+      const user = users.find(u => u.verificationToken === token);
+
+      if (!user) {
+        return res.status(400).json({ message: "Invalid verification token" });
+      }
+
+      if (user.isVerified) {
+        return res.status(400).json({ message: "Email is already verified" });
+      }
+
+      await storage.verifyEmail(user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Email verification error:', error);
+      res.status(500).json({ message: "Failed to verify email" });
+    }
+  });
+
+  // Registration endpoint (added)
+  app.post("/api/register", async (req, res) => {
+    try {
+      const schema = z.object({
+        email: z.string().email(),
+        password: z.string().min(8),
+        // ... other registration fields
+      });
+      const { email, password, ...rest } = schema.parse(req.body);
+      const token = randomBytes(20).toString('hex');
+      const user = await storage.createUser({ email, password, verificationToken: token, isVerified: false, ...rest });
+      await sendVerificationEmail(email, token);
+      res.json({ message: "Registration successful. Please check your email for verification." });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      console.error('Registration error:', error);
+      res.status(500).json({ message: "Failed to register" });
+    }
+  });
+
+
   app.post("/api/kyc/mobile", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
