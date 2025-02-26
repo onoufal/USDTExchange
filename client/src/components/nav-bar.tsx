@@ -108,7 +108,7 @@ export default function NavBar() {
             <DropdownMenuItem asChild>
               <Link 
                 href="/settings" 
-                className="flex items-center gap-2 cursor-pointer font-medium transition-colors hover:bg-primary/10"
+                className="flex items-center gap-2 cursor-pointer font-medium transition-colors duration-200 hover:bg-primary/10 focus:bg-primary/15 focus:outline-none"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Settings className="h-4 w-4" />
@@ -117,7 +117,7 @@ export default function NavBar() {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
-              className="flex items-center gap-2 cursor-pointer font-medium text-destructive hover:text-destructive focus:text-destructive transition-colors hover:bg-destructive/10"
+              className="flex items-center gap-2 cursor-pointer font-medium text-destructive hover:text-destructive focus:text-destructive transition-colors duration-200 hover:bg-destructive/10 focus:bg-destructive/15"
               onClick={handleLogout}
             >
               <LogOut className="h-4 w-4" />
@@ -159,7 +159,7 @@ export default function NavBar() {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-9 w-9 transition-colors hover:bg-primary/10"
+                  className="h-9 w-9 transition-colors duration-200 hover:bg-primary/10"
                 >
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Open menu</span>
