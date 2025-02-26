@@ -65,9 +65,9 @@ export default function HomePage() {
               </CardHeader>
               <CardContent className="p-6">
                 {showKYCWarning ? (
-                  <Alert variant="destructive" className="bg-destructive/10 border-destructive/30">
-                    <AlertCircle className="h-5 w-5" />
-                    <AlertDescription className="text-base font-medium">
+                  <Alert variant="warning" className="flex items-start gap-3">
+                    <AlertCircle className="mt-0.5" />
+                    <AlertDescription className="ml-6 text-base font-medium">
                       Please complete mobile verification and KYC before trading
                     </AlertDescription>
                   </Alert>
