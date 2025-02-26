@@ -71,16 +71,28 @@ export default function AuthPage() {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="space-y-8">
-              <TabsList className="grid w-full grid-cols-2 p-1 bg-muted/30 rounded-lg">
+              <TabsList className="grid w-full grid-cols-2 p-1 bg-muted/30 backdrop-blur supports-[backdrop-filter]:bg-muted/20 rounded-lg">
                 <TabsTrigger 
                   value="login" 
-                  className="text-sm sm:text-base py-3.5 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200"
+                  className="text-sm sm:text-base py-3.5 px-2 font-medium 
+                    data-[state=active]:bg-background 
+                    data-[state=active]:text-primary 
+                    data-[state=active]:shadow-sm 
+                    data-[state=active]:font-semibold
+                    transition-all duration-300
+                    hover:text-primary/80"
                 >
                   Login
                 </TabsTrigger>
                 <TabsTrigger 
                   value="register" 
-                  className="text-sm sm:text-base py-3.5 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200"
+                  className="text-sm sm:text-base py-3.5 px-2 font-medium 
+                    data-[state=active]:bg-background 
+                    data-[state=active]:text-primary 
+                    data-[state=active]:shadow-sm 
+                    data-[state=active]:font-semibold
+                    transition-all duration-300
+                    hover:text-primary/80"
                 >
                   Register
                 </TabsTrigger>
@@ -88,14 +100,28 @@ export default function AuthPage() {
 
               <TabsContent 
                 value="login" 
-                className="space-y-6 data-[state=active]:animate-in data-[state=active]:fade-in-50"
+                className="space-y-6 
+                  data-[state=active]:animate-in 
+                  data-[state=active]:fade-in-50 
+                  data-[state=active]:slide-in-from-left-1 
+                  data-[state=inactive]:animate-out 
+                  data-[state=inactive]:fade-out-0 
+                  data-[state=inactive]:slide-out-to-right-1
+                  duration-200"
               >
                 <LoginForm form={loginForm} mutation={loginMutation} />
               </TabsContent>
 
               <TabsContent 
                 value="register" 
-                className="space-y-6 data-[state=active]:animate-in data-[state=active]:fade-in-50"
+                className="space-y-6 
+                  data-[state=active]:animate-in 
+                  data-[state=active]:fade-in-50 
+                  data-[state=active]:slide-in-from-right-1 
+                  data-[state=inactive]:animate-out 
+                  data-[state=inactive]:fade-out-0 
+                  data-[state=inactive]:slide-out-to-left-1
+                  duration-200"
               >
                 <RegisterForm form={registerForm} mutation={registerMutation} />
               </TabsContent>
