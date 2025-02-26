@@ -65,7 +65,7 @@ export default function AuthPage() {
 
       <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mt-4 sm:mt-8 lg:mt-0">
         {/* Auth Form Section - Glassmorphic card with responsive padding */}
-        <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
+        <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           {/* Card Header with improved contrast and consistent spacing */}
           <CardHeader className="space-y-6 sm:space-y-8 items-center text-center pb-8 sm:pb-10">
             {/* Show logo only on mobile/tablet */}
@@ -139,18 +139,18 @@ export default function AuthPage() {
 
         {/* Hero Section - Only visible on desktop */}
         <div className="hidden lg:block lg:order-1 space-y-8">
-          <BrandLogo size="lg" withText={false} />
+          <BrandLogo size="lg" withText={false} className="animate-in fade-in duration-700" />
           <div className="space-y-6">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent relative drop-shadow-sm">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent relative drop-shadow-sm animate-in fade-in slide-in-from-left-4 duration-1000 delay-300">
               USDT Exchange Platform
               <div className="absolute -right-8 -top-8 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
               <div className="absolute -left-8 -bottom-8 w-24 h-24 bg-primary/5 rounded-full blur-2xl" />
             </h1>
-            <p className="text-lg sm:text-xl lg:text-2xl text-foreground/80 leading-relaxed max-w-2xl relative z-10">
+            <p className="text-lg sm:text-xl lg:text-2xl text-foreground/80 leading-relaxed max-w-2xl relative z-10 animate-in fade-in slide-in-from-left-4 duration-1000 delay-500">
               Exchange USDT for Jordanian Dinars securely and efficiently. Experience competitive rates and fast transactions.
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 gap-6 max-w-2xl relative pt-4">
+          <div className="grid sm:grid-cols-2 gap-6 max-w-2xl relative pt-4 animate-in fade-in slide-in-from-left-4 duration-1000 delay-700">
             <FeatureCard
               title="Secure Trading"
               description="Advanced security measures protect your transactions and personal information"
@@ -161,7 +161,6 @@ export default function AuthPage() {
             />
           </div>
         </div>
-
       </div>
     </div>
   );
