@@ -322,7 +322,11 @@ export default function AdminPage() {
                                     </div>
                                   ) : (
                                     <div className="flex items-center gap-1">
-                                      <span>{tx.network ? `${tx.network.toUpperCase()} Network` : 'Network not specified'}</span>
+                                      {tx.network ? (
+                                        <span>{tx.network.toUpperCase()} Network</span>
+                                      ) : (
+                                        <span className="text-red-500">Network not specified</span>
+                                      )}
                                     </div>
                                   )}
                                 </td>

@@ -215,9 +215,14 @@ export class MemStorage implements IStorage {
       proofOfPayment: data.proofOfPayment || null,
       createdAt: new Date(),
       commission: data.commission || '0',
-      fee: data.fee || '0'
+      fee: data.fee || '0',
+      network: data.type === 'sell' ? data.network : null,
+      paymentMethod: data.type === 'buy' ? data.paymentMethod : null
     };
     this.transactions.set(id, transaction);
+
+    // Debug log to verify the transaction data
+    console.log('Transaction created in storage:', transaction);
     return transaction;
   }
 

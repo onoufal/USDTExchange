@@ -128,7 +128,6 @@ const tradeFormSchema = z.object({
     .regex(/^\d+(\.\d{1,2})?$/, "Amount must be a valid number with up to 2 decimal places"),
   network: z.enum(["trc20", "bep20"]).optional(),
 }).refine((data) => {
-  // Require network field for sell orders
   if (data.type === "sell" && !data.network) {
     return false;
   }
@@ -399,7 +398,7 @@ export default function TradeForm() {
       formData.append("rate", currentRate.toString());
       formData.append("proofOfPayment", file);
 
-      // For sell orders, always include the network
+      // For sell orders, network is required
       if (values.type === "sell") {
         if (!values.network) {
           toast({
@@ -410,7 +409,7 @@ export default function TradeForm() {
           return;
         }
         formData.append("network", values.network);
-        console.log('Sending sell order with network:', values.network); // Debug log
+        console.log('Sending sell order with network:', values.network);
       }
 
       // For buy orders, include payment method

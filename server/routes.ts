@@ -195,7 +195,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: req.body.type,
         amount: req.body.amount,
         network: req.body.network,
-        paymentMethod: req.body.paymentMethod
+        paymentMethod: req.body.paymentMethod,
+        rate: req.body.rate
       });
 
       const schema = z.object({
@@ -224,8 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Debug logging for parsed data
       console.log('Parsed trade data:', {
         ...data,
-        network: data.network,
-        paymentMethod: data.paymentMethod
+        network: data.network
       });
 
       const transactionData = {
@@ -243,8 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Debug logging for transaction data before storage
       console.log('Transaction data before storage:', {
         ...transactionData,
-        network: transactionData.network,
-        paymentMethod: transactionData.paymentMethod
+        network: transactionData.network
       });
 
       const transaction = await storage.createTransaction(transactionData);
@@ -252,8 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Debug logging for created transaction
       console.log('Created transaction:', {
         ...transaction,
-        network: transaction.network,
-        paymentMethod: transaction.paymentMethod
+        network: transaction.network
       });
 
       res.json(transaction);
