@@ -52,26 +52,28 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background flex items-center justify-center p-4 sm:p-8">
-      {/* Theme Toggle */}
-      <div className="fixed top-4 right-4 z-50">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background flex flex-col justify-center p-4 sm:p-8">
+      {/* Theme Toggle - Adjusted positioning */}
+      <div className="fixed top-6 right-6 z-50">
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
+      <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mt-12 lg:mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
         {/* Auth Form Section */}
         <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur transition-all duration-300 hover:shadow-2xl">
           <CardHeader className="space-y-4 items-center text-center">
-            <BrandLogo size="md" />
+            <div className="lg:hidden">
+              <BrandLogo size="md" />
+            </div>
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent animate-in fade-in zoom-in-95 duration-300">
               Welcome to ExchangePro
             </CardTitle>
             <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <span className="italic">[Your Brand Name]</span> - Your trusted USDT exchange platform
+              Your trusted USDT exchange platform
             </p>
           </CardHeader>
           <CardContent>
-            <AuthTabs 
+            <AuthTabs
               loginForm={loginForm}
               registerForm={registerForm}
               loginMutation={loginMutation}
@@ -80,18 +82,17 @@ export default function AuthPage() {
           </CardContent>
         </Card>
 
-        {/* Hero Section */}
-        <div className="text-center lg:text-left lg:order-1 space-y-6 animate-in slide-in-from-left-8 duration-700">
+        {/* Hero Section - Hidden on mobile, visible on larger screens */}
+        <div className="hidden lg:block lg:order-1 space-y-6 animate-in slide-in-from-left-8 duration-700">
           <BrandLogo size="lg" withText={false} />
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent animate-in fade-in slide-in-from-left duration-500">
-            <span className="italic">[Your Brand]</span><br />
             USDT Exchange Platform
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 animate-in fade-in slide-in-from-left-4 duration-700">
+          <p className="text-xl text-muted-foreground max-w-2xl animate-in fade-in slide-in-from-left-4 duration-700">
             Exchange USDT for Jordanian Dinars securely and efficiently. Experience competitive rates and fast transactions.
           </p>
-          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto lg:mx-0">
+          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl">
             <FeatureCard
               title="Secure Trading"
               description="Advanced security measures protect your transactions and personal information"
@@ -131,8 +132,8 @@ function AuthTabs({ loginForm, registerForm, loginMutation, registerMutation }) 
 function LoginForm({ form, mutation }) {
   return (
     <Form {...form}>
-      <form 
-        onSubmit={form.handleSubmit((data) => mutation.mutate(data))} 
+      <form
+        onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
         className="space-y-4"
         aria-label="Login form"
       >
@@ -143,9 +144,9 @@ function LoginForm({ form, mutation }) {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input 
-                  {...field} 
-                  autoComplete="username" 
+                <Input
+                  {...field}
+                  autoComplete="username"
                   aria-required="true"
                   className="bg-white text-black border-gray-200 focus:border-primary"
                 />
@@ -161,10 +162,10 @@ function LoginForm({ form, mutation }) {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input 
-                  type="password" 
-                  {...field} 
-                  autoComplete="current-password" 
+                <Input
+                  type="password"
+                  {...field}
+                  autoComplete="current-password"
                   aria-required="true"
                   className="bg-white text-black border-gray-200 focus:border-primary"
                 />
@@ -173,8 +174,8 @@ function LoginForm({ form, mutation }) {
             </FormItem>
           )}
         />
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="w-full transition-all hover:bg-blue-700 hover:scale-105 duration-200"
           disabled={mutation.isPending}
         >
@@ -196,8 +197,8 @@ function LoginForm({ form, mutation }) {
 function RegisterForm({ form, mutation }) {
   return (
     <Form {...form}>
-      <form 
-        onSubmit={form.handleSubmit((data) => mutation.mutate(data))} 
+      <form
+        onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
         className="space-y-4"
         aria-label="Registration form"
       >
@@ -208,9 +209,9 @@ function RegisterForm({ form, mutation }) {
             <FormItem>
               <FormLabel>Full Name</FormLabel>
               <FormControl>
-                <Input 
-                  {...field} 
-                  autoComplete="name" 
+                <Input
+                  {...field}
+                  autoComplete="name"
                   aria-required="true"
                   className="bg-white text-black border-gray-200 focus:border-primary"
                 />
@@ -226,9 +227,9 @@ function RegisterForm({ form, mutation }) {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input 
-                  {...field} 
-                  autoComplete="username" 
+                <Input
+                  {...field}
+                  autoComplete="username"
                   aria-required="true"
                   className="bg-white text-black border-gray-200 focus:border-primary"
                 />
@@ -244,10 +245,10 @@ function RegisterForm({ form, mutation }) {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input 
-                  type="password" 
-                  {...field} 
-                  autoComplete="new-password" 
+                <Input
+                  type="password"
+                  {...field}
+                  autoComplete="new-password"
                   aria-required="true"
                   className="bg-white text-black border-gray-200 focus:border-primary"
                 />
@@ -256,8 +257,8 @@ function RegisterForm({ form, mutation }) {
             </FormItem>
           )}
         />
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="w-full transition-all hover:bg-blue-700 hover:scale-105 duration-200"
           disabled={mutation.isPending}
         >
