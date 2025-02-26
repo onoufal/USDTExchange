@@ -20,7 +20,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Copy, Check, Loader2 } from "lucide-react";
+import { Upload, Copy, Check, Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
@@ -367,8 +367,8 @@ export default function TradeForm() {
         ? "JOD"
         : "USDT"
       : currencyBasis === "native"
-        ? "USDT"
-        : "JOD";
+      ? "USDT"
+      : "JOD";
   };
 
   /** Label for the "other" currency displayed as the equivalent */
@@ -378,8 +378,8 @@ export default function TradeForm() {
         ? "USDT"
         : "JOD"
       : currencyBasis === "native"
-        ? "JOD"
-        : "USDT";
+      ? "JOD"
+      : "USDT";
   };
 
   /** Final form submission handler */
@@ -494,18 +494,22 @@ export default function TradeForm() {
               <>
                 {/* Warning Alerts */}
                 {type === "sell" && !hasUsdtAddress && (
-                  <Alert variant="destructive">
+                  <Alert variant="warning" className="flex items-center gap-3">
+                    <div className="shrink-0">
+                      <AlertCircle className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
+                    </div>
                     <AlertDescription className="text-sm">
-                      Please set your CliQ account details in settings before
-                      selling
+                      Please set your CliQ account details in settings before selling
                     </AlertDescription>
                   </Alert>
                 )}
                 {type === "buy" && !hasCliqSettings && (
-                  <Alert variant="destructive">
+                  <Alert variant="warning" className="flex items-center gap-3">
+                    <div className="shrink-0">
+                      <AlertCircle className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
+                    </div>
                     <AlertDescription className="text-sm">
-                      Please set your USDT wallet address in settings before
-                      buying
+                      Please set your USDT wallet address in settings before buying
                     </AlertDescription>
                   </Alert>
                 )}
@@ -600,8 +604,8 @@ export default function TradeForm() {
                                   ? "Total to Pay"
                                   : "Total to Receive"
                                 : currencyBasis === "foreign"
-                                  ? "Total to Pay"
-                                  : "Total to Receive"}
+                                ? "Total to Pay"
+                                : "Total to Receive"}
                             </span>
                             <span className="font-mono text-base font-medium">
                               {finalAmount} {getEquivalentCurrencyLabel()}
@@ -890,8 +894,8 @@ export default function TradeForm() {
                   {isUploading
                     ? "Uploading..."
                     : tradeMutation.isPending
-                      ? "Processing..."
-                      : `Submit ${type === "buy" ? "Buy" : "Sell"} Order`}
+                    ? "Processing..."
+                    : `Submit ${type === "buy" ? "Buy" : "Sell"} Order`}
                 </Button>
               </>
             )}

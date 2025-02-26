@@ -194,8 +194,8 @@ export default function KYCForm() {
 
             {!user?.mobileVerified && (
               <>
-                <Alert variant="default" className="flex items-start gap-3 bg-muted/50">
-                  <div className="shrink-0 mt-0.5">
+                <Alert variant="default" className="flex items-center gap-3 bg-muted/50">
+                  <div className="shrink-0">
                     <Info className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
                   </div>
                   <div className="space-y-1">
@@ -209,10 +209,7 @@ export default function KYCForm() {
                 </Alert>
 
                 <Form {...mobileForm}>
-                  <form
-                    onSubmit={mobileForm.handleSubmit((data) => mobileVerificationMutation.mutate(data))}
-                    className="space-y-4"
-                  >
+                  <form onSubmit={mobileForm.handleSubmit((data) => mobileVerificationMutation.mutate(data))} className="space-y-4">
                     <FormField
                       control={mobileForm.control}
                       name="mobileNumber"
@@ -290,41 +287,45 @@ export default function KYCForm() {
               </Alert>
             ) : (
               <>
-                {user?.kycStatus === "pending" && user?.kycDocument && (
-                  <Alert variant="warning" className="flex items-start gap-3">
-                    <div className="shrink-0 mt-0.5">
+                {!user?.mobileVerified ? (
+                  <Alert variant="warning" className="flex items-center gap-3">
+                    <div className="shrink-0">
+                      <AlertCircle className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
+                    </div>
+                    <AlertDescription className="text-sm">
+                      Please verify your mobile number first
+                    </AlertDescription>
+                  </Alert>
+                ) : user?.kycStatus === "pending" && user?.kycDocument ? (
+                  <Alert variant="warning" className="flex items-center gap-3">
+                    <div className="shrink-0">
                       <Clock className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
                     </div>
                     <AlertDescription className="text-sm">
                       Your document is under review. We'll notify you once approved.
                     </AlertDescription>
                   </Alert>
-                )}
-
-                {/* Only show upload form if no document submitted or previous submission was rejected */}
-                {(!user?.kycDocument || (user?.kycStatus !== "approved" && user?.kycStatus !== "pending")) && (
+                ) : (
                   <>
-                    {!user?.kycDocument && (
-                      <Alert className="flex items-start gap-3">
-                        <div className="shrink-0 mt-0.5">
-                          <Info className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
-                        </div>
-                        <div className="flex-1">
-                          <AlertTitle className="text-base font-semibold">Document Requirements</AlertTitle>
-                          <AlertDescription className="space-y-2 mt-1">
-                            <ul className="text-sm space-y-1.5 list-disc pl-4">
-                              <li>Valid government-issued ID</li>
-                              <li>Clearly visible full name</li>
-                              <li>Not expired</li>
-                              <li>Well-lit and readable</li>
-                            </ul>
-                            <p className="text-sm text-muted-foreground">
-                              Supported formats: JPG, PNG, or PDF
-                            </p>
-                          </AlertDescription>
-                        </div>
-                      </Alert>
-                    )}
+                    <Alert variant="default" className="flex items-center gap-3 bg-muted/50">
+                      <div className="shrink-0">
+                        <Info className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+                      </div>
+                      <div className="space-y-1">
+                        <AlertTitle className="text-base font-semibold">Document Requirements</AlertTitle>
+                        <AlertDescription className="space-y-2">
+                          <ul className="text-sm space-y-1.5 list-disc pl-4">
+                            <li>Valid government-issued ID</li>
+                            <li>Clearly visible full name</li>
+                            <li>Not expired</li>
+                            <li>Well-lit and readable</li>
+                          </ul>
+                          <p className="text-sm text-muted-foreground">
+                            Supported formats: JPG, PNG, or PDF
+                          </p>
+                        </AlertDescription>
+                      </div>
+                    </Alert>
 
                     <Form {...documentForm}>
                       <form className="space-y-4">
@@ -355,7 +356,6 @@ export default function KYCForm() {
                             </FormItem>
                           )}
                         />
-
 
                         <Button
                           type="button"
