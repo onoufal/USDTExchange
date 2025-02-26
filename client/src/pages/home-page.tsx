@@ -33,13 +33,13 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-        {/* Welcome Section with improved typography */}
+        {/* Welcome Section */}
         <div className="mb-12 relative">
           <div className="max-w-2xl space-y-3">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
               Welcome back, {user.fullName}
             </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
+            <p className="text-lg sm:text-xl text-foreground/80 leading-relaxed">
               Your trusted platform for USDT-JOD exchange
             </p>
           </div>
@@ -55,11 +55,11 @@ export default function HomePage() {
             <Card className="border border-border/40 shadow-lg shadow-primary/5 bg-card/50 backdrop-blur-sm rounded-xl overflow-hidden transition-shadow hover:shadow-xl">
               <CardHeader className="space-y-3 p-6 border-b border-border/40">
                 <CardTitle asChild>
-                  <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent tracking-tight">
+                  <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent tracking-tight">
                     Trade USDT
                   </h2>
                 </CardTitle>
-                <CardDescription className="text-base sm:text-lg text-muted-foreground">
+                <CardDescription className="text-base sm:text-lg text-foreground/80">
                   Buy or sell USDT for Jordanian Dinar (JOD)
                 </CardDescription>
               </CardHeader>
@@ -98,7 +98,7 @@ export default function HomePage() {
                             <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-border/40 text-[15px]">
+                        <tbody className="divide-y divide-border/40">
                           {sortTransactions(transactions)?.map((tx) => (
                             <tr key={tx.id} className="hover:bg-muted/50 transition-colors">
                               <td className="px-6 py-4 font-medium capitalize">
@@ -178,7 +178,7 @@ export default function HomePage() {
                 <CardTitle asChild>
                   <h2 className="text-2xl font-bold tracking-tight">Verification Status</h2>
                 </CardTitle>
-                <CardDescription className="text-base text-muted-foreground">
+                <CardDescription className="text-base text-foreground/80">
                   Complete verification to start trading
                 </CardDescription>
               </CardHeader>
