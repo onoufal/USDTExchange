@@ -322,7 +322,7 @@ export default function AdminPage() {
                                     </div>
                                   ) : (
                                     <div className="flex items-center gap-1">
-                                      <span>{tx.network?.toUpperCase() || 'N/A'}</span>
+                                      <span>{tx.network?.toUpperCase() || 'Network not specified'}</span>
                                     </div>
                                   )}
                                 </td>

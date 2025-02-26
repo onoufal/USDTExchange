@@ -384,8 +384,11 @@ export default function TradeForm() {
       formData.append("amount", finalInputAmount);
       formData.append("rate", currentRate.toString());
       formData.append("proofOfPayment", file);
-      formData.append("network", values.network);
 
+      // Always include network for sell orders
+      if (values.type === "sell") {
+        formData.append("network", values.network);
+      }
       // Add payment method for buy orders
       if (values.type === "buy") {
         formData.append("paymentMethod", paymentMethod);

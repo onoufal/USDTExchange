@@ -190,6 +190,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.file) return res.status(400).json({ message: "No payment proof uploaded" });
 
     try {
+      // Add request body logging
+      console.log('Trade request body:', req.body);
+
       const schema = z.object({
         type: z.enum(["buy", "sell"]),
         amount: z.string()
@@ -199,12 +202,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rate: z.string()
           .regex(/^\d+(\.\d{1,2})?$/, "Rate must be a valid number with up to 2 decimal places")
           .transform(Number),
-        network: z.enum(["trc20", "bep20"]),
+        network: z.enum(["trc20", "bep20"]).optional(),
+        paymentMethod: z.enum(["cliq", "wallet"]).optional(),
       });
 
       const data = schema.parse(req.body);
 
-      // Create transaction
+      // Log parsed data
+      console.log('Parsed trade data:', data);
+
+      // Create transaction with required fields
       const transaction = await storage.createTransaction({
         userId: req.user.id,
         type: data.type,
@@ -213,8 +220,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "pending",
         proofOfPayment: req.file.buffer.toString("base64"),
         createdAt: new Date(),
-        network: data.network,
+        network: data.type === "sell" ? data.network : undefined,
+        paymentMethod: data.type === "buy" ? data.paymentMethod : undefined,
       });
+
+      // Log created transaction
+      console.log('Created transaction:', transaction);
 
       res.json(transaction);
     } catch (error) {
