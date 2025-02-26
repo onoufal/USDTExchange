@@ -10,8 +10,6 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 
 export default function WalletSettings() {
   const { toast } = useToast();
@@ -59,16 +57,6 @@ export default function WalletSettings() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {!user?.usdtAddress && (
-          <Alert variant="warning" className="flex items-center gap-3 mb-4">
-            <div className="shrink-0">
-              <AlertCircle className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
-            </div>
-            <AlertDescription className="text-sm">
-              Please set your USDT wallet address to receive USDT from buy orders.
-            </AlertDescription>
-          </Alert>
-        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(data => updateWalletMutation.mutate(data))} className="space-y-4">
             <FormField
@@ -120,8 +108,8 @@ export default function WalletSettings() {
               )}
             />
 
-            <Button
-              type="submit"
+            <Button 
+              type="submit" 
               className="w-full"
               disabled={updateWalletMutation.isPending}
             >

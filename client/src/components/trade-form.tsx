@@ -20,7 +20,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
-import { Upload, Copy, Check, Loader2, AlertCircle } from "lucide-react";
+import { Upload, Copy, Check, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
@@ -30,7 +30,7 @@ function calculateEquivalentAmount(
   amount: string,
   tradeType: "buy" | "sell",
   currencyBasis: "native" | "foreign",
-  rate: number,
+  rate: number
 ): string {
   const num = Number(amount) || 0;
   if (tradeType === "buy") {
@@ -51,7 +51,7 @@ function calculateCommission(
   tradeType: "buy" | "sell",
   currencyBasis: "native" | "foreign",
   rate: number,
-  commission: number,
+  commission: number
 ): string {
   const commissionRate = commission / 100; // Convert percentage to decimal
   const num = Number(amount) || 0;
@@ -90,7 +90,7 @@ function calculateFinalAmount(
   tradeType: "buy" | "sell",
   currencyBasis: "native" | "foreign",
   rate: number,
-  commission: number,
+  commission: number
 ): string {
   const commissionRate = commission / 100; // Convert percentage to decimal
   const num = Number(amount) || 0;
@@ -121,30 +121,21 @@ function calculateFinalAmount(
   }
 }
 
-const tradeFormSchema = z
-  .object({
-    type: z.enum(["buy", "sell"]),
-    amount: z
-      .string()
-      .min(1, "Amount is required")
-      .regex(
-        /^\d+(\.\d{1,2})?$/,
-        "Amount must be a valid number with up to 2 decimal places",
-      ),
-    network: z.enum(["trc20", "bep20"]).optional(),
-  })
-  .refine(
-    (data) => {
-      if (data.type === "sell" && !data.network) {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "Network is required for sell orders",
-      path: ["network"],
-    },
-  );
+const tradeFormSchema = z.object({
+  type: z.enum(["buy", "sell"]),
+  amount: z.string()
+    .min(1, "Amount is required")
+    .regex(/^\d+(\.\d{1,2})?$/, "Amount must be a valid number with up to 2 decimal places"),
+  network: z.enum(["trc20", "bep20"]).optional(),
+}).refine((data) => {
+  if (data.type === "sell" && !data.network) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Network is required for sell orders",
+  path: ["network"]
+});
 
 export default function TradeForm() {
   const { toast } = useToast();
@@ -154,9 +145,7 @@ export default function TradeForm() {
   const [uploadProgress, setUploadProgress] = useState(0);
 
   /** For currency basis selection */
-  const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">(
-    "native",
-  );
+  const [currencyBasis, setCurrencyBasis] = useState<"native" | "foreign">("native");
 
   /** Single field to track which item is currently "copying" for the UI icon states. */
   const [copyingField, setCopyingField] = useState<null | string>(null);
@@ -207,50 +196,31 @@ export default function TradeForm() {
   }, [type, network, form]);
 
   // Get the appropriate rate and commission based on trade type, converting strings to numbers
-  const currentRate =
-    type === "buy"
-      ? Number(paymentSettings?.buyRate || 0)
-      : Number(paymentSettings?.sellRate || 0);
-  const currentCommission =
-    type === "buy"
-      ? Number(paymentSettings?.buyCommissionPercentage || 0)
-      : Number(paymentSettings?.sellCommissionPercentage || 0);
+  const currentRate = type === "buy"
+    ? Number(paymentSettings?.buyRate || 0)
+    : Number(paymentSettings?.sellRate || 0);
+  const currentCommission = type === "buy"
+    ? Number(paymentSettings?.buyCommissionPercentage || 0)
+    : Number(paymentSettings?.sellCommissionPercentage || 0);
 
   // useMemo for calculations
   const equivalentAmount = useMemo(
-    () =>
-      currentRate
-        ? calculateEquivalentAmount(amount, type, currencyBasis, currentRate)
-        : "0.00",
-    [amount, type, currencyBasis, currentRate],
+    () => currentRate ? calculateEquivalentAmount(amount, type, currencyBasis, currentRate) : "0.00",
+    [amount, type, currencyBasis, currentRate]
   );
 
   const commission = useMemo(
-    () =>
-      currentRate && currentCommission
-        ? calculateCommission(
-            amount,
-            type,
-            currencyBasis,
-            currentRate,
-            currentCommission,
-          )
-        : "0.00",
-    [amount, type, currencyBasis, currentRate, currentCommission],
+    () => (currentRate && currentCommission)
+      ? calculateCommission(amount, type, currencyBasis, currentRate, currentCommission)
+      : "0.00",
+    [amount, type, currencyBasis, currentRate, currentCommission]
   );
 
   const finalAmount = useMemo(
-    () =>
-      currentRate && currentCommission
-        ? calculateFinalAmount(
-            amount,
-            type,
-            currencyBasis,
-            currentRate,
-            currentCommission,
-          )
-        : "0.00",
-    [amount, type, currencyBasis, currentRate, currentCommission],
+    () => (currentRate && currentCommission)
+      ? calculateFinalAmount(amount, type, currencyBasis, currentRate, currentCommission)
+      : "0.00",
+    [amount, type, currencyBasis, currentRate, currentCommission]
   );
 
   /** Copy text to clipboard with a single state for all fields */
@@ -332,7 +302,7 @@ export default function TradeForm() {
       return await fetch("/api/trade", {
         method: "POST",
         body: formData,
-        credentials: "include",
+        credentials: "include"
       }).then(async (res) => {
         if (!res.ok) {
           const error = await res.json();
@@ -396,8 +366,7 @@ export default function TradeForm() {
     if (values.type === "buy" && !(user.cliqAlias || user.cliqNumber)) {
       toast({
         title: "CliQ details not set",
-        description:
-          "Please set either your CliQ alias or number in settings before buying",
+        description: "Please set either your CliQ alias or number in settings before buying",
         variant: "destructive",
       });
       return;
@@ -406,8 +375,7 @@ export default function TradeForm() {
     if (values.type === "sell" && !user.usdtAddress) {
       toast({
         title: "USDT wallet not set",
-        description:
-          "Please set your CliQ account details in settings before selling",
+        description: "Please set your USDT wallet address in settings before selling",
         variant: "destructive",
       });
       return;
@@ -423,8 +391,7 @@ export default function TradeForm() {
     }
 
     try {
-      const finalInputAmount =
-        currencyBasis === "foreign" ? equivalentAmount : values.amount;
+      const finalInputAmount = currencyBasis === "foreign" ? equivalentAmount : values.amount;
       const formData = new FormData();
       formData.append("type", values.type);
       formData.append("amount", finalInputAmount);
@@ -442,7 +409,7 @@ export default function TradeForm() {
           return;
         }
         formData.append("network", values.network);
-        console.log("Sending sell order with network:", values.network);
+        console.log('Sending sell order with network:', values.network);
       }
 
       // For buy orders, include payment method
@@ -455,8 +422,7 @@ export default function TradeForm() {
       console.error("Trade submission error:", error);
       toast({
         title: "Trade submission failed",
-        description:
-          error instanceof Error ? error.message : "An error occurred",
+        description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     }
@@ -476,12 +442,8 @@ export default function TradeForm() {
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="buy" className="text-base">
-            Buy USDT
-          </TabsTrigger>
-          <TabsTrigger value="sell" className="text-base">
-            Sell USDT
-          </TabsTrigger>
+          <TabsTrigger value="buy" className="text-base">Buy USDT</TabsTrigger>
+          <TabsTrigger value="sell" className="text-base">Sell USDT</TabsTrigger>
         </TabsList>
 
         <Form {...form}>
@@ -494,22 +456,16 @@ export default function TradeForm() {
               <>
                 {/* Warning Alerts */}
                 {type === "sell" && !hasUsdtAddress && (
-                  <Alert variant="warning" className="flex items-center gap-3">
-                    <div className="shrink-0">
-                      <AlertCircle className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
-                    </div>
+                  <Alert variant="destructive">
                     <AlertDescription className="text-sm">
-                      Please set your CliQ account details in settings before selling
+                      Please set your USDT wallet address in settings before selling
                     </AlertDescription>
                   </Alert>
                 )}
                 {type === "buy" && !hasCliqSettings && (
-                  <Alert variant="warning" className="flex items-center gap-3">
-                    <div className="shrink-0">
-                      <AlertCircle className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
-                    </div>
+                  <Alert variant="destructive">
                     <AlertDescription className="text-sm">
-                      Please set your USDT wallet address in settings before buying
+                      Please set your CliQ account details in settings before buying
                     </AlertDescription>
                   </Alert>
                 )}
@@ -521,9 +477,7 @@ export default function TradeForm() {
                     name="amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-base font-semibold">
-                          Amount
-                        </FormLabel>
+                        <FormLabel className="text-base font-semibold">Amount</FormLabel>
                         <div className="space-y-4">
                           <RadioGroup
                             value={currencyBasis}
@@ -561,8 +515,7 @@ export default function TradeForm() {
                           </FormControl>
                         </div>
                         <FormDescription className="text-sm text-muted-foreground">
-                          Enter the amount you want to {type} in{" "}
-                          {getCurrentCurrencyLabel()}
+                          Enter the amount you want to {type} in {getCurrentCurrencyLabel()}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -575,8 +528,7 @@ export default function TradeForm() {
                       <div className="flex flex-wrap justify-between gap-2 text-sm">
                         <span className="font-medium">Exchange Rate</span>
                         <span className="font-mono">
-                          1 USDT ={" "}
-                          {currentRate ? currentRate.toFixed(2) : "0.00"} JOD
+                          1 USDT = {currentRate ? currentRate.toFixed(2) : "0.00"} JOD
                         </span>
                       </div>
                       {amount && (
@@ -588,13 +540,7 @@ export default function TradeForm() {
                             </span>
                           </div>
                           <div className="flex flex-wrap justify-between gap-2 text-xs sm:text-sm text-muted-foreground">
-                            <span>
-                              Commission (
-                              {currentCommission
-                                ? currentCommission.toFixed(2)
-                                : "0.00"}
-                              %)
-                            </span>
+                            <span>Commission ({currentCommission ? currentCommission.toFixed(2) : "0.00"}%)</span>
                             <span className="font-mono">{commission}</span>
                           </div>
                           <div className="flex flex-wrap justify-between gap-2 pt-2 border-t text-sm">
@@ -625,9 +571,7 @@ export default function TradeForm() {
                       name="network"
                       render={({ field }) => (
                         <FormItem className="space-y-4">
-                          <FormLabel className="text-base font-semibold">
-                            Select Network
-                          </FormLabel>
+                          <FormLabel className="text-base font-semibold">Select Network</FormLabel>
                           <FormControl>
                             <RadioGroup
                               onValueChange={field.onChange}
@@ -641,9 +585,7 @@ export default function TradeForm() {
                                       <FormControl>
                                         <RadioGroupItem value="trc20" />
                                       </FormControl>
-                                      <FormLabel className="font-medium">
-                                        TRC20 Network
-                                      </FormLabel>
+                                      <FormLabel className="font-medium">TRC20 Network</FormLabel>
                                     </FormItem>
                                     {field.value === "trc20" && (
                                       <div className="ml-7 text-sm bg-muted/50 p-3 rounded-md">
@@ -657,9 +599,8 @@ export default function TradeForm() {
                                             className="shrink-0"
                                             onClick={() =>
                                               copyToClipboard(
-                                                paymentSettings?.usdtAddressTRC20 ||
-                                                  "",
-                                                "trc20",
+                                                paymentSettings?.usdtAddressTRC20 || "",
+                                                "trc20"
                                               )
                                             }
                                           >
@@ -683,9 +624,7 @@ export default function TradeForm() {
                                       <FormControl>
                                         <RadioGroupItem value="bep20" />
                                       </FormControl>
-                                      <FormLabel className="font-medium">
-                                        BEP20 Network
-                                      </FormLabel>
+                                      <FormLabel className="font-medium">BEP20 Network</FormLabel>
                                     </FormItem>
                                     {field.value === "bep20" && (
                                       <div className="ml-7 text-sm bg-muted/50 p-3 rounded-md">
@@ -699,9 +638,8 @@ export default function TradeForm() {
                                             className="shrink-0"
                                             onClick={() =>
                                               copyToClipboard(
-                                                paymentSettings?.usdtAddressBEP20 ||
-                                                  "",
-                                                "bep20",
+                                                paymentSettings?.usdtAddressBEP20 || "",
+                                                "bep20"
                                               )
                                             }
                                           >
@@ -729,9 +667,7 @@ export default function TradeForm() {
                 {/* Payment Method Selection for Buy */}
                 {type === "buy" && (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold">
-                      Select Payment Method
-                    </h3>
+                    <h3 className="text-base font-semibold">Select Payment Method</h3>
                     <Card className="border bg-card/50">
                       <CardContent className="p-4">
                         <RadioGroup
