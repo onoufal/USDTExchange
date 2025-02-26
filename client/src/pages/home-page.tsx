@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, HelpCircle } from "lucide-react";
+import { AlertCircle, HelpCircle, Receipt, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import TradeForm from "@/components/trade-form";
@@ -86,7 +86,7 @@ export default function HomePage() {
                 </div>
                 <CardDescription>Buy or sell USDT for Jordanian Dinar (JOD)</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent id="trade-form">
                 {showKYCWarning ? (
                   <Alert variant="warning" className="flex items-start gap-3">
                     <AlertCircle className="mt-0.5" />
@@ -194,7 +194,7 @@ export default function HomePage() {
                                     </TooltipTrigger>
                                     <TooltipContent side="right" className="p-2">
                                       <p className="text-xs">
-                                        {tx.status === 'approved' 
+                                        {tx.status === 'approved'
                                           ? 'Transaction completed successfully'
                                           : 'Transaction is being processed'}
                                       </p>
@@ -216,8 +216,27 @@ export default function HomePage() {
                           ))}
                           {(!transactions || transactions.length === 0) && (
                             <tr>
-                              <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                                No transactions yet
+                              <td colSpan={5} className="px-4 py-12 text-center">
+                                <div className="flex flex-col items-center gap-3">
+                                  <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center">
+                                    <Receipt className="w-6 h-6 text-muted-foreground/60" />
+                                  </div>
+                                  <div className="max-w-[220px] space-y-1">
+                                    <p className="text-base font-medium text-muted-foreground">No transactions yet</p>
+                                    <p className="text-sm text-muted-foreground/80">Your trading history will appear here</p>
+                                  </div>
+                                  {user.kycStatus === "approved" && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="mt-2"
+                                      onClick={() => document.getElementById('trade-form')?.scrollIntoView({ behavior: 'smooth' })}
+                                    >
+                                      <ArrowUp className="w-4 h-4 mr-2" />
+                                      Start Trading
+                                    </Button>
+                                  )}
+                                </div>
                               </td>
                             </tr>
                           )}
