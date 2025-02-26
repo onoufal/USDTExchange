@@ -61,9 +61,9 @@ export default function HomePage() {
         {/* Quick Actions Section */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           <Link href="#trade-form" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300 animate-fade-up [--animation-delay:100ms]">
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
+            <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50">
               <CardContent className="p-6 flex items-center gap-4">
-                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
+                <div className="w-9 h-9 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
                   <CreditCard className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -75,9 +75,9 @@ export default function HomePage() {
           </Link>
 
           <Link href="/settings" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300 animate-fade-up [--animation-delay:200ms]">
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
+            <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50">
               <CardContent className="p-6 flex items-center gap-4">
-                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
+                <div className="w-9 h-9 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
                   <Settings className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -88,9 +88,9 @@ export default function HomePage() {
             </Card>
           </Link>
 
-          <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 cursor-pointer animate-fade-up [--animation-delay:300ms]">
+          <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50 cursor-pointer animate-fade-up [--animation-delay:300ms]">
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
+              <div className="w-9 h-9 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
                 <Share2 className="w-5 h-5 text-primary" />
               </div>
               <div>
@@ -106,7 +106,7 @@ export default function HomePage() {
           {/* Main Trading and Transactions Column */}
           <div className="lg:col-span-8 space-y-6">
             {/* Trading Card */}
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up [--animation-delay:400ms]">
+            <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50 animate-fade-up [--animation-delay:400ms]">
               <CardHeader className="px-6 py-5">
                 <div className="flex items-center gap-2">
                   <ClipboardList className="w-5 h-5 text-primary" />
@@ -148,7 +148,7 @@ export default function HomePage() {
             </Card>
 
             {/* Transaction History */}
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up [--animation-delay:500ms]">
+            <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50 animate-fade-up [--animation-delay:500ms]">
               <CardHeader className="px-6 py-5">
                 <div className="flex items-center gap-2">
                   <History className="w-5 h-5 text-primary" />
@@ -161,7 +161,7 @@ export default function HomePage() {
                           <span className="sr-only">Transaction status info</span>
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent side="right" align="center" className="max-w-[300px] p-3">
+                      <TooltipContent side="right" align="center" className="p-3 max-w-xs">
                         <p className="text-sm">
                           Track your trades here. Pending trades are being processed, while approved trades have been completed successfully.
                         </p>
@@ -174,7 +174,7 @@ export default function HomePage() {
               <CardContent className="px-6 pb-6">
                 <div className="overflow-x-auto -mx-4 sm:mx-0">
                   <div className="min-w-full inline-block align-middle">
-                    <div className="overflow-hidden rounded-lg border bg-card dark:bg-card/50">
+                    <div className="overflow-hidden rounded-lg border border-border/40 bg-card dark:bg-card/50">
                       <table className="min-w-full divide-y divide-border dark:divide-border/50">
                         <thead>
                           <tr className="bg-muted/50 dark:bg-muted/20">
@@ -299,7 +299,7 @@ export default function HomePage() {
 
           {/* Sidebar - Verification Status */}
           <div className="lg:col-span-4 space-y-6 animate-fade-left [--animation-delay:200ms]">
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
+            <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50">
               <CardHeader className="px-6 py-5">
                 <div className="flex items-center gap-2">
                   <FileText className="w-5 h-5 text-primary" />
