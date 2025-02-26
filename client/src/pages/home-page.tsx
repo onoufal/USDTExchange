@@ -33,17 +33,17 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-        {/* Welcome Section with improved spacing */}
+        {/* Welcome Section with improved typography */}
         <div className="mb-12 relative">
           <div className="max-w-2xl space-y-3">
-            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent leading-tight">
               Welcome back, {user.fullName}
             </h1>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
               Your trusted platform for USDT-JOD exchange
             </p>
           </div>
-          {/* Decorative elements */}
+          {/* Decorative elements remain unchanged */}
           <div className="absolute right-0 top-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10" />
           <div className="absolute left-1/4 bottom-0 w-48 h-48 bg-primary/3 rounded-full blur-2xl -z-10" />
         </div>
@@ -54,10 +54,12 @@ export default function HomePage() {
             {/* Trading Card */}
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur overflow-hidden">
               <CardHeader className="space-y-3 p-6">
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                  Trade USDT
+                <CardTitle asChild>
+                  <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent tracking-tight">
+                    Trade USDT
+                  </h2>
                 </CardTitle>
-                <CardDescription className="text-base">
+                <CardDescription className="text-base sm:text-lg text-muted-foreground">
                   Buy or sell USDT for Jordanian Dinar (JOD)
                 </CardDescription>
               </CardHeader>
@@ -78,7 +80,9 @@ export default function HomePage() {
             {/* Transaction History */}
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur">
               <CardHeader className="p-6">
-                <CardTitle className="text-xl font-semibold">Recent Transactions</CardTitle>
+                <CardTitle asChild>
+                  <h2 className="text-2xl font-bold tracking-tight">Recent Transactions</h2>
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-6 pt-0">
                 <div className="overflow-x-auto -mx-6">
@@ -87,22 +91,22 @@ export default function HomePage() {
                       <table className="min-w-full divide-y divide-border">
                         <thead>
                           <tr className="bg-muted/50">
-                            <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Type</th>
-                            <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Amount</th>
-                            <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Rate</th>
-                            <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">Date</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rate</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-border">
+                        <tbody className="divide-y divide-border text-[15px]">
                           {sortTransactions(transactions)?.map((tx) => (
                             <tr key={tx.id} className="hover:bg-muted/50 transition-colors">
-                              <td className="px-6 py-4 text-sm font-medium capitalize">
+                              <td className="px-6 py-4 font-medium capitalize">
                                 <span className={tx.type === 'buy' ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}>
                                   {tx.type}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 text-sm">
+                              <td className="px-6 py-4">
                                 <div className="space-y-1.5">
                                   <p className="whitespace-nowrap font-mono">
                                     {tx.type === 'buy' ? (
@@ -117,17 +121,17 @@ export default function HomePage() {
                                       </>
                                     )}
                                   </p>
-                                  <p className="whitespace-nowrap text-xs font-mono">
+                                  <p className="whitespace-nowrap text-sm font-mono text-muted-foreground">
                                     {tx.type === 'buy' ? (
                                       <>
-                                        <span className="text-muted-foreground">Receive:</span>{' '}
+                                        <span>Receive:</span>{' '}
                                         <span className="font-medium">
                                           {(Number(tx.amount) / Number(tx.rate)).toFixed(2)} USDT
                                         </span>
                                       </>
                                     ) : (
                                       <>
-                                        <span className="text-muted-foreground">Receive:</span>{' '}
+                                        <span>Receive:</span>{' '}
                                         <span className="font-medium">
                                           {(Number(tx.amount) * Number(tx.rate)).toFixed(2)} JOD
                                         </span>
@@ -136,8 +140,8 @@ export default function HomePage() {
                                   </p>
                                 </div>
                               </td>
-                              <td className="px-6 py-4 text-sm font-mono">{tx.rate}</td>
-                              <td className="px-6 py-4 text-sm">
+                              <td className="px-6 py-4 font-mono">{tx.rate}</td>
+                              <td className="px-6 py-4">
                                 <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
                                   tx.status === 'approved' 
                                     ? 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400'
@@ -146,7 +150,7 @@ export default function HomePage() {
                                   {tx.status}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 text-sm text-muted-foreground">
+                              <td className="px-6 py-4 text-muted-foreground">
                                 {new Date(tx.createdAt).toLocaleDateString()}
                               </td>
                             </tr>
@@ -171,8 +175,12 @@ export default function HomePage() {
           <div className="lg:col-span-4 space-y-8">
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur sticky top-6">
               <CardHeader className="p-6">
-                <CardTitle className="text-xl font-semibold">Verification Status</CardTitle>
-                <CardDescription>Complete verification to start trading</CardDescription>
+                <CardTitle asChild>
+                  <h2 className="text-2xl font-bold tracking-tight">Verification Status</h2>
+                </CardTitle>
+                <CardDescription className="text-base text-muted-foreground">
+                  Complete verification to start trading
+                </CardDescription>
               </CardHeader>
               <CardContent className="p-6 pt-0">
                 <KYCForm />
