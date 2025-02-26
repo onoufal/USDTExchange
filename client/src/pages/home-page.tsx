@@ -39,10 +39,10 @@ export default function HomePage() {
       <div className="container mx-auto px-4 sm:px-6 py-8">
         {/* Welcome Section */}
         <div className="mb-8 animate-fade-up">
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Welcome back, {user.fullName}
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-lg text-muted-foreground mt-2">
             Your trusted platform for USDT-JOD exchange
           </p>
         </div>
@@ -56,7 +56,7 @@ export default function HomePage() {
                   <CreditCard className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-medium">Start Trading</h3>
+                  <h3 className="text-base font-semibold">Start Trading</h3>
                   <p className="text-sm text-muted-foreground">Buy or sell USDT instantly</p>
                 </div>
               </CardContent>
@@ -70,7 +70,7 @@ export default function HomePage() {
                   <Settings className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-medium">Payment Methods</h3>
+                  <h3 className="text-base font-semibold">Payment Methods</h3>
                   <p className="text-sm text-muted-foreground">Manage your payment options</p>
                 </div>
               </CardContent>
@@ -83,7 +83,7 @@ export default function HomePage() {
                 <Share2 className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-medium">Refer a Friend</h3>
+                <h3 className="text-base font-semibold">Refer a Friend</h3>
                 <p className="text-sm text-muted-foreground">Earn rewards for referrals</p>
               </div>
             </CardContent>
@@ -98,7 +98,7 @@ export default function HomePage() {
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up">
               <CardHeader className="px-6 py-5">
                 <div className="flex items-center gap-2">
-                  <CardTitle className="text-xl sm:text-2xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                     Trade USDT
                   </CardTitle>
                   <TooltipProvider>
@@ -117,7 +117,9 @@ export default function HomePage() {
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <CardDescription>Buy or sell USDT for Jordanian Dinar (JOD)</CardDescription>
+                <CardDescription className="text-base text-muted-foreground/90">
+                  Buy or sell USDT for Jordanian Dinar (JOD)
+                </CardDescription>
               </CardHeader>
               <CardContent id="trade-form" className="px-6 pb-6">
                 {showKYCWarning ? (
@@ -137,7 +139,7 @@ export default function HomePage() {
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up [--animation-delay:400ms]">
               <CardHeader className="px-6 py-5">
                 <div className="flex items-center gap-2">
-                  <CardTitle className="text-xl sm:text-2xl">Recent Transactions</CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight">Recent Transactions</CardTitle>
                   <TooltipProvider>
                     <Tooltip delayDuration={0}>
                       <TooltipTrigger asChild>
@@ -154,7 +156,7 @@ export default function HomePage() {
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <CardDescription>View and track your USDT trades</CardDescription>
+                <CardDescription className="text-base text-muted-foreground/90">View and track your USDT trades</CardDescription>
               </CardHeader>
               <CardContent className="px-6 pb-6">
                 <div className="overflow-x-auto -mx-4 sm:mx-0">
@@ -286,8 +288,8 @@ export default function HomePage() {
           <div className="lg:col-span-4 space-y-6 animate-fade-left [--animation-delay:200ms]">
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
               <CardHeader className="px-6 py-5">
-                <CardTitle className="text-xl sm:text-2xl">Verification Status</CardTitle>
-                <CardDescription>Complete verification to start trading</CardDescription>
+                <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight">Verification Status</CardTitle>
+                <CardDescription className="text-base text-muted-foreground/90">Complete verification to start trading</CardDescription>
               </CardHeader>
               <CardContent className="px-6 pb-6">
                 <KYCForm />
