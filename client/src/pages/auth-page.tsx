@@ -70,17 +70,33 @@ export default function AuthPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login" className="text-sm sm:text-base py-3 font-medium">Login</TabsTrigger>
-                <TabsTrigger value="register" className="text-sm sm:text-base py-3 font-medium">Register</TabsTrigger>
+            <Tabs defaultValue="login" className="space-y-8">
+              <TabsList className="grid w-full grid-cols-2 p-1 bg-muted/30 rounded-lg">
+                <TabsTrigger 
+                  value="login" 
+                  className="text-sm sm:text-base py-3.5 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200"
+                >
+                  Login
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="register" 
+                  className="text-sm sm:text-base py-3.5 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-200"
+                >
+                  Register
+                </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="login" className="space-y-6">
+              <TabsContent 
+                value="login" 
+                className="space-y-6 data-[state=active]:animate-in data-[state=active]:fade-in-50"
+              >
                 <LoginForm form={loginForm} mutation={loginMutation} />
               </TabsContent>
 
-              <TabsContent value="register" className="space-y-6">
+              <TabsContent 
+                value="register" 
+                className="space-y-6 data-[state=active]:animate-in data-[state=active]:fade-in-50"
+              >
                 <RegisterForm form={registerForm} mutation={registerMutation} />
               </TabsContent>
             </Tabs>
