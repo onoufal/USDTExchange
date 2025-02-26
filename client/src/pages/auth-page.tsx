@@ -45,21 +45,21 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background flex flex-col justify-center px-4 sm:px-6 py-8 sm:py-12">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background flex flex-col justify-center px-4 sm:px-6 py-8 sm:py-12 overflow-hidden">
       {/* Theme Toggle - Adjusted positioning */}
-      <div className="fixed top-6 right-6 z-50">
+      <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50">
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mt-8 lg:mt-0">
+      <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mt-4 sm:mt-8 lg:mt-0">
         {/* Auth Form Section */}
         <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
-          <CardHeader className="space-y-6 items-center text-center pb-8">
+          <CardHeader className="space-y-4 sm:space-y-6 items-center text-center pb-6 sm:pb-8">
             <div className="lg:hidden">
               <BrandLogo size="md" className="transform-gpu transition-transform hover:scale-105 duration-300" />
             </div>
             <div className="space-y-2">
-              <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                 Welcome to ExchangePro
               </CardTitle>
               <p className="text-sm sm:text-base text-muted-foreground">
@@ -68,23 +68,47 @@ export default function AuthPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" className="space-y-8" role="tablist" aria-label="Authentication forms">
+            <Tabs defaultValue="login" className="space-y-6 sm:space-y-8" role="tablist" aria-label="Authentication forms">
               <TabsList className="grid w-full grid-cols-2 p-1 bg-muted/30 backdrop-blur supports-[backdrop-filter]:bg-muted/20 rounded-lg">
-                <TabsTrigger value="login" className="text-sm sm:text-base py-3.5 px-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" role="tab" aria-controls="login-tab" aria-selected="true">
+                <TabsTrigger 
+                  value="login" 
+                  className="text-sm sm:text-base py-3 sm:py-3.5 px-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" 
+                  role="tab" 
+                  aria-controls="login-tab" 
+                  aria-selected="true"
+                >
                   Login
                 </TabsTrigger>
-                <TabsTrigger value="register" className="text-sm sm:text-base py-3.5 px-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" role="tab" aria-controls="register-tab" aria-selected="false">
+                <TabsTrigger 
+                  value="register" 
+                  className="text-sm sm:text-base py-3 sm:py-3.5 px-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" 
+                  role="tab" 
+                  aria-controls="register-tab" 
+                  aria-selected="false"
+                >
                   Register
                 </TabsTrigger>
               </TabsList>
 
               {/* Simplified tab content transitions */}
-              <div className="min-h-[320px]">
-                <TabsContent value="login" id="login-tab" role="tabpanel" tabIndex={0} className="space-y-6 data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0 duration-200">
+              <div className="min-h-[320px] relative">
+                <TabsContent 
+                  value="login" 
+                  id="login-tab" 
+                  role="tabpanel" 
+                  tabIndex={0} 
+                  className="space-y-6 outline-none"
+                >
                   <LoginForm form={loginForm} mutation={loginMutation} />
                 </TabsContent>
 
-                <TabsContent value="register" id="register-tab" role="tabpanel" tabIndex={0} className="space-y-6 data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=inactive]:animate-out data-[state=inactive]:fade-out-0 duration-200">
+                <TabsContent 
+                  value="register" 
+                  id="register-tab" 
+                  role="tabpanel" 
+                  tabIndex={0} 
+                  className="space-y-6 outline-none"
+                >
                   <RegisterForm form={registerForm} mutation={registerMutation} />
                 </TabsContent>
               </div>
