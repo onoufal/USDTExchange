@@ -77,7 +77,7 @@ export default function AuthPage() {
             <Tabs defaultValue="login" className="space-y-6 sm:space-y-8" role="tablist" aria-label="Authentication forms">
               {/* Tab Headers */}
               <TabsList 
-                className="h-[52px] grid w-full grid-cols-2 rounded-lg bg-muted/30 backdrop-blur supports-[backdrop-filter]:bg-muted/20 mt-0.5 p-0.5"
+                className="h-[52px] grid w-full grid-cols-2 rounded-lg bg-muted/30 backdrop-blur supports-[backdrop-filter]:bg-muted/20 mt-1 p-0.5"
                 role="tablist"
               >
                 <TabsTrigger
