@@ -47,22 +47,22 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      <div className="container mx-auto px-4 sm:px-6 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Welcome Section */}
-        <div className="mb-8 animate-fade-up [--animation-delay:0ms]">
+        <div className="mb-6 sm:mb-8 animate-fade-up [--animation-delay:0ms]">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Welcome back, {user.fullName}
           </h1>
-          <p className="text-lg text-muted-foreground mt-2">
+          <p className="text-base sm:text-lg text-muted-foreground mt-2">
             Your trusted platform for USDT-JOD exchange
           </p>
         </div>
 
-        {/* Quick Actions Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        {/* Quick Actions Section - Adjusted for better mobile spacing */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Link href="#trade-form" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300 animate-fade-up [--animation-delay:100ms]">
             <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50">
-              <CardContent className="p-6 flex items-center gap-4">
+              <CardContent className="p-4 sm:p-6 flex items-center gap-3 sm:gap-4">
                 <div className="w-9 h-9 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
                   <CreditCard className="w-5 h-5 text-primary" />
                 </div>
@@ -76,7 +76,7 @@ export default function HomePage() {
 
           <Link href="/settings" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300 animate-fade-up [--animation-delay:200ms]">
             <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50">
-              <CardContent className="p-6 flex items-center gap-4">
+              <CardContent className="p-4 sm:p-6 flex items-center gap-3 sm:gap-4">
                 <div className="w-9 h-9 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
                   <Settings className="w-5 h-5 text-primary" />
                 </div>
@@ -89,7 +89,7 @@ export default function HomePage() {
           </Link>
 
           <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50 cursor-pointer animate-fade-up [--animation-delay:300ms]">
-            <CardContent className="p-6 flex items-center gap-4">
+            <CardContent className="p-4 sm:p-6 flex items-center gap-3 sm:gap-4">
               <div className="w-9 h-9 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
                 <Share2 className="w-5 h-5 text-primary" />
               </div>
@@ -101,16 +101,16 @@ export default function HomePage() {
           </Card>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Main Content Grid - Adjusted for mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
           {/* Main Trading and Transactions Column */}
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-8 space-y-4 sm:space-y-6">
             {/* Trading Card */}
             <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50 animate-fade-up [--animation-delay:400ms]">
-              <CardHeader className="px-6 py-5">
+              <CardHeader className="px-4 sm:px-6 py-4 sm:py-5">
                 <div className="flex items-center gap-2">
                   <ClipboardList className="w-5 h-5 text-primary" />
-                  <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                     Trade USDT
                   </CardTitle>
                   <TooltipProvider>
@@ -121,7 +121,7 @@ export default function HomePage() {
                           <span className="sr-only">Trade info</span>
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent side="right" align="center" className="p-3 max-w-[300px]">
+                      <TooltipContent side="right" align="center" className="p-3 max-w-xs">
                         <p className="text-sm">
                           Exchange USDT for JOD or vice versa at competitive rates. Trades are processed within 24 hours after verification.
                         </p>
@@ -129,15 +129,15 @@ export default function HomePage() {
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <CardDescription className="text-base text-muted-foreground/90">
+                <CardDescription className="text-sm sm:text-base text-muted-foreground/90">
                   Buy or sell USDT for Jordanian Dinar (JOD)
                 </CardDescription>
               </CardHeader>
-              <CardContent id="trade-form" className="px-6 pb-6">
+              <CardContent id="trade-form" className="px-4 sm:px-6 pb-4 sm:pb-6">
                 {showKYCWarning ? (
                   <Alert variant="warning" className="flex items-start gap-3">
                     <AlertCircle className="mt-0.5" />
-                    <AlertDescription className="ml-6 text-base font-medium">
+                    <AlertDescription className="text-sm sm:text-base font-medium">
                       Please complete mobile verification and KYC before trading
                     </AlertDescription>
                   </Alert>
@@ -147,12 +147,12 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            {/* Transaction History */}
+            {/* Transaction History - Mobile Optimized */}
             <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50 animate-fade-up [--animation-delay:500ms]">
-              <CardHeader className="px-6 py-5">
+              <CardHeader className="px-4 sm:px-6 py-4 sm:py-5">
                 <div className="flex items-center gap-2">
                   <History className="w-5 h-5 text-primary" />
-                  <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight">Recent Transactions</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold tracking-tight">Recent Transactions</CardTitle>
                   <TooltipProvider>
                     <Tooltip delayDuration={0}>
                       <TooltipTrigger asChild>
@@ -169,10 +169,11 @@ export default function HomePage() {
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <CardDescription className="text-base text-muted-foreground/90">View and track your USDT trades</CardDescription>
+                <CardDescription className="text-sm sm:text-base text-muted-foreground/90">View and track your USDT trades</CardDescription>
               </CardHeader>
-              <CardContent className="px-6 pb-6">
-                <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+                {/* Scrollable table wrapper */}
+                <div className="overflow-x-auto -mx-4 sm:mx-0 scrollbar-thin scrollbar-thumb-muted-foreground/10 scrollbar-track-transparent">
                   <div className="min-w-full inline-block align-middle">
                     <div className="overflow-hidden rounded-lg border border-border/40 bg-card dark:bg-card/50">
                       <table className="min-w-full divide-y divide-border dark:divide-border/50">
@@ -298,16 +299,16 @@ export default function HomePage() {
           </div>
 
           {/* Sidebar - Verification Status */}
-          <div className="lg:col-span-4 space-y-6 animate-fade-left [--animation-delay:200ms]">
+          <div className="lg:col-span-4 space-y-4 sm:space-y-6 animate-fade-left [--animation-delay:200ms]">
             <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50">
-              <CardHeader className="px-6 py-5">
+              <CardHeader className="px-4 sm:px-6 py-4 sm:py-5">
                 <div className="flex items-center gap-2">
                   <FileText className="w-5 h-5 text-primary" />
-                  <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight">Verification Status</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold tracking-tight">Verification Status</CardTitle>
                 </div>
-                <CardDescription className="text-base text-muted-foreground/90">Complete verification to start trading</CardDescription>
+                <CardDescription className="text-sm sm:text-base text-muted-foreground/90">Complete verification to start trading</CardDescription>
               </CardHeader>
-              <CardContent className="px-6 pb-6">
+              <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
                 <KYCForm />
               </CardContent>
             </Card>
