@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { insertUserSchema } from "@shared/schema";
@@ -55,10 +55,10 @@ export default function AuthPage() {
 
       <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mt-8 lg:mt-0">
         {/* Auth Form Section */}
-        <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur transition-all duration-300 hover:shadow-2xl">
+        <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30 transition-all duration-300 hover:shadow-2xl">
           <CardHeader className="space-y-6 items-center text-center pb-8">
             <div className="lg:hidden">
-              <BrandLogo size="md" />
+              <BrandLogo size="md" className="transform-gpu transition-transform hover:scale-105 duration-300" />
             </div>
             <div className="space-y-2">
               <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -72,8 +72,8 @@ export default function AuthPage() {
           <CardContent>
             <Tabs defaultValue="login" className="space-y-6">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login" className="text-sm sm:text-base py-3">Login</TabsTrigger>
-                <TabsTrigger value="register" className="text-sm sm:text-base py-3">Register</TabsTrigger>
+                <TabsTrigger value="login" className="text-sm sm:text-base py-3 font-medium">Login</TabsTrigger>
+                <TabsTrigger value="register" className="text-sm sm:text-base py-3 font-medium">Register</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login" className="space-y-6">
@@ -120,23 +120,22 @@ function LoginForm({ form, mutation }) {
       <form
         onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
         className="space-y-6"
-        aria-label="Login form"
       >
         <FormField
           control={form.control}
           name="username"
           render={({ field }) => (
             <FormItem className="space-y-2.5">
-              <FormLabel className="text-sm sm:text-base">Username</FormLabel>
+              <FormLabel className="text-sm sm:text-base font-medium">Username</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   autoComplete="username"
                   aria-required="true"
-                  className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary"
+                  className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary transition-colors"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -145,24 +144,24 @@ function LoginForm({ form, mutation }) {
           name="password"
           render={({ field }) => (
             <FormItem className="space-y-2.5">
-              <FormLabel className="text-sm sm:text-base">Password</FormLabel>
+              <FormLabel className="text-sm sm:text-base font-medium">Password</FormLabel>
               <FormControl>
                 <Input
                   type="password"
                   {...field}
                   autoComplete="current-password"
                   aria-required="true"
-                  className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary"
+                  className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary transition-colors"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
         <Button
           type="submit"
           size="lg"
-          className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium transition-all hover:bg-primary/90"
+          className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium transition-all hover:bg-primary/90 active:scale-[0.98]"
           disabled={mutation.isPending}
         >
           {mutation.isPending ? (
@@ -185,23 +184,22 @@ function RegisterForm({ form, mutation }) {
       <form
         onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
         className="space-y-6"
-        aria-label="Registration form"
       >
         <FormField
           control={form.control}
           name="fullName"
           render={({ field }) => (
             <FormItem className="space-y-2.5">
-              <FormLabel className="text-sm sm:text-base">Full Name</FormLabel>
+              <FormLabel className="text-sm sm:text-base font-medium">Full Name</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   autoComplete="name"
                   aria-required="true"
-                  className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary"
+                  className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary transition-colors"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -210,16 +208,16 @@ function RegisterForm({ form, mutation }) {
           name="username"
           render={({ field }) => (
             <FormItem className="space-y-2.5">
-              <FormLabel className="text-sm sm:text-base">Username</FormLabel>
+              <FormLabel className="text-sm sm:text-base font-medium">Username</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   autoComplete="username"
                   aria-required="true"
-                  className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary"
+                  className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary transition-colors"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
@@ -228,24 +226,24 @@ function RegisterForm({ form, mutation }) {
           name="password"
           render={({ field }) => (
             <FormItem className="space-y-2.5">
-              <FormLabel className="text-sm sm:text-base">Password</FormLabel>
+              <FormLabel className="text-sm sm:text-base font-medium">Password</FormLabel>
               <FormControl>
                 <Input
                   type="password"
                   {...field}
                   autoComplete="new-password"
                   aria-required="true"
-                  className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary"
+                  className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary transition-colors"
                 />
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-sm" />
             </FormItem>
           )}
         />
         <Button
           type="submit"
           size="lg"
-          className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium transition-all hover:bg-primary/90"
+          className="w-full h-11 sm:h-12 text-sm sm:text-base font-medium transition-all hover:bg-primary/90 active:scale-[0.98]"
           disabled={mutation.isPending}
         >
           {mutation.isPending ? (
