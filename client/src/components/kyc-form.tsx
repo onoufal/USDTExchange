@@ -321,6 +321,17 @@ export default function KYCForm() {
                       </Alert>
                     )}
 
+                    {user?.kycStatus === "pending" && user?.kycDocument && (
+                      <Alert variant="warning" className="flex items-start gap-3">
+                        <div className="shrink-0 mt-0.5">
+                          <Clock className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
+                        </div>
+                        <AlertDescription className="text-sm">
+                          Your document is under review. We'll notify you once approved.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
                     <Form {...documentForm}>
                       <form className="space-y-4">
                         <FormField
@@ -351,16 +362,6 @@ export default function KYCForm() {
                           )}
                         />
 
-                        {user?.kycStatus === "pending" && (
-                          <Alert variant="warning" className="flex items-start gap-3">
-                            <div className="shrink-0 mt-0.5">
-                              <Clock className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
-                            </div>
-                            <AlertDescription className="text-sm">
-                              Your document is under review. We'll notify you once approved.
-                            </AlertDescription>
-                          </Alert>
-                        )}
 
                         <Button
                           type="button"
