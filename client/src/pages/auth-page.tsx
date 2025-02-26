@@ -14,8 +14,7 @@ import { BrandLogo } from "@/components/ui/brand-logo";
 import { FeatureCard } from "@/components/ui/feature-card";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { UseMutationResult } from "@tanstack/react-query";
-import type { LoginData, InsertUser } from "@shared/types"; // Assuming these types are defined elsewhere
-
+import type { LoginData, InsertUser } from "@shared/types";
 
 // Validation schema for login form
 const loginSchema = insertUserSchema.pick({
@@ -58,7 +57,7 @@ export default function AuthPage() {
 
       <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mt-8 lg:mt-0">
         {/* Auth Form Section */}
-        <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30 transition-all duration-300 hover:shadow-2xl">
+        <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
           <CardHeader className="space-y-6 items-center text-center pb-8">
             <div className="lg:hidden">
               <BrandLogo size="md" className="transform-gpu transition-transform hover:scale-105 duration-300" />
@@ -167,10 +166,7 @@ function LoginForm({ form, mutation }: {
 }) {
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-        className="space-y-6"
-      >
+      <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-6">
         <FormField
           control={form.control}
           name="username"
@@ -234,10 +230,7 @@ function RegisterForm({ form, mutation }: {
 }) {
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-        className="space-y-6"
-      >
+      <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-6">
         <FormField
           control={form.control}
           name="fullName"
