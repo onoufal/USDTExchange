@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Transaction } from "@shared/schema";
 import { Link } from "wouter";
 
+// Helper function to sort transactions by status and date
 function sortTransactions(transactions: Transaction[] = []) {
   const pendingTransactions = transactions
     .filter(tx => tx.status === 'pending')
@@ -26,7 +27,7 @@ export default function HomePage() {
   const { user } = useAuth();
   const { data: transactions } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions"],
-    refetchInterval: 5000
+    refetchInterval: 5000 // Refresh every 5 seconds to show new transactions
   });
 
   const showKYCWarning = user && (!user.mobileVerified || user.kycStatus !== "approved");
@@ -48,7 +49,7 @@ export default function HomePage() {
 
         {/* Quick Actions Section */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 animate-fade-up [--animation-delay:200ms]">
-          <Link href="#trade-form">
+          <Link href="#trade-form" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
             <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-primary/20">
               <CardContent className="p-6 flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-200">
@@ -62,7 +63,7 @@ export default function HomePage() {
             </Card>
           </Link>
 
-          <Link href="/settings">
+          <Link href="/settings" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
             <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-primary/20">
               <CardContent className="p-6 flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-200">
