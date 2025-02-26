@@ -10,10 +10,11 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Clock, Upload, PhoneCall, FileText, HelpCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle2, XCircle, Clock, Upload, PhoneCall, FileText, HelpCircle, Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Card } from "@/components/ui/card";
 
 // Schema definitions remain unchanged
 const mobileSchema = z.object({
@@ -31,7 +32,6 @@ const documentSchema = z.object({
     const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
     const validExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
 
-    // Safely extract extension with a default
     const extension = (file.name.toLowerCase().match(/\.[^.]*$/) || ['.unknown'])[0];
 
     return validTypes.includes(file.type) && validExtensions.includes(extension);
@@ -58,6 +58,7 @@ export default function KYCForm() {
     },
   });
 
+  // Mutations remain unchanged
   const mobileVerificationMutation = useMutation({
     mutationFn: async (data: z.infer<typeof mobileSchema>) => {
       const res = await apiRequest("POST", "/api/kyc/mobile", data);
@@ -159,6 +160,33 @@ export default function KYCForm() {
 
   return (
     <div className="space-y-8">
+      {/* Verification Steps Overview */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <Card className={`p-4 border transition-colors duration-200 ${user?.mobileVerified ? 'bg-primary/5 border-primary/20' : 'bg-muted/5'}`}>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-background">
+              <span className="text-sm font-medium">1</span>
+            </div>
+            <h4 className="font-medium">Mobile Verification</h4>
+          </div>
+          <p className="text-sm text-muted-foreground pl-10">
+            Verify your phone number to receive important updates and trade notifications
+          </p>
+        </Card>
+        <Card className={`p-4 border transition-colors duration-200 ${user?.kycStatus === 'approved' ? 'bg-primary/5 border-primary/20' : 'bg-muted/5'}`}>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-background">
+              <span className="text-sm font-medium">2</span>
+            </div>
+            <h4 className="font-medium">ID Verification</h4>
+          </div>
+          <p className="text-sm text-muted-foreground pl-10">
+            Upload your government-issued ID to enable trading
+          </p>
+        </Card>
+      </div>
+
+      {/* Mobile Verification Section */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
           <div className="flex items-center gap-2">
@@ -191,36 +219,56 @@ export default function KYCForm() {
         </div>
 
         {!user?.mobileVerified && (
-          <Form {...mobileForm}>
-            <form onSubmit={mobileForm.handleSubmit((data) => mobileVerificationMutation.mutate(data))} className="space-y-4">
-              <FormField
-                control={mobileForm.control}
-                name="mobileNumber"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mobile Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="07xxxxxxxx" {...field} className="w-full" />
-                    </FormControl>
-                    <FormDescription className="text-xs">
-                      Enter your Jordanian mobile number starting with 077, 078, or 079
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={mobileVerificationMutation.isPending}
-              >
-                {mobileVerificationMutation.isPending ? "Verifying..." : "Verify Mobile"}
-              </Button>
-            </form>
-          </Form>
+          <>
+            <Alert className="mb-4">
+              <Info className="h-4 w-4" />
+              <AlertTitle>Verification Process</AlertTitle>
+              <AlertDescription>
+                1. Enter your Jordanian mobile number
+                <br />
+                2. You'll receive a verification code via SMS
+                <br />
+                3. Enter the code to complete verification
+              </AlertDescription>
+            </Alert>
+
+            <Form {...mobileForm}>
+              <form onSubmit={mobileForm.handleSubmit((data) => mobileVerificationMutation.mutate(data))} className="space-y-4">
+                <FormField
+                  control={mobileForm.control}
+                  name="mobileNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mobile Number</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="07xxxxxxxx" 
+                          {...field} 
+                          className="w-full"
+                          maxLength={10}
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        Enter your Jordanian mobile number starting with 077, 078, or 079
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={mobileVerificationMutation.isPending}
+                >
+                  {mobileVerificationMutation.isPending ? "Verifying..." : "Verify Mobile"}
+                </Button>
+              </form>
+            </Form>
+          </>
         )}
       </div>
 
+      {/* KYC Document Section */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
           <div className="flex items-center gap-2">
@@ -271,6 +319,25 @@ export default function KYCForm() {
               <Alert variant="warning" className="flex items-center gap-2">
                 <AlertDescription className="text-sm">
                   Please verify your mobile number before uploading KYC documents
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {user?.mobileVerified && !user?.kycDocument && (
+              <Alert className="mb-4">
+                <Info className="h-4 w-4" />
+                <AlertTitle>Document Requirements</AlertTitle>
+                <AlertDescription className="space-y-2">
+                  <p>Please ensure your ID document:</p>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li>Is a valid government-issued ID</li>
+                    <li>Shows your full name clearly</li>
+                    <li>Is not expired</li>
+                    <li>Is well-lit and readable</li>
+                  </ul>
+                  <p className="text-sm text-muted-foreground">
+                    Supported formats: JPG, PNG, or PDF
+                  </p>
                 </AlertDescription>
               </Alert>
             )}
