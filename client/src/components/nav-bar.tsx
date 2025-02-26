@@ -12,6 +12,7 @@ import { UserCircle, LogOut, Shield, Settings, CreditCard, Menu, Wallet } from "
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 import { ThemeToggle } from "./theme-toggle";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function NavBar() {
   const { user, logoutMutation } = useAuth();
@@ -34,17 +35,28 @@ export default function NavBar() {
   const navigationItems = (isMobile: boolean) => (
     <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
       {/* Points Display */}
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/15 transition-colors duration-200">
-        <Wallet className="h-4 w-4" />
-        <span className="text-sm font-medium tracking-tight">{user.loyaltyPoints} points</span>
-      </div>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/15 transition-colors duration-200">
+              <Wallet className="h-4 w-4" />
+              <span className="text-sm font-medium tracking-tight">{user.loyaltyPoints} points</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="p-3 max-w-xs">
+            <p className="text-sm">
+              Earn loyalty points for each successful trade. Points can be used for fee discounts and special promotions.
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
       {/* Admin Panel Button */}
       {user.role === "admin" && (
         <Button 
           variant="ghost"
           size="sm"
-          className={`flex items-center gap-2 font-medium transition-all duration-200 hover:bg-primary/10 ${
+          className={`flex items-center gap-2 font-medium transition-colors duration-200 hover:bg-primary/10 ${
             isMobile ? 'w-full justify-start' : ''
           }`}
           onClick={() => {
@@ -62,7 +74,7 @@ export default function NavBar() {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start font-medium transition-all duration-200 hover:bg-primary/10"
+          className="w-full justify-start font-medium transition-colors duration-200 hover:bg-primary/10"
           onClick={() => {
             setLocation('/settings');
             setMobileMenuOpen(false);

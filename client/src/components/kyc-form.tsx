@@ -10,9 +10,10 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Clock, Upload, PhoneCall, FileText } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Upload, PhoneCall, FileText, HelpCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Schema definitions remain unchanged
 const mobileSchema = z.object({
@@ -163,6 +164,21 @@ export default function KYCForm() {
           <div className="flex items-center gap-2">
             <PhoneCall className="w-5 h-5 text-primary" />
             <h3 className="text-base sm:text-lg font-medium">Mobile Verification</h3>
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 p-0 hover:bg-transparent">
+                    <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                    <span className="sr-only">Mobile verification info</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right" align="center" className="max-w-[300px] p-3">
+                  <p className="text-sm">
+                    Verify your mobile number to enable secure trading. You'll receive important notifications and updates about your trades.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           <Badge variant={user?.mobileVerified ? "default" : "destructive"} className="shadow-sm">
             {user?.mobileVerified ? (
@@ -210,6 +226,21 @@ export default function KYCForm() {
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />
             <h3 className="text-base sm:text-lg font-medium">KYC Verification</h3>
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 p-0 hover:bg-transparent">
+                    <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                    <span className="sr-only">KYC verification info</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right" align="center" className="max-w-[300px] p-3">
+                  <p className="text-sm">
+                    KYC (Know Your Customer) verification helps us maintain a secure trading environment. Upload a clear photo of your government-issued ID to get verified.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           <Badge variant={
             user?.kycStatus === "approved" ? "default" :

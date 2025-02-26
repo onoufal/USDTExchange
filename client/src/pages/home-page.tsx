@@ -1,7 +1,9 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, HelpCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import TradeForm from "@/components/trade-form";
 import KYCForm from "@/components/kyc-form";
 import { useQuery } from "@tanstack/react-query";
@@ -62,9 +64,26 @@ export default function HomePage() {
             {/* Trading Card */}
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up">
               <CardHeader>
-                <CardTitle className="text-xl sm:text-2xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                  Trade USDT
-                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-xl sm:text-2xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                    Trade USDT
+                  </CardTitle>
+                  <TooltipProvider>
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 p-0 hover:bg-transparent">
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                          <span className="sr-only">Trade info</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" align="center" className="max-w-[300px] p-3">
+                        <p className="text-sm">
+                          Exchange USDT for JOD or vice versa at competitive rates. Trades are processed within 24 hours after verification.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <CardDescription>Buy or sell USDT for Jordanian Dinar (JOD)</CardDescription>
               </CardHeader>
               <CardContent>
@@ -84,7 +103,24 @@ export default function HomePage() {
             {/* Transaction History */}
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up [--animation-delay:400ms]">
               <CardHeader>
-                <CardTitle className="text-xl sm:text-2xl">Recent Transactions</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-xl sm:text-2xl">Recent Transactions</CardTitle>
+                  <TooltipProvider>
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 p-0 hover:bg-transparent">
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                          <span className="sr-only">Transaction status info</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" align="center" className="max-w-[300px] p-3">
+                        <p className="text-sm">
+                          Track your trades here. Pending trades are being processed, while approved trades have been completed successfully.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <CardDescription>View and track your USDT trades</CardDescription>
               </CardHeader>
               <CardContent>
@@ -143,15 +179,28 @@ export default function HomePage() {
                                   </p>
                                 </div>
                               </td>
-                              <td className="whitespace-nowrap px-4 py-4 text-sm font-mono hidden sm:table-cell">{tx.rate}</td>
+                              <td className="whitespace-nowrap px-4 py-4 font-mono text-sm hidden sm:table-cell">{tx.rate}</td>
                               <td className="whitespace-nowrap px-4 py-4">
-                                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                  tx.status === 'approved'
-                                    ? 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400'
-                                    : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400'
-                                }`}>
-                                  {tx.status}
-                                </span>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                        tx.status === 'approved'
+                                          ? 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400'
+                                          : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400'
+                                      }`}>
+                                        {tx.status}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="right" className="p-2">
+                                      <p className="text-xs">
+                                        {tx.status === 'approved' 
+                                          ? 'Transaction completed successfully'
+                                          : 'Transaction is being processed'}
+                                      </p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                                 {/* Mobile-only amount display */}
                                 <div className="mt-1 sm:hidden">
                                   <p className="font-mono text-sm">
