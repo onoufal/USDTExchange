@@ -147,7 +147,7 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            {/* Transaction History */}
+            {/* Transaction History - REPLACED with edited code */}
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up [--animation-delay:400ms]">
               <CardHeader className="px-6 py-5">
                 <div className="flex items-center gap-2">
