@@ -12,7 +12,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { LoginForm } from "@/components/login-form";
 import { RegisterForm } from "@/components/register-form";
 
-// Validation schema for login form
+// Validation schema for login form - only username and password required
 const loginSchema = insertUserSchema.pick({
   username: true,
   password: true,
@@ -22,6 +22,7 @@ export default function AuthPage() {
   const { loginMutation, registerMutation, user } = useAuth();
   const [, setLocation] = useLocation();
 
+  // Initialize login form with validation schema
   const loginForm = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -30,6 +31,7 @@ export default function AuthPage() {
     },
   });
 
+  // Initialize registration form with full user schema
   const registerForm = useForm({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
@@ -39,6 +41,7 @@ export default function AuthPage() {
     },
   });
 
+  // Redirect to home if user is already authenticated
   if (user) {
     setLocation("/");
     return null;
@@ -46,15 +49,16 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background flex flex-col justify-center px-4 sm:px-6 py-8 sm:py-12 overflow-hidden">
-      {/* Theme Toggle - Adjusted positioning */}
+      {/* Theme Toggle - Fixed position with responsive spacing */}
       <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-50">
         <ThemeToggle />
       </div>
 
       <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mt-4 sm:mt-8 lg:mt-0">
-        {/* Auth Form Section */}
+        {/* Auth Form Section - Glassmorphic card with responsive padding */}
         <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
           <CardHeader className="space-y-4 sm:space-y-6 items-center text-center pb-6 sm:pb-8">
+            {/* Show logo only on mobile/tablet */}
             <div className="lg:hidden">
               <BrandLogo size="md" className="transform-gpu transition-transform hover:scale-105 duration-300" />
             </div>
@@ -67,8 +71,11 @@ export default function AuthPage() {
               </p>
             </div>
           </CardHeader>
+
           <CardContent>
+            {/* Auth Forms with Tab Navigation */}
             <Tabs defaultValue="login" className="space-y-6 sm:space-y-8" role="tablist" aria-label="Authentication forms">
+              {/* Tab Headers */}
               <TabsList className="grid w-full grid-cols-2 p-1 bg-muted/30 backdrop-blur supports-[backdrop-filter]:bg-muted/20 rounded-lg">
                 <TabsTrigger 
                   value="login" 
@@ -90,7 +97,7 @@ export default function AuthPage() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Simplified tab content transitions */}
+              {/* Tab Content Container - Fixed height to prevent layout shifts */}
               <div className="min-h-[320px] relative">
                 <TabsContent 
                   value="login" 
@@ -116,7 +123,7 @@ export default function AuthPage() {
           </CardContent>
         </Card>
 
-        {/* Hero Section - Hidden on mobile */}
+        {/* Hero Section - Only visible on desktop */}
         <div className="hidden lg:block lg:order-1 space-y-8">
           <BrandLogo size="lg" withText={false} />
           <div className="space-y-4">

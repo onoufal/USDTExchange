@@ -13,6 +13,7 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ form, mutation }: LoginFormProps) {
+  // Memoize form submission handler to prevent unnecessary re-renders
   const onSubmit = useCallback((data: LoginData) => {
     mutation.mutate(data);
   }, [mutation]);
@@ -24,6 +25,7 @@ export function LoginForm({ form, mutation }: LoginFormProps) {
         className="space-y-6"
         aria-label="Login form"
       >
+        {/* Username Field */}
         <FormField
           control={form.control}
           name="username"
@@ -44,6 +46,8 @@ export function LoginForm({ form, mutation }: LoginFormProps) {
             </FormItem>
           )}
         />
+
+        {/* Password Field */}
         <FormField
           control={form.control}
           name="password"
@@ -65,6 +69,8 @@ export function LoginForm({ form, mutation }: LoginFormProps) {
             </FormItem>
           )}
         />
+
+        {/* Submit Button with Loading State */}
         <Button
           type="submit"
           size="lg"

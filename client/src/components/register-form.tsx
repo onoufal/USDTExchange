@@ -13,6 +13,7 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({ form, mutation }: RegisterFormProps) {
+  // Memoize form submission handler to prevent unnecessary re-renders
   const onSubmit = useCallback((data: InsertUser) => {
     mutation.mutate(data);
   }, [mutation]);
@@ -24,6 +25,7 @@ export function RegisterForm({ form, mutation }: RegisterFormProps) {
         className="space-y-6"
         aria-label="Registration form"
       >
+        {/* Full Name Field */}
         <FormField
           control={form.control}
           name="fullName"
@@ -45,6 +47,7 @@ export function RegisterForm({ form, mutation }: RegisterFormProps) {
           )}
         />
 
+        {/* Username Field */}
         <FormField
           control={form.control}
           name="username"
@@ -66,6 +69,7 @@ export function RegisterForm({ form, mutation }: RegisterFormProps) {
           )}
         />
 
+        {/* Password Field */}
         <FormField
           control={form.control}
           name="password"
@@ -88,6 +92,7 @@ export function RegisterForm({ form, mutation }: RegisterFormProps) {
           )}
         />
 
+        {/* Submit Button with Loading State */}
         <Button
           type="submit"
           size="lg"
