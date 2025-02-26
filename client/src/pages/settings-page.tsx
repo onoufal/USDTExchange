@@ -31,16 +31,20 @@ export default function SettingsPage() {
 
         {/* Show alerts if settings are missing */}
         {(!user.usdtAddress || !user.cliqAlias && !user.cliqNumber) && (
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {!user.usdtAddress && (
-                <div>Please set your USDT wallet address to receive USDT from buy orders.</div>
-              )}
-              {!user.cliqAlias && !user.cliqNumber && (
-                <div>Please set your CliQ account details to receive JOD from sell orders.</div>
-              )}
-            </AlertDescription>
+          <Alert variant="default" className="bg-muted/50">
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 mt-0.5">
+                <AlertCircle className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+              </div>
+              <AlertDescription className="text-sm space-y-2">
+                {!user.usdtAddress && (
+                  <div>Please set your USDT wallet address to receive USDT from buy orders.</div>
+                )}
+                {!user.cliqAlias && !user.cliqNumber && (
+                  <div>Please set your CliQ account details to receive JOD from sell orders.</div>
+                )}
+              </AlertDescription>
+            </div>
           </Alert>
         )}
       </div>
