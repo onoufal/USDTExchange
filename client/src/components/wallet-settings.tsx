@@ -10,6 +10,8 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 export default function WalletSettings() {
   const { toast } = useToast();
@@ -52,8 +54,15 @@ export default function WalletSettings() {
     <Card>
       <CardHeader>
         <CardTitle>USDT Wallet Settings</CardTitle>
-        <CardDescription>
-          Set your USDT wallet address where you'll receive USDT from buy orders
+        <CardDescription className="flex items-center gap-3">
+          <Alert className="flex items-start gap-3 mt-2">
+            <div className="shrink-0 mt-0.5">
+              <Info className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+            </div>
+            <AlertDescription className="text-sm">
+              Please set your USDT wallet address to receive USDT from buy orders.
+            </AlertDescription>
+          </Alert>
         </CardDescription>
       </CardHeader>
       <CardContent>
