@@ -1,0 +1,31 @@
+export const arJO = {
+  common: {
+    welcome: 'مرحباً بكم في ExchangePro',
+    brandDescription: 'منصتك الموثوقة لتبادل USDT',
+    login: 'تسجيل الدخول',
+    register: 'إنشاء حساب',
+    logout: 'تسجيل الخروج',
+    username: 'اسم المستخدم',
+    password: 'كلمة المرور',
+    fullName: 'الاسم الكامل',
+    createAccount: 'إنشاء حساب',
+    signingIn: 'جاري تسجيل الدخول...',
+    creatingAccount: 'جاري إنشاء الحساب...',
+    signIn: 'تسجيل الدخول',
+    secure: 'تداول آمن',
+    fast: 'معالجة سريعة',
+    secureDescription: 'إجراءات أمان متقدمة لحماية معاملاتك ومعلوماتك الشخصية',
+    fastDescription: 'تحقق سريع ومعالجة سريعة للمعاملات',
+    platform: 'منصة تبادل USDT',
+    description: 'تبادل USDT مقابل الدينار الأردني بشكل آمن وفعال. استمتع بأسعار تنافسية ومعاملات سريعة.',
+  },
+  validation: {
+    required: 'هذا الحقل مطلوب',
+    invalidEmail: 'عنوان البريد الإلكتروني غير صالح',
+    minLength: 'يجب أن يكون {{length}} حروف على الأقل',
+  },
+  languages: {
+    en: 'English',
+    ar: 'العربية',
+  },
+};
