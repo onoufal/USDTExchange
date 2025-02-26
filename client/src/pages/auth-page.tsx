@@ -70,7 +70,11 @@ export default function AuthPage() {
 
               <TabsContent value="login" className="space-y-4">
                 <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))} className="space-y-4">
+                  <form 
+                    onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))} 
+                    className="space-y-4"
+                    aria-label="Login form"
+                  >
                     <FormField
                       control={loginForm.control}
                       name="username"
@@ -78,7 +82,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input {...field} autoComplete="username" />
+                            <Input {...field} autoComplete="username" aria-required="true" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -91,7 +95,12 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} autoComplete="current-password" />
+                            <Input 
+                              type="password" 
+                              {...field} 
+                              autoComplete="current-password" 
+                              aria-required="true"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -105,7 +114,7 @@ export default function AuthPage() {
                       {loginMutation.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Signing in...
+                          <span>Signing in...</span>
                         </>
                       ) : (
                         "Sign In"
@@ -117,7 +126,11 @@ export default function AuthPage() {
 
               <TabsContent value="register" className="space-y-4">
                 <Form {...registerForm}>
-                  <form onSubmit={registerForm.handleSubmit((data) => registerMutation.mutate(data))} className="space-y-4">
+                  <form 
+                    onSubmit={registerForm.handleSubmit((data) => registerMutation.mutate(data))} 
+                    className="space-y-4"
+                    aria-label="Registration form"
+                  >
                     <FormField
                       control={registerForm.control}
                       name="fullName"
@@ -125,7 +138,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Full Name</FormLabel>
                           <FormControl>
-                            <Input {...field} autoComplete="name" />
+                            <Input {...field} autoComplete="name" aria-required="true" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -138,7 +151,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input {...field} autoComplete="username" />
+                            <Input {...field} autoComplete="username" aria-required="true" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -151,7 +164,12 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} autoComplete="new-password" />
+                            <Input 
+                              type="password" 
+                              {...field} 
+                              autoComplete="new-password" 
+                              aria-required="true"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -165,7 +183,7 @@ export default function AuthPage() {
                       {registerMutation.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Creating Account...
+                          <span>Creating Account...</span>
                         </>
                       ) : (
                         "Create Account"
