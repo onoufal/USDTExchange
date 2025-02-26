@@ -77,20 +77,20 @@ export default function AuthPage() {
             <Tabs defaultValue="login" className="space-y-6 sm:space-y-8" role="tablist" aria-label="Authentication forms">
               {/* Tab Headers */}
               <TabsList className="grid w-full grid-cols-2 p-1 bg-muted/30 backdrop-blur supports-[backdrop-filter]:bg-muted/20 rounded-lg">
-                <TabsTrigger 
-                  value="login" 
-                  className="text-sm sm:text-base py-3 sm:py-3.5 px-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" 
-                  role="tab" 
-                  aria-controls="login-tab" 
+                <TabsTrigger
+                  value="login"
+                  className="text-sm sm:text-base h-[52px] py-0 px-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  role="tab"
+                  aria-controls="login-tab"
                   aria-selected="true"
                 >
                   Login
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="register" 
-                  className="text-sm sm:text-base py-3 sm:py-3.5 px-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" 
-                  role="tab" 
-                  aria-controls="register-tab" 
+                <TabsTrigger
+                  value="register"
+                  className="text-sm sm:text-base h-[52px] py-0 px-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  role="tab"
+                  aria-controls="register-tab"
                   aria-selected="false"
                 >
                   Register
@@ -99,21 +99,21 @@ export default function AuthPage() {
 
               {/* Tab Content Container - Fixed height to prevent layout shifts */}
               <div className="min-h-[320px] relative">
-                <TabsContent 
-                  value="login" 
-                  id="login-tab" 
-                  role="tabpanel" 
-                  tabIndex={0} 
+                <TabsContent
+                  value="login"
+                  id="login-tab"
+                  role="tabpanel"
+                  tabIndex={0}
                   className="space-y-6 outline-none"
                 >
                   <LoginForm form={loginForm} mutation={loginMutation} />
                 </TabsContent>
 
-                <TabsContent 
-                  value="register" 
-                  id="register-tab" 
-                  role="tabpanel" 
-                  tabIndex={0} 
+                <TabsContent
+                  value="register"
+                  id="register-tab"
+                  role="tabpanel"
+                  tabIndex={0}
                   className="space-y-6 outline-none"
                 >
                   <RegisterForm form={registerForm} mutation={registerMutation} />
