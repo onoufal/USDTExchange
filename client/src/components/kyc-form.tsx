@@ -10,10 +10,11 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Clock, Upload } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Upload, PhoneCall, FileText } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 
+// Schema definitions remain unchanged
 const mobileSchema = z.object({
   mobileNumber: z
     .string()
@@ -156,11 +157,14 @@ export default function KYCForm() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-          <h3 className="text-base sm:text-lg font-medium">Mobile Verification</h3>
-          <Badge variant={user?.mobileVerified ? "default" : "destructive"}>
+          <div className="flex items-center gap-2">
+            <PhoneCall className="w-5 h-5 text-primary" />
+            <h3 className="text-base sm:text-lg font-medium">Mobile Verification</h3>
+          </div>
+          <Badge variant={user?.mobileVerified ? "default" : "destructive"} className="shadow-sm">
             {user?.mobileVerified ? (
               <CheckCircle2 className="w-4 h-4 mr-1" />
             ) : (
@@ -203,11 +207,14 @@ export default function KYCForm() {
 
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-          <h3 className="text-base sm:text-lg font-medium">KYC Verification</h3>
+          <div className="flex items-center gap-2">
+            <FileText className="w-5 h-5 text-primary" />
+            <h3 className="text-base sm:text-lg font-medium">KYC Verification</h3>
+          </div>
           <Badge variant={
             user?.kycStatus === "approved" ? "default" :
               user?.kycStatus === "pending" ? "secondary" : "destructive"
-          }>
+          } className="shadow-sm">
             {user?.kycStatus === "approved" ? (
               <CheckCircle2 className="w-4 h-4 mr-1" />
             ) : user?.kycStatus === "pending" ? (
@@ -221,15 +228,16 @@ export default function KYCForm() {
         </div>
 
         {user?.kycStatus === "approved" ? (
-          <Alert>
-            <AlertDescription className="text-sm">
-              ✅ KYC Approved - You can now trade on the platform.
+          <Alert variant="success" className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5" />
+            <AlertDescription className="text-sm font-medium">
+              KYC Approved - You can now trade on the platform
             </AlertDescription>
           </Alert>
         ) : (
           <div className="space-y-4">
             {!user?.mobileVerified && (
-              <Alert>
+              <Alert variant="warning" className="flex items-center gap-2">
                 <AlertDescription className="text-sm">
                   Please verify your mobile number before uploading KYC documents
                 </AlertDescription>
@@ -274,7 +282,8 @@ export default function KYCForm() {
                 )}
 
                 {user?.kycDocument && user?.kycStatus === "pending" && (
-                  <Alert>
+                  <Alert variant="warning" className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
                     <AlertDescription className="text-sm">
                       Your document is under review. We'll notify you once it's approved.
                     </AlertDescription>
