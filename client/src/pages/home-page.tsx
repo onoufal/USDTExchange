@@ -38,7 +38,7 @@ export default function HomePage() {
   const { user } = useAuth();
   const { data: transactions } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions"],
-    refetchInterval: 5000 // Refresh every 5 seconds to show new transactions
+    refetchInterval: 5000
   });
 
   const showKYCWarning = user && (!user.mobileVerified || user.kycStatus !== "approved");
@@ -141,7 +141,7 @@ export default function HomePage() {
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-6 w-6 p-0 hover:bg-transparent"
+                            className="h-6 w-6 p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-primary"
                             aria-label="Trading information"
                           >
                             <HelpCircle className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
@@ -192,7 +192,7 @@ export default function HomePage() {
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-6 w-6 p-0 hover:bg-transparent"
+                            className="h-6 w-6 p-0 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-primary"
                             aria-label="Transaction status information"
                           >
                             <HelpCircle className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
@@ -244,7 +244,7 @@ export default function HomePage() {
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        className="mt-2"
+                                        className="mt-2 hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary"
                                         onClick={() => document.getElementById('trade-form')?.scrollIntoView({ behavior: 'smooth' })}
                                       >
                                         <ArrowUp className="w-4 h-4 mr-2" aria-hidden="true" />
@@ -259,7 +259,7 @@ export default function HomePage() {
                                 <tr key={tx.id} className="hover:bg-muted/50 dark:hover:bg-muted/10 transition-colors">
                                   <td className="whitespace-nowrap px-4 py-4 text-sm font-medium">
                                     <span className={tx.type === 'buy' ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}>
-                                      {tx.type}
+                                      {tx.type === 'buy' ? 'Buy' : 'Sell'}
                                     </span>
                                   </td>
                                   <td className="whitespace-nowrap px-4 py-4 text-sm hidden sm:table-cell">
@@ -309,7 +309,7 @@ export default function HomePage() {
                                             }`}
                                             aria-label={`Transaction status: ${tx.status}`}
                                           >
-                                            {tx.status}
+                                            {tx.status === 'approved' ? 'Approved' : 'Pending'}
                                           </span>
                                         </TooltipTrigger>
                                         <TooltipContent side="right" className="p-2">
