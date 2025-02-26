@@ -12,6 +12,7 @@ import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { FeatureCard } from "@/components/ui/feature-card";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 // Validation schema for login form
 const loginSchema = insertUserSchema.pick({
@@ -52,6 +53,11 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background flex items-center justify-center p-4 sm:p-8">
+      {/* Theme Toggle */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
         {/* Auth Form Section */}
         <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur transition-all duration-300 hover:shadow-2xl">
