@@ -62,7 +62,7 @@ export default function NavBar() {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start font-medium transition-all duration-200"
+          className="w-full justify-start font-medium transition-all duration-200 hover:bg-primary/10"
           onClick={() => {
             setLocation('/settings');
             setMobileMenuOpen(false);

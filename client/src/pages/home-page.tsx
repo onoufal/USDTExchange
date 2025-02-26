@@ -34,7 +34,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <div className="container mx-auto px-4 sm:px-6 py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-up">
           <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Welcome back, {user.fullName}
           </h1>
@@ -44,9 +44,9 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Sidebar - KYC & Status Section - Move to top on mobile */}
-          <div className="lg:order-2 lg:col-span-4 space-y-6">
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur">
+          {/* Sidebar - KYC & Status Section */}
+          <div className="lg:order-2 lg:col-span-4 space-y-6 animate-fade-left [--animation-delay:200ms]">
+            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
               <CardHeader>
                 <CardTitle className="text-xl sm:text-2xl">Verification Status</CardTitle>
                 <CardDescription>Complete verification to start trading</CardDescription>
@@ -60,7 +60,7 @@ export default function HomePage() {
           {/* Main Content Area */}
           <div className="lg:order-1 lg:col-span-8 space-y-6">
             {/* Trading Card */}
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur">
+            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up">
               <CardHeader>
                 <CardTitle className="text-xl sm:text-2xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                   Trade USDT
@@ -82,7 +82,7 @@ export default function HomePage() {
             </Card>
 
             {/* Transaction History */}
-            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur">
+            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up [--animation-delay:400ms]">
               <CardHeader>
                 <CardTitle className="text-xl sm:text-2xl">Recent Transactions</CardTitle>
                 <CardDescription>View and track your USDT trades</CardDescription>
@@ -155,8 +155,8 @@ export default function HomePage() {
                                 {/* Mobile-only amount display */}
                                 <div className="mt-1 sm:hidden">
                                   <p className="font-mono text-sm">
-                                    {tx.type === 'buy' ? `${tx.amount} JOD → ${(Number(tx.amount) / Number(tx.rate)).toFixed(2)} USDT` : 
-                                    `${tx.amount} USDT → ${(Number(tx.amount) * Number(tx.rate)).toFixed(2)} JOD`}
+                                    {tx.type === 'buy' ? `${tx.amount} JOD → ${(Number(tx.amount) / Number(tx.rate)).toFixed(2)} USDT` :
+                                      `${tx.amount} USDT → ${(Number(tx.amount) * Number(tx.rate)).toFixed(2)} JOD`}
                                   </p>
                                 </div>
                               </td>
