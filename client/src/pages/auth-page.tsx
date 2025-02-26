@@ -141,7 +141,7 @@ function LoginForm({ form, mutation }) {
                   {...field} 
                   autoComplete="username" 
                   aria-required="true"
-                  className="bg-background text-foreground"
+                  className="bg-muted text-foreground"
                 />
               </FormControl>
               <FormMessage />
@@ -160,7 +160,7 @@ function LoginForm({ form, mutation }) {
                   {...field} 
                   autoComplete="current-password" 
                   aria-required="true"
-                  className="bg-background text-foreground"
+                  className="bg-muted text-foreground"
                 />
               </FormControl>
               <FormMessage />
@@ -206,7 +206,7 @@ function RegisterForm({ form, mutation }) {
                   {...field} 
                   autoComplete="name" 
                   aria-required="true"
-                  className="bg-background text-foreground"
+                  className="bg-muted text-foreground"
                 />
               </FormControl>
               <FormMessage />
@@ -224,7 +224,7 @@ function RegisterForm({ form, mutation }) {
                   {...field} 
                   autoComplete="username" 
                   aria-required="true"
-                  className="bg-background text-foreground"
+                  className="bg-muted text-foreground"
                 />
               </FormControl>
               <FormMessage />
@@ -243,7 +243,7 @@ function RegisterForm({ form, mutation }) {
                   {...field} 
                   autoComplete="new-password" 
                   aria-required="true"
-                  className="bg-background text-foreground"
+                  className="bg-muted text-foreground"
                 />
               </FormControl>
               <FormMessage />
