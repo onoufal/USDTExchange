@@ -1,7 +1,18 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, HelpCircle, Receipt, ArrowUp, CreditCard, Share2, Settings } from "lucide-react";
+import {
+  AlertCircle,
+  HelpCircle,
+  Receipt,
+  ArrowUp,
+  CreditCard,
+  Share2,
+  Settings,
+  FileText,
+  ClipboardList,
+  History
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import TradeForm from "@/components/trade-form";
@@ -98,6 +109,7 @@ export default function HomePage() {
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up">
               <CardHeader className="px-6 py-5">
                 <div className="flex items-center gap-2">
+                  <ClipboardList className="w-5 h-5 text-primary" />
                   <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                     Trade USDT
                   </CardTitle>
@@ -139,6 +151,7 @@ export default function HomePage() {
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 animate-fade-up [--animation-delay:400ms]">
               <CardHeader className="px-6 py-5">
                 <div className="flex items-center gap-2">
+                  <History className="w-5 h-5 text-primary" />
                   <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight">Recent Transactions</CardTitle>
                   <TooltipProvider>
                     <Tooltip delayDuration={0}>
@@ -288,7 +301,10 @@ export default function HomePage() {
           <div className="lg:col-span-4 space-y-6 animate-fade-left [--animation-delay:200ms]">
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
               <CardHeader className="px-6 py-5">
-                <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight">Verification Status</CardTitle>
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight">Verification Status</CardTitle>
+                </div>
                 <CardDescription className="text-base text-muted-foreground/90">Complete verification to start trading</CardDescription>
               </CardHeader>
               <CardContent className="px-6 pb-6">
