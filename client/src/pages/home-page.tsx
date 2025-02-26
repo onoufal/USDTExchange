@@ -31,56 +31,43 @@ export default function HomePage() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background">
-      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-10">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+      <div className="container mx-auto px-4 sm:px-6 py-8">
         {/* Welcome Section */}
-        <div className="mb-8 sm:mb-12 relative">
-          <div className="max-w-2xl space-y-3">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-              Welcome back, {user.fullName}
-            </h1>
-            <p className="text-base sm:text-lg text-foreground/80 leading-relaxed">
-              Your trusted platform for USDT-JOD exchange
-            </p>
-          </div>
-          {/* Decorative elements */}
-          <div className="absolute right-0 top-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10" />
-          <div className="absolute left-1/4 bottom-0 w-48 h-48 bg-primary/3 rounded-full blur-2xl -z-10" />
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            Welcome back, {user.fullName}
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Your trusted platform for USDT-JOD exchange
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Sidebar - KYC & Status Section - Move to top on mobile */}
-          <div className="lg:order-2 lg:col-span-4 space-y-6 sm:space-y-8">
-            <Card className="border border-border/40 shadow-lg shadow-primary/5 bg-card/50 backdrop-blur-sm rounded-xl overflow-hidden transition-shadow hover:shadow-xl">
-              <CardHeader className="p-6 border-b border-border/40">
-                <CardTitle asChild>
-                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Verification Status</h2>
-                </CardTitle>
-                <CardDescription className="text-base text-foreground/80">
-                  Complete verification to start trading
-                </CardDescription>
+          <div className="lg:order-2 lg:col-span-4 space-y-6">
+            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="text-xl sm:text-2xl">Verification Status</CardTitle>
+                <CardDescription>Complete verification to start trading</CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent>
                 <KYCForm />
               </CardContent>
             </Card>
           </div>
 
           {/* Main Content Area */}
-          <div className="lg:order-1 lg:col-span-8 space-y-6 sm:space-y-8">
+          <div className="lg:order-1 lg:col-span-8 space-y-6">
             {/* Trading Card */}
-            <Card className="border border-border/40 shadow-lg shadow-primary/5 bg-card/50 backdrop-blur-sm rounded-xl overflow-hidden transition-shadow hover:shadow-xl">
-              <CardHeader className="space-y-3 p-6 border-b border-border/40">
-                <CardTitle asChild>
-                  <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent tracking-tight">
-                    Trade USDT
-                  </h2>
+            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="text-xl sm:text-2xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  Trade USDT
                 </CardTitle>
-                <CardDescription className="text-base text-foreground/80">
-                  Buy or sell USDT for Jordanian Dinar (JOD)
-                </CardDescription>
+                <CardDescription>Buy or sell USDT for Jordanian Dinar (JOD)</CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent>
                 {showKYCWarning ? (
                   <Alert variant="warning" className="flex items-start gap-3">
                     <AlertCircle className="mt-0.5" />
@@ -95,40 +82,36 @@ export default function HomePage() {
             </Card>
 
             {/* Transaction History */}
-            <Card className="border border-border/40 shadow-lg shadow-primary/5 bg-card/50 backdrop-blur-sm rounded-xl overflow-hidden transition-shadow hover:shadow-xl">
-              <CardHeader className="p-6 border-b border-border/40">
-                <CardTitle asChild>
-                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Recent Transactions</h2>
-                </CardTitle>
-                <CardDescription className="text-base text-foreground/80">
-                  View and track your USDT trades
-                </CardDescription>
+            <Card className="border-0 shadow-lg bg-card/50 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="text-xl sm:text-2xl">Recent Transactions</CardTitle>
+                <CardDescription>View and track your USDT trades</CardDescription>
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="overflow-x-auto -mx-6">
+              <CardContent>
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
                   <div className="min-w-full inline-block align-middle">
-                    <div className="overflow-hidden rounded-lg border border-border/40 bg-background/50">
-                      <table className="min-w-full divide-y divide-border">
+                    <div className="overflow-hidden rounded-lg border bg-card dark:bg-card/50">
+                      <table className="min-w-full divide-y divide-border dark:divide-border/50">
                         <thead>
-                          <tr className="bg-muted/50">
-                            <th scope="col" className="px-4 sm:px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">Type</th>
-                            <th scope="col" className="px-4 sm:px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70 hidden sm:table-cell">Amount</th>
-                            <th scope="col" className="px-4 sm:px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70 hidden sm:table-cell">Rate</th>
-                            <th scope="col" className="px-4 sm:px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">Status</th>
-                            <th scope="col" className="px-4 sm:px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70 hidden sm:table-cell">Date</th>
+                          <tr className="bg-muted/50 dark:bg-muted/20">
+                            <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium text-muted-foreground dark:text-muted-foreground/70">Type</th>
+                            <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium text-muted-foreground dark:text-muted-foreground/70 hidden sm:table-cell">Amount</th>
+                            <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium text-muted-foreground dark:text-muted-foreground/70 hidden sm:table-cell">Rate</th>
+                            <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium text-muted-foreground dark:text-muted-foreground/70">Status</th>
+                            <th scope="col" className="px-4 py-3.5 text-left text-sm font-medium text-muted-foreground dark:text-muted-foreground/70 hidden sm:table-cell">Date</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-border/40">
+                        <tbody className="divide-y divide-border dark:divide-border/50">
                           {sortTransactions(transactions)?.map((tx) => (
-                            <tr key={tx.id} className="hover:bg-muted/50 transition-colors duration-150">
-                              <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm">
+                            <tr key={tx.id} className="hover:bg-muted/50 dark:hover:bg-muted/10 transition-colors">
+                              <td className="whitespace-nowrap px-4 py-4 text-sm font-medium">
                                 <span className={tx.type === 'buy' ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}>
                                   {tx.type}
                                 </span>
                               </td>
-                              <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right hidden sm:table-cell">
+                              <td className="whitespace-nowrap px-4 py-4 text-sm hidden sm:table-cell">
                                 <div className="space-y-1">
-                                  <p className="font-mono text-sm">
+                                  <p className="font-mono">
                                     {tx.type === 'buy' ? (
                                       <>
                                         <span className="text-muted-foreground font-normal">Pay:</span>{' '}
@@ -141,17 +124,17 @@ export default function HomePage() {
                                       </>
                                     )}
                                   </p>
-                                  <p className="font-mono text-xs text-muted-foreground">
+                                  <p className="text-xs font-mono">
                                     {tx.type === 'buy' ? (
                                       <>
-                                        <span>Receive:</span>{' '}
+                                        <span className="text-muted-foreground">Receive:</span>{' '}
                                         <span className="font-medium">
                                           {(Number(tx.amount) / Number(tx.rate)).toFixed(2)} USDT
                                         </span>
                                       </>
                                     ) : (
                                       <>
-                                        <span>Receive:</span>{' '}
+                                        <span className="text-muted-foreground">Receive:</span>{' '}
                                         <span className="font-medium">
                                           {(Number(tx.amount) * Number(tx.rate)).toFixed(2)} JOD
                                         </span>
@@ -160,9 +143,9 @@ export default function HomePage() {
                                   </p>
                                 </div>
                               </td>
-                              <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right font-mono text-sm hidden sm:table-cell">{tx.rate}</td>
-                              <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                              <td className="whitespace-nowrap px-4 py-4 text-sm font-mono hidden sm:table-cell">{tx.rate}</td>
+                              <td className="whitespace-nowrap px-4 py-4">
+                                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                   tx.status === 'approved'
                                     ? 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400'
                                     : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400'
@@ -177,14 +160,14 @@ export default function HomePage() {
                                   </p>
                                 </div>
                               </td>
-                              <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-muted-foreground hidden sm:table-cell">
+                              <td className="whitespace-nowrap px-4 py-4 text-sm text-muted-foreground hidden sm:table-cell">
                                 {new Date(tx.createdAt).toLocaleDateString()}
                               </td>
                             </tr>
                           ))}
                           {(!transactions || transactions.length === 0) && (
                             <tr>
-                              <td colSpan={5} className="px-4 sm:px-6 py-8 text-center text-muted-foreground">
+                              <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
                                 No transactions yet
                               </td>
                             </tr>
