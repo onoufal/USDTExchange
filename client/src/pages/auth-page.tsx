@@ -94,19 +94,15 @@ export default function AuthPage() {
                 </TabsTrigger>
               </TabsList>
 
-              <div className="relative">
+              {/* Simplified tab content transitions */}
+              <div className="min-h-[320px]"> {/* Fixed minimum height to prevent content jumping */}
                 <TabsContent 
                   value="login" 
-                  role="tabpanel"
-                  className="space-y-6 absolute top-0 left-0 right-0
-                    data-[state=active]:relative
+                  className="space-y-6
                     data-[state=active]:animate-in
                     data-[state=active]:fade-in-0
-                    data-[state=active]:zoom-in-95
                     data-[state=inactive]:animate-out
                     data-[state=inactive]:fade-out-0
-                    data-[state=inactive]:zoom-out-95
-                    data-[state=inactive]:absolute
                     duration-200"
                 >
                   <LoginForm form={loginForm} mutation={loginMutation} />
@@ -114,16 +110,11 @@ export default function AuthPage() {
 
                 <TabsContent 
                   value="register" 
-                  role="tabpanel"
-                  className="space-y-6 absolute top-0 left-0 right-0
-                    data-[state=active]:relative
+                  className="space-y-6
                     data-[state=active]:animate-in
                     data-[state=active]:fade-in-0
-                    data-[state=active]:zoom-in-95
                     data-[state=inactive]:animate-out
                     data-[state=inactive]:fade-out-0
-                    data-[state=inactive]:zoom-out-95
-                    data-[state=inactive]:absolute
                     duration-200"
                 >
                   <RegisterForm form={registerForm} mutation={registerMutation} />
