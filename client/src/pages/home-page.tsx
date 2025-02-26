@@ -88,27 +88,27 @@ export default function HomePage() {
                 <div className="overflow-x-auto -mx-6">
                   <div className="min-w-full inline-block align-middle">
                     <div className="overflow-hidden rounded-lg border border-border/40 bg-background/50">
-                      <table className="min-w-full divide-y divide-border/40">
+                      <table className="min-w-full divide-y divide-border">
                         <thead>
                           <tr className="bg-muted/50">
-                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Type</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Amount</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rate</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date</th>
+                            <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">Type</th>
+                            <th scope="col" className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">Amount</th>
+                            <th scope="col" className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">Rate</th>
+                            <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">Status</th>
+                            <th scope="col" className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground/70">Date</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-border/40">
                           {sortTransactions(transactions)?.map((tx) => (
-                            <tr key={tx.id} className="hover:bg-muted/50 transition-colors">
-                              <td className="px-6 py-4 font-medium capitalize">
+                            <tr key={tx.id} className="hover:bg-muted/50 transition-colors duration-150">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium capitalize">
                                 <span className={tx.type === 'buy' ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}>
                                   {tx.type}
                                 </span>
                               </td>
-                              <td className="px-6 py-4">
+                              <td className="px-6 py-4 whitespace-nowrap text-right">
                                 <div className="space-y-1.5">
-                                  <p className="whitespace-nowrap font-mono">
+                                  <p className="font-mono text-sm">
                                     {tx.type === 'buy' ? (
                                       <>
                                         <span className="text-muted-foreground font-normal">Pay:</span>{' '}
@@ -121,7 +121,7 @@ export default function HomePage() {
                                       </>
                                     )}
                                   </p>
-                                  <p className="whitespace-nowrap text-sm font-mono text-muted-foreground">
+                                  <p className="font-mono text-xs text-muted-foreground">
                                     {tx.type === 'buy' ? (
                                       <>
                                         <span>Receive:</span>{' '}
@@ -140,17 +140,17 @@ export default function HomePage() {
                                   </p>
                                 </div>
                               </td>
-                              <td className="px-6 py-4 font-mono">{tx.rate}</td>
-                              <td className="px-6 py-4">
-                                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                                  tx.status === 'approved'
+                              <td className="px-6 py-4 whitespace-nowrap text-right font-mono text-sm">{tx.rate}</td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                  tx.status === 'approved' 
                                     ? 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400'
                                     : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400'
                                 }`}>
                                   {tx.status}
                                 </span>
                               </td>
-                              <td className="px-6 py-4 text-muted-foreground">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                                 {new Date(tx.createdAt).toLocaleDateString()}
                               </td>
                             </tr>
