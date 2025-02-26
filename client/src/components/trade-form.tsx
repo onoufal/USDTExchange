@@ -180,7 +180,7 @@ export default function TradeForm() {
     defaultValues: {
       type: "buy",
       amount: "",
-      network: "trc20",
+      network: undefined,
     },
   });
 
@@ -188,6 +188,13 @@ export default function TradeForm() {
   const type = form.watch("type");
   const amount = form.watch("amount");
   const network = form.watch("network");
+
+  // Set default network when switching to sell type
+  useEffect(() => {
+    if (type === "sell" && !network) {
+      form.setValue("network", "trc20"); // Set a default network for sell orders
+    }
+  }, [type, network, form]);
 
   // Get the appropriate rate and commission based on trade type, converting strings to numbers
   const currentRate = type === "buy"
@@ -395,8 +402,9 @@ export default function TradeForm() {
       formData.append("proofOfPayment", file);
 
       // Always include network for sell orders
-      if (values.type === "sell") {
-        formData.append("network", values.network!);
+      if (values.type === "sell" && values.network) {
+        formData.append("network", values.network);
+        console.log('Network value being sent:', values.network); // Debug log
       }
 
       // Add payment method for buy orders
