@@ -221,7 +221,7 @@ export default function AdminPage() {
                                         size="sm"
                                         variant="outline"
                                         onClick={() => setSelectedUser({ id: user.id, username: user.username })}
-                                        className="inline-flex items-center"
+                                        className="inline-flex items-center dark:bg-muted/20 dark:hover:bg-muted/30 dark:text-foreground transition-colors"
                                       >
                                         <Eye className="h-4 w-4 mr-1.5" />
                                         View Doc
