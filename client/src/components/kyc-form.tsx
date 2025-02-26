@@ -290,16 +290,19 @@ export default function KYCForm() {
               </Alert>
             ) : (
               <>
-                {!user?.mobileVerified ? (
-                  <Alert variant="warning" className="flex items-start gap-2">
+                {user?.kycStatus === "pending" && user?.kycDocument && (
+                  <Alert variant="warning" className="flex items-start gap-3">
                     <div className="shrink-0 mt-0.5">
-                      <AlertCircle className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
+                      <Clock className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
                     </div>
                     <AlertDescription className="text-sm">
-                      Please verify your mobile number first
+                      Your document is under review. We'll notify you once approved.
                     </AlertDescription>
                   </Alert>
-                ) : (
+                )}
+
+                {/* Only show upload form if no document submitted or previous submission was rejected */}
+                {(!user?.kycDocument || (user?.kycStatus !== "approved" && user?.kycStatus !== "pending")) && (
                   <>
                     {!user?.kycDocument && (
                       <Alert className="flex items-start gap-3">
@@ -320,17 +323,6 @@ export default function KYCForm() {
                             </p>
                           </AlertDescription>
                         </div>
-                      </Alert>
-                    )}
-
-                    {user?.kycStatus === "pending" && user?.kycDocument && (
-                      <Alert variant="warning" className="flex items-start gap-3">
-                        <div className="shrink-0 mt-0.5">
-                          <Clock className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
-                        </div>
-                        <AlertDescription className="text-sm">
-                          Your document is under review. We'll notify you once approved.
-                        </AlertDescription>
                       </Alert>
                     )}
 
