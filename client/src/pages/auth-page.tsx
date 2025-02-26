@@ -76,7 +76,10 @@ export default function AuthPage() {
             {/* Auth Forms with Tab Navigation */}
             <Tabs defaultValue="login" className="space-y-6 sm:space-y-8" role="tablist" aria-label="Authentication forms">
               {/* Tab Headers */}
-              <TabsList className="grid w-full grid-cols-2 p-1 bg-muted/30 backdrop-blur supports-[backdrop-filter]:bg-muted/20 rounded-lg">
+              <TabsList 
+                className="h-[52px] items-center justify-center text-muted-foreground grid w-full grid-cols-2 p-1 bg-muted/30 backdrop-blur supports-[backdrop-filter]:bg-muted/20 rounded-lg"
+                role="tablist"
+              >
                 <TabsTrigger
                   value="login"
                   className="text-sm sm:text-base h-[52px] py-0 px-2 font-medium data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
