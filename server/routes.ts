@@ -11,7 +11,6 @@ import { sendVerificationEmail } from "./services/email";
 import { insertUserSchema } from "@shared/schema"; // Assuming this schema is defined elsewhere
 import { hashPassword } from "./services/password"; // Assuming this function is defined elsewhere
 
-
 const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -57,12 +56,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Registration endpoint (updated)
   app.post("/api/register", async (req, res) => {
     try {
+      console.log('Registration request received:', req.body);
+
       // Validate registration data using our schema
       const validatedData = insertUserSchema.parse(req.body);
+      console.log('Validation passed, data:', validatedData);
 
       // Check if email already exists
       const existingUser = await storage.getUserByEmail(validatedData.email);
       if (existingUser) {
+        console.log('Email already registered:', validatedData.email);
         return res.status(400).json({ message: "Email already registered" });
       }
 
@@ -75,6 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         verificationToken: token,
         password: await hashPassword(validatedData.password)
       });
+      console.log('User created successfully:', { id: user.id, email: user.email });
 
       // Send verification email
       const success = await sendVerificationEmail({
@@ -83,17 +87,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (!success) {
-        // If email fails, still create the account but inform the user
+        console.log('Failed to send verification email to:', validatedData.email);
         return res.status(200).json({ 
           message: "Account created but verification email could not be sent. Please contact support."
         });
       }
 
+      console.log('Registration completed successfully for:', validatedData.email);
       res.json({ 
         message: "Registration successful. Please check your email to verify your account." 
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.log('Validation error:', error.errors);
         return res.status(400).json({ message: error.errors[0].message });
       }
       console.error('Registration error:', error);

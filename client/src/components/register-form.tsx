@@ -70,20 +70,22 @@ export function RegisterForm({ form, mutation }: RegisterFormProps) {
           )}
         />
 
-        {/* Optional Username Field */}
+        {/* Username Field - Now Required */}
         <FormField
           control={form.control}
           name="username"
           render={({ field }) => (
             <FormItem className="space-y-2.5">
-              <FormLabel className="text-sm sm:text-base font-medium">Username (Optional)</FormLabel>
+              <FormLabel className="text-sm sm:text-base font-medium">Username</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   autoComplete="username"
+                  aria-required="true"
                   aria-invalid={!!form.formState.errors.username}
                   aria-describedby={form.formState.errors.username ? "username-error" : undefined}
                   className="h-11 sm:h-12 px-4 bg-white dark:bg-white/5 text-foreground border-border/50 focus-visible:ring-primary transition-colors"
+                  placeholder="Choose a unique username"
                 />
               </FormControl>
               <FormMessage className="text-sm" id="username-error" role="alert" />
