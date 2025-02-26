@@ -83,6 +83,9 @@ export default function HomePage() {
                 <CardTitle asChild>
                   <h2 className="text-2xl font-bold tracking-tight">Recent Transactions</h2>
                 </CardTitle>
+                <CardDescription className="text-base text-foreground/80">
+                  View and track your USDT trades
+                </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="overflow-x-auto -mx-6">
@@ -143,7 +146,7 @@ export default function HomePage() {
                               <td className="px-6 py-4 whitespace-nowrap text-right font-mono text-sm">{tx.rate}</td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                  tx.status === 'approved' 
+                                  tx.status === 'approved'
                                     ? 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400'
                                     : 'bg-yellow-50 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400'
                                 }`}>
