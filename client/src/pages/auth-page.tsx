@@ -13,8 +13,6 @@ import { Loader2 } from "lucide-react";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { FeatureCard } from "@/components/ui/feature-card";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LanguageToggle } from "@/components/language-toggle";
-import { useTranslation } from "react-i18next";
 
 // Validation schema for login form
 const loginSchema = insertUserSchema.pick({
@@ -22,10 +20,13 @@ const loginSchema = insertUserSchema.pick({
   password: true,
 });
 
+/**
+ * Authentication page component that handles both login and registration
+ * with a responsive layout and animated transitions.
+ */
 export default function AuthPage() {
   const { loginMutation, registerMutation, user } = useAuth();
   const [, setLocation] = useLocation();
-  const { t } = useTranslation();
 
   const loginForm = useForm({
     resolver: zodResolver(loginSchema),
@@ -44,6 +45,7 @@ export default function AuthPage() {
     },
   });
 
+  // Redirect if already authenticated
   if (user) {
     setLocation("/");
     return null;
@@ -51,9 +53,8 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted to-background flex items-center justify-center p-4 sm:p-8">
-      {/* Theme and Language Toggles */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
-        <LanguageToggle />
+      {/* Theme Toggle */}
+      <div className="fixed top-4 right-4 z-50">
         <ThemeToggle />
       </div>
 
@@ -63,10 +64,10 @@ export default function AuthPage() {
           <CardHeader className="space-y-4 items-center text-center">
             <BrandLogo size="md" />
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent animate-in fade-in zoom-in-95 duration-300">
-              {t('common.welcome')}
+              Welcome to ExchangePro
             </CardTitle>
             <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <span className="italic">[Your Brand]</span> - {t('common.brandDescription')}
+              <span className="italic">[Your Brand Name]</span> - Your trusted USDT exchange platform
             </p>
           </CardHeader>
           <CardContent>
@@ -85,19 +86,19 @@ export default function AuthPage() {
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent animate-in fade-in slide-in-from-left duration-500">
             <span className="italic">[Your Brand]</span><br />
-            {t('common.platform')}
+            USDT Exchange Platform
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 animate-in fade-in slide-in-from-left-4 duration-700">
-            {t('common.description')}
+            Exchange USDT for Jordanian Dinars securely and efficiently. Experience competitive rates and fast transactions.
           </p>
           <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto lg:mx-0">
             <FeatureCard
-              title={t('common.secure')}
-              description={t('common.secureDescription')}
+              title="Secure Trading"
+              description="Advanced security measures protect your transactions and personal information"
             />
             <FeatureCard
-              title={t('common.fast')}
-              description={t('common.fastDescription')}
+              title="Fast Processing"
+              description="Quick verification and speedy transaction processing"
             />
           </div>
         </div>
@@ -106,18 +107,13 @@ export default function AuthPage() {
   );
 }
 
+// Separate component for auth tabs to improve readability
 function AuthTabs({ loginForm, registerForm, loginMutation, registerMutation }) {
-  const { t } = useTranslation();
-
   return (
     <Tabs defaultValue="login" className="space-y-4">
       <TabsList className="grid w-full grid-cols-2 transition-colors">
-        <TabsTrigger value="login" className="data-[state=active]:animate-in data-[state=active]:fade-in">
-          {t('common.login')}
-        </TabsTrigger>
-        <TabsTrigger value="register" className="data-[state=active]:animate-in data-[state=active]:fade-in">
-          {t('common.register')}
-        </TabsTrigger>
+        <TabsTrigger value="login" className="data-[state=active]:animate-in data-[state=active]:fade-in">Login</TabsTrigger>
+        <TabsTrigger value="register" className="data-[state=active]:animate-in data-[state=active]:fade-in">Register</TabsTrigger>
       </TabsList>
 
       <TabsContent value="login" className="space-y-4 animate-in fade-in-50 duration-300">
@@ -131,9 +127,8 @@ function AuthTabs({ loginForm, registerForm, loginMutation, registerMutation }) 
   );
 }
 
+// Separate login form component
 function LoginForm({ form, mutation }) {
-  const { t } = useTranslation();
-
   return (
     <Form {...form}>
       <form 
@@ -146,7 +141,7 @@ function LoginForm({ form, mutation }) {
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('common.username')}</FormLabel>
+              <FormLabel>Username</FormLabel>
               <FormControl>
                 <Input 
                   {...field} 
@@ -164,7 +159,7 @@ function LoginForm({ form, mutation }) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('common.password')}</FormLabel>
+              <FormLabel>Password</FormLabel>
               <FormControl>
                 <Input 
                   type="password" 
@@ -186,10 +181,10 @@ function LoginForm({ form, mutation }) {
           {mutation.isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              <span>{t('common.signingIn')}</span>
+              <span>Signing in...</span>
             </>
           ) : (
-            t('common.signIn')
+            "Sign In"
           )}
         </Button>
       </form>
@@ -197,9 +192,8 @@ function LoginForm({ form, mutation }) {
   );
 }
 
+// Separate registration form component
 function RegisterForm({ form, mutation }) {
-  const { t } = useTranslation();
-
   return (
     <Form {...form}>
       <form 
@@ -212,7 +206,7 @@ function RegisterForm({ form, mutation }) {
           name="fullName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('common.fullName')}</FormLabel>
+              <FormLabel>Full Name</FormLabel>
               <FormControl>
                 <Input 
                   {...field} 
@@ -230,7 +224,7 @@ function RegisterForm({ form, mutation }) {
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('common.username')}</FormLabel>
+              <FormLabel>Username</FormLabel>
               <FormControl>
                 <Input 
                   {...field} 
@@ -248,7 +242,7 @@ function RegisterForm({ form, mutation }) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('common.password')}</FormLabel>
+              <FormLabel>Password</FormLabel>
               <FormControl>
                 <Input 
                   type="password" 
@@ -270,10 +264,10 @@ function RegisterForm({ form, mutation }) {
           {mutation.isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              <span>{t('common.creatingAccount')}</span>
+              <span>Creating Account...</span>
             </>
           ) : (
-            t('common.createAccount')
+            "Create Account"
           )}
         </Button>
       </form>

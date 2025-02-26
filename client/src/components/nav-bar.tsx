@@ -12,14 +12,11 @@ import { UserCircle, LogOut, Shield, Settings, CreditCard, Menu } from "lucide-r
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 import { ThemeToggle } from "./theme-toggle";
-import { LanguageToggle } from "./language-toggle";
-import { useTranslation } from "react-i18next";
 
 export default function NavBar() {
   const { user, logoutMutation } = useAuth();
   const [, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { t } = useTranslation();
 
   const handleLogout = () => {
     logoutMutation.mutate(undefined, {
@@ -62,11 +59,10 @@ export default function NavBar() {
         className="flex items-center gap-2 hover:bg-destructive/10 hover:text-destructive transition-all duration-300 hover:scale-[1.02]"
       >
         <LogOut className="h-4 w-4" />
-        <span>{t('common.logout')}</span>
+        <span>Sign Out</span>
       </Button>
 
       <ThemeToggle />
-      <LanguageToggle />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
