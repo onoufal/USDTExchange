@@ -11,6 +11,7 @@ import { FeatureCard } from "@/components/ui/feature-card";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LoginForm } from "@/components/login-form";
 import { RegisterForm } from "@/components/register-form";
+import { Shield, Zap } from "lucide-react";
 
 // Validation schema for login form - only username and password required
 const loginSchema = insertUserSchema.pick({
@@ -152,10 +153,12 @@ export default function AuthPage() {
           </div>
           <div className="grid sm:grid-cols-2 gap-6 max-w-2xl relative pt-4 animate-in fade-in slide-in-from-left-4 duration-1000 delay-700">
             <FeatureCard
+              icon={Shield}
               title="Secure Trading"
               description="Advanced security measures protect your transactions and personal information"
             />
             <FeatureCard
+              icon={Zap}
               title="Fast Processing"
               description="Quick verification and speedy transaction processing"
             />
