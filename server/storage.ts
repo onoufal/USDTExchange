@@ -56,7 +56,7 @@ export class MemStorage implements IStorage {
     this.createUser({
       email: "admin@exchangepro.com",
       username: "admin",
-      password: "admin123", // In real app, this would be hashed
+      password: "Admin@123", // Secure password meeting all requirements
       fullName: "Admin User"
     }).then(user => {
       const updatedUser = {
@@ -67,7 +67,7 @@ export class MemStorage implements IStorage {
       this.users.set(user.id, updatedUser);
     });
 
-    // Default payment settings remain unchanged
+    // Default payment settings
     this.settings.set("buyRate", "0.71");
     this.settings.set("buyCommissionPercentage", "1.00");
     this.settings.set("sellRate", "0.71");
