@@ -14,7 +14,7 @@ import { CheckCircle2, XCircle, Clock, Upload, PhoneCall, FileText, HelpCircle, 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 // Schema definitions remain unchanged
 const mobileSchema = z.object({
@@ -44,6 +44,15 @@ export default function KYCForm() {
   const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  // Calculate overall verification progress
+  const verificationProgress = (() => {
+    let progress = 0;
+    if (user?.mobileVerified) progress += 50;
+    if (user?.kycStatus === 'approved') progress += 50;
+    return progress;
+  })();
+
+  // Form setup and mutations remain unchanged
   const mobileForm = useForm({
     resolver: zodResolver(mobileSchema),
     defaultValues: {
@@ -159,258 +168,225 @@ export default function KYCForm() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Verification Steps Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <Card className={`p-4 border transition-colors duration-200 ${user?.mobileVerified ? 'bg-primary/5 border-primary/20' : 'bg-muted/5'}`}>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-background">
-              <span className="text-sm font-medium">1</span>
-            </div>
-            <h4 className="font-medium">Mobile Verification</h4>
-          </div>
-          <p className="text-sm text-muted-foreground pl-10">
-            Verify your phone number to receive important updates and trade notifications
-          </p>
-        </Card>
-        <Card className={`p-4 border transition-colors duration-200 ${user?.kycStatus === 'approved' ? 'bg-primary/5 border-primary/20' : 'bg-muted/5'}`}>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-background">
-              <span className="text-sm font-medium">2</span>
-            </div>
-            <h4 className="font-medium">ID Verification</h4>
-          </div>
-          <p className="text-sm text-muted-foreground pl-10">
-            Upload your government-issued ID to enable trading
-          </p>
-        </Card>
+    <div className="space-y-6">
+      {/* Progress Bar */}
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className="font-medium">Verification Progress</span>
+          <span className="text-muted-foreground">{verificationProgress}% Complete</span>
+        </div>
+        <Progress value={verificationProgress} className="h-2" />
       </div>
 
-      {/* Mobile Verification Section */}
-      <div>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-          <div className="flex items-center gap-2">
-            <PhoneCall className="w-5 h-5 text-primary" />
-            <h3 className="text-base sm:text-lg font-medium">Mobile Verification</h3>
-            <TooltipProvider>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 p-0 hover:bg-transparent">
-                    <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                    <span className="sr-only">Mobile verification info</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right" align="center" className="max-w-[300px] p-3">
-                  <p className="text-sm">
-                    Verify your mobile number to enable secure trading. You'll receive important notifications and updates about your trades.
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <Badge variant={user?.mobileVerified ? "default" : "destructive"} className="shadow-sm">
-            {user?.mobileVerified ? (
-              <CheckCircle2 className="w-4 h-4 mr-1" />
-            ) : (
-              <XCircle className="w-4 h-4 mr-1" />
-            )}
-            {user?.mobileVerified ? "Verified" : "Not Verified"}
-          </Badge>
-        </div>
-
-        {!user?.mobileVerified && (
-          <>
-            <Alert className="mb-4">
-              <Info className="h-4 w-4" />
-              <AlertTitle>Verification Process</AlertTitle>
-              <AlertDescription>
-                1. Enter your Jordanian mobile number
-                <br />
-                2. You'll receive a verification code via SMS
-                <br />
-                3. Enter the code to complete verification
-              </AlertDescription>
-            </Alert>
-
-            <Form {...mobileForm}>
-              <form onSubmit={mobileForm.handleSubmit((data) => mobileVerificationMutation.mutate(data))} className="space-y-4">
-                <FormField
-                  control={mobileForm.control}
-                  name="mobileNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mobile Number</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="07xxxxxxxx" 
-                          {...field} 
-                          className="w-full"
-                          maxLength={10}
-                        />
-                      </FormControl>
-                      <FormDescription className="text-xs">
-                        Enter your Jordanian mobile number starting with 077, 078, or 079
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={mobileVerificationMutation.isPending}
-                >
-                  {mobileVerificationMutation.isPending ? "Verifying..." : "Verify Mobile"}
-                </Button>
-              </form>
-            </Form>
-          </>
-        )}
-      </div>
-
-      {/* KYC Document Section */}
-      <div>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-          <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-primary" />
-            <h3 className="text-base sm:text-lg font-medium">KYC Verification</h3>
-            <TooltipProvider>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 p-0 hover:bg-transparent">
-                    <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                    <span className="sr-only">KYC verification info</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right" align="center" className="max-w-[300px] p-3">
-                  <p className="text-sm">
-                    KYC (Know Your Customer) verification helps us maintain a secure trading environment. Upload a clear photo of your government-issued ID to get verified.
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <Badge variant={
-            user?.kycStatus === "approved" ? "default" :
-              user?.kycStatus === "pending" ? "secondary" : "destructive"
-          } className="shadow-sm">
-            {user?.kycStatus === "approved" ? (
-              <CheckCircle2 className="w-4 h-4 mr-1" />
-            ) : user?.kycStatus === "pending" ? (
-              <Clock className="w-4 h-4 mr-1" />
-            ) : (
-              <XCircle className="w-4 h-4 mr-1" />
-            )}
-            {user?.kycStatus === "approved" ? "Approved" :
-              user?.kycStatus === "pending" ? "Pending Review" : "Not Submitted"}
-          </Badge>
-        </div>
-
-        {user?.kycStatus === "approved" ? (
-          <Alert variant="success" className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5" />
-            <AlertDescription className="text-sm font-medium">
-              KYC Approved - You can now trade on the platform
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <div className="space-y-4">
-            {!user?.mobileVerified && (
-              <Alert variant="warning" className="flex items-center gap-2">
-                <AlertDescription className="text-sm">
-                  Please verify your mobile number before uploading KYC documents
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {user?.mobileVerified && !user?.kycDocument && (
-              <Alert className="mb-4">
-                <Info className="h-4 w-4" />
-                <AlertTitle>Document Requirements</AlertTitle>
-                <AlertDescription className="space-y-2">
-                  <p>Please ensure your ID document:</p>
-                  <ul className="list-disc pl-4 space-y-1">
-                    <li>Is a valid government-issued ID</li>
-                    <li>Shows your full name clearly</li>
-                    <li>Is not expired</li>
-                    <li>Is well-lit and readable</li>
-                  </ul>
-                  <p className="text-sm text-muted-foreground">
-                    Supported formats: JPG, PNG, or PDF
-                  </p>
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <Form {...documentForm}>
-              <form className="space-y-4">
-                <FormField
-                  control={documentForm.control}
-                  name="document"
-                  render={({ field: { onChange, ...field } }) => (
-                    <FormItem>
-                      <FormLabel>Identity Document</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="file"
-                          onChange={(e) => {
-                            handleFileChange(e);
-                            onChange(e.target.files?.[0]);
-                          }}
-                          accept="image/jpeg,image/png,image/jpg,application/pdf"
-                          disabled={!user?.mobileVerified || isUploading || user?.kycStatus === "approved"}
-                          className="w-full"
-                        />
-                      </FormControl>
-                      <FormDescription className="text-xs">
-                        Upload a clear photo or scan of your ID card or passport (JPG, PNG, or PDF format)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {isUploading && (
-                  <div className="space-y-2">
-                    <Progress value={uploadProgress} className="w-full" />
-                    <p className="text-xs text-center text-muted-foreground">
-                      Uploading... {uploadProgress}%
-                    </p>
-                  </div>
+      {/* Verification Steps Grid */}
+      <div className="grid grid-cols-1 gap-4">
+        {/* Mobile Verification Step */}
+        <Card className={`border transition-colors duration-200 ${user?.mobileVerified ? 'bg-primary/5 border-primary/20' : ''}`}>
+          <CardContent className="p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <PhoneCall className="w-4 h-4 text-primary" />
+                </div>
+                <h3 className="font-medium">Mobile Verification</h3>
+              </div>
+              <Badge variant={user?.mobileVerified ? "default" : "destructive"} className="font-medium">
+                {user?.mobileVerified ? (
+                  <CheckCircle2 className="w-4 h-4 mr-1.5" />
+                ) : (
+                  <XCircle className="w-4 h-4 mr-1.5" />
                 )}
+                {user?.mobileVerified ? "Verified" : "Required"}
+              </Badge>
+            </div>
 
-                {user?.kycDocument && user?.kycStatus === "pending" && (
-                  <Alert variant="warning" className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
+            {!user?.mobileVerified && (
+              <>
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>Verification Steps</AlertTitle>
+                  <AlertDescription className="text-sm space-y-1">
+                    <p>1. Enter your Jordanian mobile number</p>
+                    <p>2. Receive verification code via SMS</p>
+                    <p>3. Enter code to complete verification</p>
+                  </AlertDescription>
+                </Alert>
+
+                <Form {...mobileForm}>
+                  <form 
+                    onSubmit={mobileForm.handleSubmit((data) => mobileVerificationMutation.mutate(data))} 
+                    className="space-y-4"
+                  >
+                    <FormField
+                      control={mobileForm.control}
+                      name="mobileNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="07xxxxxxxx"
+                              {...field}
+                              maxLength={10}
+                              className="font-mono"
+                            />
+                          </FormControl>
+                          <FormDescription className="text-xs">
+                            Enter your Jordanian mobile number (starts with 077, 078, or 079)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={mobileVerificationMutation.isPending}
+                    >
+                      {mobileVerificationMutation.isPending ? "Verifying..." : "Verify Mobile"}
+                    </Button>
+                  </form>
+                </Form>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* KYC Document Verification Step */}
+        <Card className={`border transition-colors duration-200 ${user?.kycStatus === 'approved' ? 'bg-primary/5 border-primary/20' : ''}`}>
+          <CardContent className="p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-primary" />
+                </div>
+                <h3 className="font-medium">ID Verification</h3>
+              </div>
+              <Badge 
+                variant={
+                  user?.kycStatus === "approved" ? "default" :
+                  user?.kycStatus === "pending" ? "secondary" : "destructive"
+                } 
+                className="font-medium"
+              >
+                {user?.kycStatus === "approved" ? (
+                  <CheckCircle2 className="w-4 h-4 mr-1.5" />
+                ) : user?.kycStatus === "pending" ? (
+                  <Clock className="w-4 h-4 mr-1.5" />
+                ) : (
+                  <XCircle className="w-4 h-4 mr-1.5" />
+                )}
+                {user?.kycStatus === "approved" 
+                  ? "Verified" 
+                  : user?.kycStatus === "pending" 
+                  ? "Pending Review" 
+                  : "Required"}
+              </Badge>
+            </div>
+
+            {user?.kycStatus === "approved" ? (
+              <Alert variant="success" className="bg-primary/5 text-primary border-primary/20">
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription className="text-sm font-medium">
+                  Your ID has been verified successfully
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                {!user?.mobileVerified ? (
+                  <Alert variant="warning">
                     <AlertDescription className="text-sm">
-                      Your document is under review. We'll notify you once it's approved.
+                      Please verify your mobile number first
                     </AlertDescription>
                   </Alert>
-                )}
+                ) : (
+                  <>
+                    {!user?.kycDocument && (
+                      <Alert>
+                        <Info className="h-4 w-4" />
+                        <AlertTitle>Document Requirements</AlertTitle>
+                        <AlertDescription className="space-y-2">
+                          <ul className="text-sm space-y-1 list-disc pl-4">
+                            <li>Valid government-issued ID</li>
+                            <li>Clearly visible full name</li>
+                            <li>Not expired</li>
+                            <li>Well-lit and readable</li>
+                          </ul>
+                          <p className="text-xs text-muted-foreground">
+                            Supported formats: JPG, PNG, or PDF
+                          </p>
+                        </AlertDescription>
+                      </Alert>
+                    )}
 
-                <Button
-                  type="button"
-                  className="w-full"
-                  disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending || user?.kycStatus === "approved"}
-                  onClick={() => {
-                    if (file) {
-                      documentForm.trigger("document").then((isValid) => {
-                        if (isValid) {
-                          kycDocumentMutation.mutate(file);
-                        }
-                      });
-                    }
-                  }}
-                >
-                  {kycDocumentMutation.isPending ? (
-                    <Upload className="h-4 w-4 mr-2 animate-bounce" />
-                  ) : null}
-                  {kycDocumentMutation.isPending ? "Uploading..." : "Upload Document"}
-                </Button>
-              </form>
-            </Form>
-          </div>
-        )}
+                    <Form {...documentForm}>
+                      <form className="space-y-4">
+                        <FormField
+                          control={documentForm.control}
+                          name="document"
+                          render={({ field: { onChange, ...field } }) => (
+                            <FormItem>
+                              <FormControl>
+                                <div className="flex items-center gap-3">
+                                  <Input
+                                    type="file"
+                                    onChange={(e) => {
+                                      handleFileChange(e);
+                                      onChange(e.target.files?.[0]);
+                                    }}
+                                    accept="image/jpeg,image/png,image/jpg,application/pdf"
+                                    disabled={!user?.mobileVerified || isUploading}
+                                    className="text-sm file:text-sm"
+                                  />
+                                  {uploadProgress > 0 && (
+                                    <Progress value={uploadProgress} className="w-[60px]" />
+                                  )}
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {user?.kycStatus === "pending" && (
+                          <Alert variant="warning" className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            <AlertDescription className="text-sm">
+                              Your document is under review. We'll notify you once approved.
+                            </AlertDescription>
+                          </Alert>
+                        )}
+
+                        <Button
+                          type="button"
+                          className="w-full"
+                          disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending}
+                          onClick={() => {
+                            if (file) {
+                              documentForm.trigger("document").then((isValid) => {
+                                if (isValid) {
+                                  kycDocumentMutation.mutate(file);
+                                }
+                              });
+                            }
+                          }}
+                        >
+                          {kycDocumentMutation.isPending ? (
+                            <>
+                              <Upload className="h-4 w-4 mr-2 animate-bounce" />
+                              Uploading...
+                            </>
+                          ) : (
+                            "Upload Document"
+                          )}
+                        </Button>
+                      </form>
+                    </Form>
+                  </>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
