@@ -1,13 +1,14 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, HelpCircle, Receipt, ArrowUp } from "lucide-react";
+import { AlertCircle, HelpCircle, Receipt, ArrowUp, CreditCard, Share2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import TradeForm from "@/components/trade-form";
 import KYCForm from "@/components/kyc-form";
 import { useQuery } from "@tanstack/react-query";
 import { Transaction } from "@shared/schema";
+import { Link } from "wouter";
 
 function sortTransactions(transactions: Transaction[] = []) {
   const pendingTransactions = transactions
@@ -43,6 +44,49 @@ export default function HomePage() {
           <p className="text-muted-foreground mt-2">
             Your trusted platform for USDT-JOD exchange
           </p>
+        </div>
+
+        {/* Quick Actions Section */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 animate-fade-up [--animation-delay:200ms]">
+          <Link href="#trade-form">
+            <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-primary/20">
+              <CardContent className="p-6 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-200">
+                  <CreditCard className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Start Trading</h3>
+                  <p className="text-sm text-muted-foreground">Buy or sell USDT instantly</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/settings">
+            <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-primary/20">
+              <CardContent className="p-6 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-200">
+                  <Settings className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Payment Methods</h3>
+                  <p className="text-sm text-muted-foreground">Manage your payment options</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-primary/20">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-200">
+                <Share2 className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-medium">Refer a Friend</h3>
+                <p className="text-sm text-muted-foreground">Earn rewards for referrals</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
