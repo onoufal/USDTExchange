@@ -20,7 +20,7 @@ export function FeatureCard({ title, description, className, icon: Icon }: Featu
     )}>
       {Icon && (
         <div className="mb-4">
-          <Icon className="h-8 w-8 text-primary/80" />
+          <Icon className="h-8 w-8 text-primary/80 transition-transform duration-300 group-hover:scale-110 group-hover:text-primary" />
         </div>
       )}
       <h3 className="font-semibold text-lg mb-2">{title}</h3>
