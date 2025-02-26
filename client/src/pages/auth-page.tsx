@@ -80,7 +80,7 @@ export default function AuthPage() {
                     data-[state=active]:bg-background 
                     data-[state=active]:text-primary 
                     data-[state=active]:shadow-sm 
-                    data-[state=active]:font-semibold
+                    data-[state=active]:font-medium
                     transition-all duration-300
                     hover:text-primary/80"
                 >
@@ -92,7 +92,7 @@ export default function AuthPage() {
                     data-[state=active]:bg-background 
                     data-[state=active]:text-primary 
                     data-[state=active]:shadow-sm 
-                    data-[state=active]:font-semibold
+                    data-[state=active]:font-medium
                     transition-all duration-300
                     hover:text-primary/80"
                 >
