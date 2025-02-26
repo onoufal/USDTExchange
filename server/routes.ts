@@ -4,8 +4,8 @@ import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import multer from "multer";
 import { z } from "zod";
-import { updateUserWalletSchema } from "@shared/schema"; // Fixed import path
-import { updateUserCliqSchema } from "@shared/schema"; // Added import for CliQ schema
+import { updateUserWalletSchema } from "@shared/schema";
+import { updateUserCliqSchema } from "@shared/schema";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -204,6 +204,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .transform(Number),
         network: z.enum(["trc20", "bep20"]).optional(),
         paymentMethod: z.enum(["cliq", "wallet"]).optional(),
+      }).refine((data) => {
+        // Require network field for sell orders
+        if (data.type === "sell" && !data.network) {
+          return false;
+        }
+        return true;
+      }, {
+        message: "Network is required for sell orders",
+        path: ["network"]
       });
 
       const data = schema.parse(req.body);
