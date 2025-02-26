@@ -63,11 +63,11 @@ export default function HomePage() {
           <Link href="#trade-form" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300">
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
               <CardContent className="p-6 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
+                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
                   <CreditCard className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold">Start Trading</h3>
+                  <h3 className="text-lg font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Start Trading</h3>
                   <p className="text-sm text-muted-foreground">Buy or sell USDT instantly</p>
                 </div>
               </CardContent>
@@ -77,11 +77,11 @@ export default function HomePage() {
           <Link href="/settings" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300">
             <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60">
               <CardContent className="p-6 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
+                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
                   <Settings className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold">Payment Methods</h3>
+                  <h3 className="text-lg font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Payment Methods</h3>
                   <p className="text-sm text-muted-foreground">Manage your payment options</p>
                 </div>
               </CardContent>
@@ -90,11 +90,11 @@ export default function HomePage() {
 
           <Card className="border-0 shadow-lg bg-card/50 backdrop-blur transition-all duration-200 hover:shadow-xl hover:bg-card/60 cursor-pointer">
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
+              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
                 <Share2 className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="text-base font-semibold">Refer a Friend</h3>
+                <h3 className="text-lg font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Refer a Friend</h3>
                 <p className="text-sm text-muted-foreground">Earn rewards for referrals</p>
               </div>
             </CardContent>
