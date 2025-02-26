@@ -20,11 +20,11 @@ import AdminPaymentSettings from "@/components/admin-payment-settings";
 function sortTransactions(transactions: Transaction[] = []) {
   const pendingTransactions = transactions
     .filter(tx => tx.status === 'pending')
-    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()); // Ascending order - oldest first
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
   const approvedTransactions = transactions
     .filter(tx => tx.status === 'approved')
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // Descending order - newest first
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return [...pendingTransactions, ...approvedTransactions];
 }
