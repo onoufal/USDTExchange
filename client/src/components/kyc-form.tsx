@@ -10,13 +10,12 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Clock, Upload, PhoneCall, FileText, HelpCircle, Info } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Upload, PhoneCall, FileText, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Card, CardContent } from "@/components/ui/card";
 
-// Schema definitions remain unchanged
+// Schema definitions
 const mobileSchema = z.object({
   mobileNumber: z
     .string()
@@ -28,12 +27,9 @@ const mobileSchema = z.object({
 const documentSchema = z.object({
   document: z.instanceof(File).refine((file) => {
     if (!file) return false;
-
     const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
     const validExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
-
     const extension = (file.name.toLowerCase().match(/\.[^.]*$/) || ['.unknown'])[0];
-
     return validTypes.includes(file.type) && validExtensions.includes(extension);
   }, "Please upload a valid JPG, PNG, or PDF file")
 });
@@ -52,7 +48,6 @@ export default function KYCForm() {
     return progress;
   })();
 
-  // Form setup and mutations remain unchanged
   const mobileForm = useForm({
     resolver: zodResolver(mobileSchema),
     defaultValues: {
@@ -67,7 +62,6 @@ export default function KYCForm() {
     },
   });
 
-  // Mutations remain unchanged
   const mobileVerificationMutation = useMutation({
     mutationFn: async (data: z.infer<typeof mobileSchema>) => {
       const res = await apiRequest("POST", "/api/kyc/mobile", data);
@@ -145,8 +139,6 @@ export default function KYCForm() {
     },
   });
 
-  const isUploading = kycDocumentMutation.isPending && uploadProgress > 0;
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     if (selectedFile) {
@@ -178,17 +170,17 @@ export default function KYCForm() {
         <Progress value={verificationProgress} className="h-2" />
       </div>
 
-      {/* Verification Steps Grid */}
-      <div className="grid grid-cols-1 gap-4">
+      {/* Verification Steps */}
+      <div className="space-y-4">
         {/* Mobile Verification Step */}
         <Card className={`border transition-colors duration-200 ${user?.mobileVerified ? 'bg-primary/5 border-primary/20' : ''}`}>
-          <CardContent className="p-4 space-y-4">
+          <CardContent className="p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <PhoneCall className="w-4 h-4 text-primary" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <PhoneCall className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="font-medium">Mobile Verification</h3>
+                <h3 className="text-lg font-medium">Mobile Verification</h3>
               </div>
               <Badge variant={user?.mobileVerified ? "default" : "destructive"} className="font-medium">
                 {user?.mobileVerified ? (
@@ -205,7 +197,7 @@ export default function KYCForm() {
                 <Alert>
                   <Info className="h-4 w-4" />
                   <AlertTitle>Verification Steps</AlertTitle>
-                  <AlertDescription className="text-sm space-y-1">
+                  <AlertDescription className="text-sm space-y-1.5">
                     <p>1. Enter your Jordanian mobile number</p>
                     <p>2. Receive verification code via SMS</p>
                     <p>3. Enter code to complete verification</p>
@@ -227,10 +219,10 @@ export default function KYCForm() {
                               placeholder="07xxxxxxxx"
                               {...field}
                               maxLength={10}
-                              className="font-mono"
+                              className="font-mono text-base"
                             />
                           </FormControl>
-                          <FormDescription className="text-xs">
+                          <FormDescription className="text-sm">
                             Enter your Jordanian mobile number (starts with 077, 078, or 079)
                           </FormDescription>
                           <FormMessage />
@@ -239,7 +231,7 @@ export default function KYCForm() {
                     />
                     <Button
                       type="submit"
-                      className="w-full"
+                      className="w-full font-medium"
                       disabled={mobileVerificationMutation.isPending}
                     >
                       {mobileVerificationMutation.isPending ? "Verifying..." : "Verify Mobile"}
@@ -253,13 +245,13 @@ export default function KYCForm() {
 
         {/* KYC Document Verification Step */}
         <Card className={`border transition-colors duration-200 ${user?.kycStatus === 'approved' ? 'bg-primary/5 border-primary/20' : ''}`}>
-          <CardContent className="p-4 space-y-4">
+          <CardContent className="p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-primary" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="font-medium">ID Verification</h3>
+                <h3 className="text-lg font-medium">ID Verification</h3>
               </div>
               <Badge 
                 variant={
@@ -305,13 +297,13 @@ export default function KYCForm() {
                         <Info className="h-4 w-4" />
                         <AlertTitle>Document Requirements</AlertTitle>
                         <AlertDescription className="space-y-2">
-                          <ul className="text-sm space-y-1 list-disc pl-4">
+                          <ul className="text-sm space-y-1.5 list-disc pl-4">
                             <li>Valid government-issued ID</li>
                             <li>Clearly visible full name</li>
                             <li>Not expired</li>
                             <li>Well-lit and readable</li>
                           </ul>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-sm text-muted-foreground">
                             Supported formats: JPG, PNG, or PDF
                           </p>
                         </AlertDescription>
@@ -325,6 +317,7 @@ export default function KYCForm() {
                           name="document"
                           render={({ field: { onChange, ...field } }) => (
                             <FormItem>
+                              <FormLabel className="text-base font-medium">Upload Document</FormLabel>
                               <FormControl>
                                 <div className="flex items-center gap-3">
                                   <Input
@@ -334,8 +327,8 @@ export default function KYCForm() {
                                       onChange(e.target.files?.[0]);
                                     }}
                                     accept="image/jpeg,image/png,image/jpg,application/pdf"
-                                    disabled={!user?.mobileVerified || isUploading}
-                                    className="text-sm file:text-sm"
+                                    disabled={!user?.mobileVerified || kycDocumentMutation.isPending}
+                                    className="text-sm file:text-sm file:font-medium file:bg-muted file:hover:bg-muted/80 file:transition-colors"
                                   />
                                   {uploadProgress > 0 && (
                                     <Progress value={uploadProgress} className="w-[60px]" />
@@ -358,7 +351,7 @@ export default function KYCForm() {
 
                         <Button
                           type="button"
-                          className="w-full"
+                          className="w-full font-medium"
                           disabled={!file || !user?.mobileVerified || kycDocumentMutation.isPending}
                           onClick={() => {
                             if (file) {
