@@ -66,27 +66,27 @@ export default function AuthPage() {
       <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center mt-4 sm:mt-8 lg:mt-0">
         {/* Auth Form Section - Glassmorphic card with responsive padding */}
         <Card className="w-full max-w-md mx-auto lg:order-2 border-0 shadow-xl bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
-          {/* Card Header with improved contrast */}
-          <CardHeader className="space-y-4 sm:space-y-6 items-center text-center pb-6 sm:pb-8">
+          {/* Card Header with improved contrast and consistent spacing */}
+          <CardHeader className="space-y-6 sm:space-y-8 items-center text-center pb-8 sm:pb-10">
             {/* Show logo only on mobile/tablet */}
             <div className="lg:hidden">
               <BrandLogo size="md" className="transform-gpu transition-transform hover:scale-105 duration-300" />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <CardTitle className="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                 Welcome to ExchangePro
               </CardTitle>
-              <p className="text-base sm:text-lg text-foreground/80 leading-relaxed">
+              <p className="text-base sm:text-lg text-foreground/80 leading-relaxed max-w-sm mx-auto">
                 Your trusted USDT exchange platform
               </p>
             </div>
           </CardHeader>
 
-          {/* Card content with improved contrast and readability */}
-          <CardContent>
+          {/* Card content with improved spacing */}
+          <CardContent className="pb-8 sm:pb-10">
             {/* Auth Forms with Tab Navigation */}
-            <Tabs defaultValue="login" className="space-y-6 sm:space-y-8" role="tablist" aria-label="Authentication forms">
-              {/* Tab Headers */}
+            <Tabs defaultValue="login" className="space-y-8" role="tablist" aria-label="Authentication forms">
+              {/* Tab Headers with increased spacing */}
               <TabsList
                 className="h-[52px] grid w-full grid-cols-2 rounded-lg bg-muted/50 backdrop-blur supports-[backdrop-filter]:bg-muted/40 mt-1 p-0.5"
                 role="tablist"
@@ -111,14 +111,14 @@ export default function AuthPage() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* Tab Content Container - Fixed height to prevent layout shifts */}
-              <div className="min-h-[320px] relative">
+              {/* Tab Content Container with consistent spacing */}
+              <div className="min-h-[320px] relative mt-6">
                 <TabsContent
                   value="login"
                   id="login-tab"
                   role="tabpanel"
                   tabIndex={0}
-                  className="space-y-6 outline-none"
+                  className="space-y-6 outline-none px-1"
                 >
                   <LoginForm form={loginForm} mutation={loginMutation} />
                 </TabsContent>
@@ -128,7 +128,7 @@ export default function AuthPage() {
                   id="register-tab"
                   role="tabpanel"
                   tabIndex={0}
-                  className="space-y-6 outline-none"
+                  className="space-y-6 outline-none px-1"
                 >
                   <RegisterForm form={registerForm} mutation={registerMutation} />
                 </TabsContent>
