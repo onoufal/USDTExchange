@@ -24,7 +24,7 @@ export function FeatureCard({ title, description, className, icon: Icon }: Featu
         </div>
       )}
       <h3 className="font-semibold text-lg mb-2">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
+      <p className="text-muted-foreground text-base leading-relaxed">{description}</p>
     </div>
   );
 }

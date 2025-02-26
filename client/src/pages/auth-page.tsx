@@ -156,11 +156,13 @@ export default function AuthPage() {
               icon={Shield}
               title="Secure Trading"
               description="Advanced security measures protect your transactions and personal information"
+              className="text-[15px]"
             />
             <FeatureCard
               icon={Zap}
               title="Fast Processing"
               description="Quick verification and speedy transaction processing"
+              className="text-[15px]"
             />
           </div>
         </div>
