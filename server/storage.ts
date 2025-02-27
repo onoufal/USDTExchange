@@ -258,6 +258,24 @@ export class MemStorage implements IStorage {
 
   async createTransaction(data: Transaction): Promise<Transaction> {
     const id = this.currentTransactionId++;
+
+    // Log the incoming transaction data
+    console.log('Transaction data received:', {
+      type: data.type,
+      amount: data.amount,
+      rate: data.rate,
+      status: 'pending',
+      createdAt: new Date(),
+      commission: data.commission || '0',
+      fee: data.fee || '0',
+      network: data.type === 'sell' ? data.network : null,
+      paymentMethod: data.type === 'buy' ? data.paymentMethod : null,
+      // For sell orders, get CliQ info from the authenticated user
+      cliqType: data.cliqType,
+      cliqAlias: data.cliqAlias,
+      cliqNumber: data.cliqNumber
+    });
+
     const transaction: Transaction = {
       id,
       userId: data.userId,
@@ -276,10 +294,19 @@ export class MemStorage implements IStorage {
       cliqAlias: data.cliqAlias,
       cliqNumber: data.cliqNumber
     };
-    this.transactions.set(id, transaction);
 
-    // Debug log to verify the transaction data
-    console.log('Transaction created in storage:', transaction);
+    // Debug log to verify the transaction object before saving
+    console.log('Transaction object being saved:', {
+      id: transaction.id,
+      type: transaction.type,
+      cliqDetails: {
+        type: transaction.cliqType,
+        alias: transaction.cliqAlias,
+        number: transaction.cliqNumber
+      }
+    });
+
+    this.transactions.set(id, transaction);
     return transaction;
   }
 

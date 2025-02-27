@@ -417,6 +417,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
           return res.status(400).json({ message: "CliQ settings must be configured for sell orders" });
         }
+
+        // Double check CliQ data before proceeding
+        console.log('Verified CliQ settings for sell order:', {
+          userId: req.user.id,
+          cliqType: req.user.cliqType,
+          cliqAlias: req.user.cliqAlias,
+          cliqNumber: req.user.cliqNumber
+        });
       }
 
       // Prepare transaction data
