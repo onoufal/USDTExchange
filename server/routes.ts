@@ -439,7 +439,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transaction = await storage.createTransaction(transactionData);
 
       // Log the created transaction
-      console.log('Transaction created:', {
+      console.log('Created transaction:', {
         ...transaction,
         proofOfPayment: '[REDACTED]'
       });
