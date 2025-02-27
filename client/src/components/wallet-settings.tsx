@@ -10,18 +10,24 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 
 export default function WalletSettings() {
   const { toast } = useToast();
   const { user } = useAuth();
 
   const form = useForm<UpdateUserWallet>({
-    resolver: zodResolver(updateUserWalletSchema),
+    resolver: zodResolver(updateUserWalletSchema.extend({
+      usdtAddress: updateUserWalletSchema.shape.usdtAddress
+        .min(30, "USDT address must be at least 30 characters")
+        .max(50, "USDT address cannot exceed 50 characters")
+        .regex(/^[a-zA-Z0-9]+$/, "USDT address can only contain letters and numbers"),
+    })),
     defaultValues: {
       usdtAddress: user?.usdtAddress || "",
       usdtNetwork: user?.usdtNetwork as "tron" | "bep20" || "tron"
-    }
+    },
+    mode: "onChange" // Enable real-time validation
   });
 
   const updateWalletMutation = useMutation({
@@ -95,7 +101,12 @@ export default function WalletSettings() {
                       </FormItem>
                     </RadioGroup>
                   </FormControl>
-                  <FormMessage className="text-sm font-medium text-destructive animate-in fade-in-50" />
+                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
+                    {form.formState.errors.usdtNetwork?.message && (
+                      <AlertCircle className="h-4 w-4" />
+                    )}
+                    {form.formState.errors.usdtNetwork?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -115,10 +126,17 @@ export default function WalletSettings() {
                     <Input 
                       placeholder="Enter your USDT wallet address" 
                       {...field}
-                      className="h-11 text-base transition-colors hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2"
+                      className={`h-11 text-base transition-colors hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                        form.formState.errors.usdtAddress ? "border-destructive" : ""
+                      }`}
                     />
                   </FormControl>
-                  <FormMessage className="text-sm font-medium text-destructive animate-in fade-in-50" />
+                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
+                    {form.formState.errors.usdtAddress?.message && (
+                      <AlertCircle className="h-4 w-4" />
+                    )}
+                    {form.formState.errors.usdtAddress?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -127,7 +145,7 @@ export default function WalletSettings() {
               <Button 
                 type="submit" 
                 className="w-full h-11 text-base font-medium transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-offset-2"
-                disabled={updateWalletMutation.isPending}
+                disabled={!form.formState.isValid || updateWalletMutation.isPending}
               >
                 {updateWalletMutation.isPending ? (
                   <>
