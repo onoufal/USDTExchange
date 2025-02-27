@@ -47,29 +47,29 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Welcome Section */}
-        <div className="mb-6 sm:mb-8 animate-fade-up [--animation-delay:0ms]">
+      <main className="container mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8 sm:space-y-10">
+        {/* Welcome Section - Increased padding */}
+        <div className="animate-fade-up [--animation-delay:0ms]">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Welcome back, {user.fullName}
           </h1>
-          <p className="text-base sm:text-lg text-muted-foreground mt-2">
+          <p className="text-base sm:text-lg text-muted-foreground mt-3">
             Your trusted platform for USDT-JOD exchange
           </p>
         </div>
 
-        {/* Quick Actions Section */}
-        <section aria-labelledby="quick-actions-heading" className="mb-6 sm:mb-8">
+        {/* Quick Actions Section - Increased gaps */}
+        <section aria-labelledby="quick-actions-heading" className="py-2">
           <h2 id="quick-actions-heading" className="sr-only">Quick Actions</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             <Link 
               href="#trade-form" 
               className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300 animate-fade-up [--animation-delay:100ms]"
               aria-label="Start Trading USDT"
             >
               <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50">
-                <CardContent className="p-4 sm:p-6 flex items-center gap-3 sm:gap-4">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
+                <CardContent className="p-5 sm:p-6 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
                     <CreditCard className="w-5 h-5 text-primary" aria-hidden="true" />
                   </div>
                   <div>
@@ -79,15 +79,14 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </Link>
-
             <Link 
               href="/settings" 
               className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300 animate-fade-up [--animation-delay:200ms]"
               aria-label="Manage Payment Methods"
             >
               <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50">
-                <CardContent className="p-4 sm:p-6 flex items-center gap-3 sm:gap-4">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
+                <CardContent className="p-5 sm:p-6 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
                     <Settings className="w-5 h-5 text-primary" aria-hidden="true" />
                   </div>
                   <div>
@@ -97,7 +96,6 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </Link>
-
             <Button 
               asChild 
               variant="ghost" 
@@ -105,8 +103,8 @@ export default function HomePage() {
               aria-label="Learn about our referral program"
             >
               <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50 w-full">
-                <CardContent className="p-4 sm:p-6 flex items-center gap-3 sm:gap-4">
-                  <div className="w-9 h-9 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
+                <CardContent className="p-5 sm:p-6 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30">
                     <Share2 className="w-5 h-5 text-primary" aria-hidden="true" />
                   </div>
                   <div>
@@ -119,19 +117,19 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+        {/* Main Content Grid - Increased spacing between sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
           {/* Main Trading and Transactions Column */}
-          <div className="lg:col-span-8 space-y-4 sm:space-y-6">
-            {/* Trading Section */}
+          <div className="lg:col-span-8 space-y-6 sm:space-y-8">
+            {/* Trading Section - Added more padding */}
             <section aria-labelledby="trade-section-title">
               <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50 animate-fade-up [--animation-delay:400ms]">
-                <CardHeader className="px-4 sm:px-6 py-4 sm:py-5">
-                  <div className="flex items-center gap-2">
+                <CardHeader className="px-5 sm:px-6 py-5 sm:py-6">
+                  <div className="flex items-center gap-3">
                     <ClipboardList className="w-5 h-5 text-primary" aria-hidden="true" />
                     <h2 
                       id="trade-section-title" 
-                      className="text-lg sm:text-xl lg:text-2xl font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent"
+                      className="text-xl sm:text-2xl font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent"
                     >
                       Trade USDT
                     </h2>
@@ -155,16 +153,14 @@ export default function HomePage() {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  <CardDescription className="text-sm sm:text-base text-muted-foreground/90">
+                  <CardDescription className="text-sm sm:text-base text-muted-foreground/90 mt-2">
                     Buy or sell USDT for Jordanian Dinar (JOD)
                   </CardDescription>
                 </CardHeader>
-                <CardContent id="trade-form" className="px-4 sm:px-6 pb-4 sm:pb-6">
+                <CardContent id="trade-form" className="px-5 sm:px-6 pb-5 sm:pb-6">
                   {showKYCWarning ? (
                     <Alert variant="warning" className="flex items-center gap-3">
-                      <div className="shrink-0">
-                        <AlertCircle className="h-5 w-5 text-warning-foreground" aria-hidden="true" />
-                      </div>
+                      <AlertCircle className="h-5 w-5 text-warning-foreground shrink-0" aria-hidden="true" />
                       <AlertDescription className="text-sm sm:text-base font-medium">
                         Please complete mobile verification and KYC before trading
                       </AlertDescription>
@@ -175,16 +171,14 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </section>
-
-            {/* Transaction History Section */}
             <section aria-labelledby="transactions-section-title">
               <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50 animate-fade-up [--animation-delay:500ms]">
-                <CardHeader className="px-4 sm:px-6 py-4 sm:py-5">
-                  <div className="flex items-center gap-2">
+                <CardHeader className="px-5 sm:px-6 py-5 sm:py-6">
+                  <div className="flex items-center gap-3">
                     <History className="w-5 h-5 text-primary" aria-hidden="true" />
                     <h2 
                       id="transactions-section-title" 
-                      className="text-lg sm:text-xl lg:text-2xl font-semibold tracking-tight"
+                      className="text-xl sm:text-2xl lg:text-2xl font-semibold tracking-tight"
                     >
                       Recent Transactions
                     </h2>
@@ -208,11 +202,11 @@ export default function HomePage() {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  <CardDescription className="text-sm sm:text-base text-muted-foreground/90">
+                  <CardDescription className="text-sm sm:text-base text-muted-foreground/90 mt-2">
                     View and track your USDT trades
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+                <CardContent className="px-5 sm:px-6 pb-5 sm:pb-6">
                   {/* Scrollable table wrapper */}
                   <div className="overflow-x-auto -mx-4 sm:mx-0 scrollbar-thin scrollbar-thumb-muted-foreground/10 scrollbar-track-transparent">
                     <div className="min-w-full inline-block align-middle">
@@ -349,24 +343,24 @@ export default function HomePage() {
           </div>
 
           {/* Sidebar - Verification Status */}
-          <div className="lg:col-span-4 space-y-4 sm:space-y-6 animate-fade-left [--animation-delay:200ms]">
+          <div className="lg:col-span-4 space-y-6 sm:space-y-8 animate-fade-left [--animation-delay:200ms]">
             <section aria-labelledby="verification-section-title">
               <Card className="border-0 shadow-lg bg-card/50 dark:bg-card/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50">
-                <CardHeader className="px-4 sm:px-6 py-4 sm:py-5">
-                  <div className="flex items-center gap-2">
+                <CardHeader className="px-5 sm:px-6 py-5 sm:py-6">
+                  <div className="flex items-center gap-3">
                     <FileText className="w-5 h-5 text-primary" aria-hidden="true" />
                     <h2 
                       id="verification-section-title" 
-                      className="text-lg sm:text-xl lg:text-2xl font-semibold tracking-tight"
+                      className="text-xl sm:text-2xl font-semibold tracking-tight"
                     >
                       Verification Status
                     </h2>
                   </div>
-                  <CardDescription className="text-sm sm:text-base text-muted-foreground/90">
+                  <CardDescription className="text-sm sm:text-base text-muted-foreground/90 mt-2">
                     Complete verification to start trading
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+                <CardContent className="px-5 sm:px-6 pb-5 sm:pb-6">
                   <KYCForm />
                 </CardContent>
               </Card>
