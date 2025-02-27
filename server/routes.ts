@@ -325,9 +325,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .transform(Number),
         network: z.enum(["trc20", "bep20"]).optional(),
         paymentMethod: z.enum(["cliq", "wallet"]).optional(),
-        cliqType: z.string().optional(),
-        cliqAlias: z.string().nullable().optional(),
-        cliqNumber: z.string().nullable().optional(),
       }).refine((data) => {
         if (data.type === "sell" && !data.network) {
           return false;
@@ -350,10 +347,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: new Date(),
         network: data.type === "sell" ? data.network : null,
         paymentMethod: data.type === "buy" ? data.paymentMethod : null,
-        // Store CliQ information for sell orders
-        cliqType: data.type === "sell" ? data.cliqType : null,
-        cliqAlias: data.type === "sell" ? data.cliqAlias : null,
-        cliqNumber: data.type === "sell" ? data.cliqNumber : null,
+        // For sell orders, get CliQ info from the authenticated user
+        cliqType: data.type === "sell" ? req.user.cliqType : null,
+        cliqAlias: data.type === "sell" && req.user.cliqType === "alias" ? req.user.cliqAlias : null,
+        cliqNumber: data.type === "sell" && req.user.cliqType === "number" ? req.user.cliqNumber : null,
       };
 
       // Debug logging for transaction data before storage
