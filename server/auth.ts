@@ -16,24 +16,13 @@ declare global {
 
 const scryptAsync = promisify(scrypt);
 
-/**
- * Hashes a password using scrypt with a random salt
- * @param password The plain text password to hash
- * @returns Promise resolving to "hash.salt" string
- */
-async function hashPassword(password: string): Promise<string> {
+async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
   return `${buf.toString("hex")}.${salt}`;
 }
 
-/**
- * Compares a supplied password against a stored hashed password
- * @param supplied The plain text password to verify
- * @param stored The stored "hash.salt" string
- * @returns Promise resolving to true if passwords match
- */
-async function comparePasswords(supplied: string, stored: string): Promise<boolean> {
+async function comparePasswords(supplied: string, stored: string) {
   // For admin user with unhashed password
   if (supplied === stored) {
     return true;
@@ -51,12 +40,7 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
   }
 }
 
-/**
- * Sets up authentication middleware and routes for the application
- * @param app Express application instance
- */
-export function setupAuth(app: Express): void {
-  // Configure session middleware
+export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
@@ -70,17 +54,14 @@ export function setupAuth(app: Express): void {
     store: storage.sessionStore
   };
 
-  // Enable proxy trust if in production
   if (app.get('env') === 'production') {
     app.set('trust proxy', 1);
   }
 
-  // Initialize session and passport middleware
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Configure local authentication strategy
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
@@ -112,43 +93,22 @@ export function setupAuth(app: Express): void {
     })
   );
 
-  // Session serialization
   passport.serializeUser((user, done) => {
     done(null, user.id);
   });
 
-  // Session deserialization - Always fetch fresh user data
   passport.deserializeUser(async (id: number, done) => {
     try {
-      // Log deserialization attempt
-      log(`Deserializing user session for ID: ${id}`);
-
-      // Always fetch fresh user data from storage
       const user = await storage.getUser(id);
-
       if (!user) {
-        log(`Deserialization failed: User not found - ID: ${id}`);
         return done(null, false);
       }
-
-      // Log successful deserialization with user details
-      log(`User deserialized successfully:`, {
-        id: user.id,
-        cliqSettings: {
-          type: user.cliqType,
-          alias: user.cliqAlias,
-          number: user.cliqNumber
-        }
-      });
-
       done(null, user);
     } catch (err) {
-      log(`Deserialization error for user ${id}:`, err);
       done(err);
     }
   });
 
-  // Authentication routes
   app.post("/api/login", (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
       if (err) {

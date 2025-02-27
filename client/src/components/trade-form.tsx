@@ -415,7 +415,7 @@ export default function TradeForm() {
       toast({
         title: "USDT wallet not set",
         description:
-          "Please set your USDT wallet address in settings before selling",
+          "Please set your CliQ account details in settings before selling",
         variant: "destructive",
       });
       return;
@@ -439,7 +439,7 @@ export default function TradeForm() {
       formData.append("rate", currentRate.toString());
       formData.append("proofOfPayment", file);
 
-      // For sell orders, include network and CliQ information
+      // For sell orders, network is required
       if (values.type === "sell") {
         if (!values.network) {
           toast({
@@ -450,10 +450,7 @@ export default function TradeForm() {
           return;
         }
         formData.append("network", values.network);
-        // Include user's CliQ information
-        formData.append("cliqType", user.cliqType || "alias");
-        formData.append("cliqAlias", user.cliqAlias || "");
-        formData.append("cliqNumber", user.cliqNumber || "");
+        console.log("Sending sell order with network:", values.network);
       }
 
       // For buy orders, include payment method
@@ -906,7 +903,7 @@ export default function TradeForm() {
 
                   {/* Payment Proof Upload Section */}
                   <div className="space-y-8">
-                    <h2 className="text-xlfont-semibold tracking-tight">Payment Proof</h2>
+                    <h2 className="text-xl font-semibold tracking-tight">Payment Proof</h2>
                     <Card className="border bg-card/50">
                       <CardContent className="p-6">
                         <div className="space-y-6">

@@ -75,11 +75,7 @@ export const transactions = pgTable("transactions", {
   commission: decimal("commission").default('0'),
   fee: decimal("fee").default('0'),
   network: text("network"), 
-  paymentMethod: text("payment_method"),
-  // Add CliQ fields
-  cliqType: text("cliq_type"),
-  cliqAlias: text("cliq_alias"),
-  cliqNumber: text("cliq_number"),
+  paymentMethod: text("payment_method"), 
 });
 
 export const notifications = pgTable("notifications", {

@@ -1,20 +1,15 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { WebSocketServer, WebSocket } from "ws";
 import { setupAuth } from "./auth";
+import { storage } from "./storage";
 import multer from "multer";
 import { z } from "zod";
-import { updateUserWalletSchema, updateUserCliqSchema } from "@shared/schema";
-import { UserService } from "./services/user.service";
-import { KYCService } from "./services/kyc.service";
-import { TransactionService } from "./services/transaction.service";
-import { 
-  getUserNotifications, 
-  markNotificationAsRead, 
-  markAllNotificationsAsRead 
-} from "./services/notification.service";
+import { updateUserWalletSchema } from "@shared/schema";
+import { updateUserCliqSchema } from "@shared/schema";
+import { randomBytes } from "crypto";
+import { sendVerificationEmail } from "./services/email";
 import { insertUserSchema } from "@shared/schema"; // Assuming this schema is defined elsewhere
-
+import { hashPassword } from "./services/password"; // Assuming this function is defined elsewhere
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -39,43 +34,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      await UserService.verifyEmail(token);
+      const users = await storage.getAllUsers();
+      const user = users.find(u => u.verificationToken === token);
+
+      if (!user) {
+        return res.status(400).json({ message: "Invalid verification token" });
+      }
+
+      if (user.isVerified) {
+        return res.status(400).json({ message: "Email is already verified" });
+      }
+
+      await storage.verifyEmail(user.id);
       res.json({ success: true });
     } catch (error) {
       console.error('Email verification error:', error);
-      res.status(500).json({ message: error.message || "Failed to verify email" });
+      res.status(500).json({ message: "Failed to verify email" });
     }
   });
 
-  // Registration endpoint
+  // Registration endpoint (updated)
   app.post("/api/register", async (req, res) => {
     try {
+      console.log('Registration request received:', req.body);
+
       const validatedData = insertUserSchema.parse(req.body);
-      const user = await UserService.createUser(validatedData);
+      console.log('Validation passed, data:', validatedData);
+
+      const existingUser = await storage.getUserByEmail(validatedData.email);
+      if (existingUser) {
+        console.log('Email already registered:', validatedData.email);
+        return res.status(400).json({ message: "Email already registered" });
+      }
+
+      const token = randomBytes(20).toString('hex');
+
+      const user = await storage.createUser({
+        ...validatedData,
+        verificationToken: token,
+        password: await hashPassword(validatedData.password)
+      });
+      console.log('User created successfully:', { id: user.id, email: user.email });
+
+      // Create notification for admin
+      const admins = await storage.getAdminUsers();
+      for (const admin of admins) {
+        await storage.createNotification({
+          userId: admin.id,
+          type: "new_user",
+          message: `New user registration: ${user.fullName} (${user.email})`,
+          relatedId: user.id
+        });
+      }
+
+      const success = await sendVerificationEmail({
+        to: validatedData.email,
+        verificationToken: token
+      });
+
+      if (!success) {
+        console.log('Failed to send verification email to:', validatedData.email);
+        return res.status(200).json({ 
+          message: "Account created but verification email could not be sent. Please contact support."
+        });
+      }
+
+      console.log('Registration completed successfully for:', validatedData.email);
       res.json({ 
         message: "Registration successful. Please check your email to verify your account." 
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.log('Validation error:', error.errors);
         return res.status(400).json({ message: error.errors[0].message });
       }
       console.error('Registration error:', error);
-      res.status(500).json({ message: error.message || "Failed to register" });
+      res.status(500).json({ message: "Failed to register" });
     }
   });
+
 
   app.post("/api/kyc/mobile", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
     try {
-      await KYCService.verifyMobileNumber(req.user.id, req.body.mobileNumber);
+      const schema = z.object({ 
+        mobileNumber: z.string().regex(/^07[789]\d{7}$/, {
+          message: "Invalid Jordanian mobile number format"
+        })
+      });
+
+      const { mobileNumber } = schema.parse(req.body);
+
+      // Check if mobile number is already used by another user
+      const users = await storage.getAllUsers();
+      const existingUser = users.find(u => 
+        u.id !== req.user.id && u.mobileNumber === mobileNumber
+      );
+
+      if (existingUser) {
+        return res.status(400).json({ 
+          message: "This mobile number is already registered" 
+        });
+      }
+
+      await storage.updateUserMobile(req.user.id, mobileNumber);
       res.json({ success: true });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.errors[0].message });
+        return res.status(400).json({ 
+          message: error.errors[0].message 
+        });
       }
       console.error('Mobile verification error:', error);
-      res.status(500).json({ message: error.message || "Failed to verify mobile number" });
+      res.status(500).json({ 
+        message: "Failed to verify mobile number" 
+      });
     }
   });
 
@@ -83,176 +157,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     if (!req.file) return res.status(400).json({ message: "No document uploaded" });
 
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (req.file.size > maxSize) {
+      return res.status(400).json({ message: "File size must be less than 5MB" });
+    }
+
+    // Validate file type using both mimetype and original filename extension
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.pdf'];
+
+    const fileExtension = req.file.originalname.toLowerCase().match(/\.[^.]*$/)?.[0];
+
+    if (!allowedTypes.includes(req.file.mimetype) || !allowedExtensions.includes(fileExtension)) {
+      return res.status(400).json({ 
+        message: "Invalid file type. Please upload a JPG, PNG, or PDF file" 
+      });
+    }
+
     try {
-      await KYCService.validateDocument(req.file);
-      await KYCService.uploadKYCDocument(
-        req.user.id,
-        req.file.buffer.toString("base64"),
-        req.user.fullName
-      );
+      await storage.updateUserKYC(req.user.id, req.file.buffer.toString("base64"));
+
+      // Create notification for admin
+      const admins = await storage.getAdminUsers();
+      for (const admin of admins) {
+        await storage.createNotification({
+          userId: admin.id,
+          type: "kyc_submitted",
+          message: `User ${req.user.fullName} has submitted KYC documents for verification`,
+          relatedId: req.user.id
+        });
+      }
+
       res.json({ success: true });
     } catch (error) {
       console.error('KYC document upload error:', error);
-      res.status(500).json({ message: error.message || "Failed to process document upload" });
+      res.status(500).json({ message: "Failed to process document upload" });
     }
   });
 
-  // Admin routes
   app.get("/api/admin/users", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
-    const users = await UserService.getAllUsers();
+    const users = await storage.getAllUsers();
     res.json(users);
   });
 
   app.get("/api/admin/transactions", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
-    const transactions = await TransactionService.getAllTransactions();
+    const transactions = await storage.getAllTransactions();
     res.json(transactions);
   });
 
   app.post("/api/admin/approve-kyc/:userId", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
-    try {
-      await KYCService.approveKYC(parseInt(req.params.userId));
-      res.json({ success: true });
-    } catch (error) {
-      res.status(500).json({ message: error.message || "Failed to approve KYC" });
-    }
+    await storage.approveKYC(parseInt(req.params.userId));
+    res.json({ success: true });
   });
 
   app.post("/api/admin/approve-transaction/:transactionId", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+
     try {
-      await TransactionService.approveTransaction(
-        parseInt(req.params.transactionId),
-        req.user.id
-      );
+      const transaction = await storage.approveTransaction(parseInt(req.params.transactionId));
+
+      // Create notification for user
+      await storage.createNotification({
+        userId: transaction.userId,
+        type: "order_approved",
+        message: `Your ${transaction.type} order for ${transaction.amount} USDT has been approved`,
+        relatedId: transaction.id
+      });
+
       res.json({ success: true });
     } catch (error) {
       console.error('Transaction approval error:', error);
-      res.status(500).json({ message: error.message || "Failed to approve transaction" });
-    }
-  });
-
-  // User settings routes
-  app.post("/api/user/settings/cliq", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    try {
-      // Log initial session state
-      console.log('CliQ Update - Initial session state:', {
-        userId: req.user.id,
-        currentSettings: {
-          cliqType: req.user.cliqType,
-          cliqAlias: req.user.cliqAlias,
-          cliqNumber: req.user.cliqNumber
-        }
-      });
-
-      const data = updateUserCliqSchema.parse(req.body);
-      const updatedUser = await UserService.updateUserCliq(req.user.id, data);
-
-      // Log user data after update
-      console.log('CliQ Update - User data after storage update:', {
-        userId: updatedUser.id,
-        updatedSettings: {
-          cliqType: updatedUser.cliqType,
-          cliqAlias: updatedUser.cliqAlias,
-          cliqNumber: updatedUser.cliqNumber
-        }
-      });
-
-      // Refresh session with updated user data
-      await new Promise<void>((resolve, reject) => {
-        req.login(updatedUser, (err) => {
-          if (err) {
-            console.error('Session refresh error:', err);
-            reject(err);
-            return;
-          }
-
-          // Log session state after refresh
-          console.log('CliQ Update - Session state after refresh:', {
-            userId: req.user.id,
-            refreshedSettings: {
-              cliqType: req.user.cliqType,
-              cliqAlias: req.user.cliqAlias,
-              cliqNumber: req.user.cliqNumber
-            }
-          });
-
-          resolve();
-        });
-      });
-
-      res.json({ success: true });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.errors[0].message });
-      }
-      console.error('CliQ details update error:', error);
-      res.status(500).json({ message: error.message || "Failed to update CliQ settings" });
-    }
-  });
-
-  // Trade routes
-  app.post("/api/trade", upload.single("proofOfPayment"), async (req, res) => {
-    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
-    if (!req.file) return res.status(400).json({ message: "No payment proof uploaded" });
-
-    try {
-      const transaction = await TransactionService.createTransaction(
-        req.user.id,
-        req.body,
-        req.file.buffer.toString("base64"),
-        req.user
-      );
-      res.json(transaction);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.errors[0].message });
-      }
-      console.error('Trade submission error:', error);
-      res.status(500).json({ message: error.message || "Failed to process trade" });
-    }
-  });
-
-  // Notification routes
-  app.get("/api/notifications", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-
-    try {
-      const notifications = await getUserNotifications(req.user.id);
-      res.json(notifications);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-      res.status(500).json({ message: "Failed to fetch notifications" });
-    }
-  });
-
-  app.post("/api/notifications/:notificationId/read", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-
-    try {
-      await markNotificationAsRead(parseInt(req.params.notificationId));
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-      res.status(500).json({ message: "Failed to mark notification as read" });
-    }
-  });
-
-  app.post("/api/notifications/mark-all-read", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-
-    try {
-      await markAllNotificationsAsRead(req.user.id);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error marking all notifications as read:', error);
-      res.status(500).json({ message: "Failed to mark all notifications as read" });
+      res.status(500).json({ message: "Failed to approve transaction" });
     }
   });
 
@@ -260,7 +239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
 
     try {
-      const user = await UserService.getUser(parseInt(req.params.userId));
+      const user = await storage.getUser(parseInt(req.params.userId));
       if (!user || !user.kycDocument) {
         return res.status(404).json({ message: "Document not found" });
       }
@@ -310,7 +289,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/transactions", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     try {
-      const transactions = await TransactionService.getUserTransactions(req.user.id);
+      const transactions = await storage.getUserTransactions(req.user.id);
       res.json(transactions);
     } catch (error) {
       console.error('Error fetching user transactions:', error);
@@ -318,26 +297,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/trade", upload.single("proofOfPayment"), async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.file) return res.status(400).json({ message: "No payment proof uploaded" });
+
+    try {
+      // Debug logging for request body
+      console.log('Trade request body:', {
+        type: req.body.type,
+        amount: req.body.amount,
+        network: req.body.network,
+        paymentMethod: req.body.paymentMethod,
+        rate: req.body.rate
+      });
+
+      const schema = z.object({
+        type: z.enum(["buy", "sell"]),
+        amount: z.string()
+          .min(1, "Amount is required")
+          .regex(/^\d+(\.\d{1,2})?$/, "Amount must be a valid number with up to 2 decimal places")
+          .transform(Number),
+        rate: z.string()
+          .regex(/^\d+(\.\d{1,2})?$/, "Rate must be a valid number with up to 2 decimal places")
+          .transform(Number),
+        network: z.enum(["trc20", "bep20"]).optional(),
+        paymentMethod: z.enum(["cliq", "wallet"]).optional(),
+      }).refine((data) => {
+        if (data.type === "sell" && !data.network) {
+          return false;
+        }
+        return true;
+      }, {
+        message: "Network is required for sell orders",
+        path: ["network"]
+      });
+
+      const data = schema.parse(req.body);
+
+      // Debug logging for parsed data
+      console.log('Parsed trade data:', {
+        ...data,
+        network: data.network
+      });
+
+      const transactionData = {
+        userId: req.user.id,
+        type: data.type,
+        amount: data.amount.toString(),
+        rate: data.rate,
+        status: "pending",
+        proofOfPayment: req.file.buffer.toString("base64"),
+        createdAt: new Date(),
+        network: data.type === "sell" ? data.network : null,
+        paymentMethod: data.type === "buy" ? data.paymentMethod : null,
+      };
+
+      // Debug logging for transaction data before storage
+      console.log('Transaction data before storage:', {
+        ...transactionData,
+        network: transactionData.network
+      });
+
+      const transaction = await storage.createTransaction(transactionData);
+
+      // Create notification for admin
+      const admins = await storage.getAdminUsers();
+      for (const admin of admins) {
+        await storage.createNotification({
+          userId: admin.id,
+          type: "order_submitted",
+          message: `New ${data.type} order submitted by ${req.user.fullName} for ${data.amount} USDT`,
+          relatedId: transaction.id
+        });
+      }
+
+      // Debug logging for created transaction
+      console.log('Created transaction:', {
+        ...transaction,
+        network: transaction.network
+      });
+
+      res.json(transaction);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      console.error('Trade submission error:', error);
+      res.status(500).json({ message: "Failed to process trade" });
+    }
+  });
+
+  app.get("/api/admin/payment-proof/:transactionId", async (req, res) => {
+    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+
+    try {
+      const transaction = await storage.getTransaction(parseInt(req.params.transactionId));
+      if (!transaction || !transaction.proofOfPayment) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+
+      const buffer = Buffer.from(transaction.proofOfPayment, 'base64');
+
+      // Check the file signature to determine the actual file type
+      const isPng = buffer.toString('hex', 0, 8) === '89504e470d0a1a0a';
+      const isJpg = buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[buffer.length - 2] === 0xFF && buffer[buffer.length - 1] === 0xD9;
+
+      let contentType = 'application/octet-stream';
+      let extension = '.bin';
+
+      if (isPng) {
+        contentType = 'image/png';
+        extension = '.png';
+      } else if (isJpg) {
+        contentType = 'image/jpeg';
+        extension = '.jpg';
+      }
+
+      // Set proper headers for preview and download
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Length', buffer.length);
+      res.setHeader('Accept-Ranges', 'bytes');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+
+      if (req.query.download) {
+        res.setHeader('Content-Disposition', `attachment; filename="payment-proof-${transaction.id}${extension}"`);
+      } else {
+        res.setHeader('Content-Disposition', 'inline');
+      }
+
+      // Send the raw buffer data
+      res.send(buffer);
+    } catch (error) {
+      console.error('Error fetching payment proof:', error);
+      res.status(500).json({ message: "Failed to fetch document" });
+    }
+  });
+
+  // User wallet settings
   app.post("/api/settings/wallet", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
     try {
       const data = updateUserWalletSchema.parse(req.body);
-      await UserService.updateUserWallet(req.user.id, data.usdtAddress, data.usdtNetwork);
+      await storage.updateUserWallet(req.user.id, data.usdtAddress, data.usdtNetwork);
       res.json({ success: true });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: error.errors[0].message });
       }
       console.error('Wallet update error:', error);
-      res.status(500).json({ message: error.message || "Failed to update wallet settings" });
+      res.status(500).json({ message: "Failed to update wallet settings" });
     }
   });
+
+  // Update the CliQ settings route to match the client's expected path
+  app.post("/api/user/settings/cliq", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const data = updateUserCliqSchema.parse(req.body);
+      await storage.updateUserCliq(req.user.id, data);
+      res.json({ success: true });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      console.error('CliQ details update error:', error);
+      res.status(500).json({ message: "Failed to update CliQ settings" });
+    }
+  });
+
 
   // Get platform payment settings (public)
   app.get("/api/settings/payment", async (req, res) => {
     try {
-      const settings = await TransactionService.getPaymentSettings();
+      const settings = await storage.getPaymentSettings();
       res.json(settings);
     } catch (error) {
       console.error('Error fetching payment settings:', error);
@@ -373,7 +510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const settings = schema.parse(req.body);
       console.log('Saving payment settings:', settings); // Debug log
-      await TransactionService.updatePaymentSettings(settings);
+      await storage.updatePaymentSettings(settings);
       res.json({ success: true });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -384,121 +521,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add this test route temporarily before the error handling middleware
-  app.get("/api/test-error", (req, res) => {
-    throw new Error("Test error to verify error handling");
-  });
+  // Add the following routes to handle notifications
+  app.get("/api/notifications", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
 
-  // Global error handling middleware
-  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    // Log the error details for debugging (but don't expose to client)
-    console.error('Unhandled error:', {
-      error: err.message,
-      stack: err.stack,
-      url: req.url,
-      method: req.method,
-      userId: req.user?.id
-    });
-
-    // Send standardized error response
-    res.status(500).json({ 
-      error: "An unexpected error occurred." 
-    });
-  });
-
-  const httpServer = createServer(app);
-
-  // Initialize WebSocket server on a specific path
-  const wss = new WebSocketServer({ 
-    server: httpServer, 
-    path: '/ws',
-    clientTracking: true,
-    perMessageDeflate: {
-      zlibDeflateOptions: {
-        chunkSize: 1024,
-        memLevel: 7,
-        level: 3
-      },
-      zlibInflateOptions: {
-        chunkSize: 10 * 1024
-      },
-      clientNoContextTakeover: true, 
-      serverNoContextTakeover: true, 
-      serverMaxWindowBits: 10, 
-      concurrencyLimit: 10, 
-      threshold: 1024 
+    try {
+      const userNotifications = await storage.getUserNotifications(req.user.id);
+      res.json(userNotifications);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
     }
   });
 
-  // Connection handling
-  wss.on('connection', (ws: WebSocket, req: Request) => {
-    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    console.log(`WebSocket connection established from ${clientIp}`);
+  app.post("/api/notifications/:notificationId/read", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
 
-    // Set up ping-pong heartbeat
-    ws.isAlive = true;
-    ws.on('pong', () => {
-      ws.isAlive = true;
-      console.log(`Received pong from client ${clientIp}`);
-    });
-
-    // Handle incoming messages
-    ws.on('message', (data: Buffer) => {
-      try {
-        console.log(`Received message from ${clientIp}:`, data.toString());
-        // Handle message processing here
-        ws.send(JSON.stringify({ status: 'received' }));
-      } catch (error) {
-        console.error('Error processing message:', error);
-        ws.send(JSON.stringify({ error: 'Failed to process message' }));
-      }
-    });
-
-    // Handle connection close
-    ws.on('close', (code: number, reason: Buffer) => {
-      console.log(`Client ${clientIp} disconnected:`, {
-        code,
-        reason: reason.toString()
-      });
-    });
-
-    // Handle errors
-    ws.on('error', (error: Error) => {
-      console.error(`WebSocket error for client ${clientIp}:`, {
-        message: error.message,
-        stack: error.stack
-      });
-    });
-
-    // Send initial connection success message
-    ws.send(JSON.stringify({ status: 'connected' }));
+    try {
+      await storage.markNotificationAsRead(parseInt(req.params.notificationId));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
   });
 
-  // Implement heartbeat interval
-  const heartbeatInterval = setInterval(() => {
-    wss.clients.forEach((ws: WebSocket) => {
-      if (ws.isAlive === false) {
-        console.log('Terminating inactive connection');
-        return ws.terminate();
-      }
+  app.post("/api/notifications/mark-all-read", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
 
-      ws.isAlive = false;
-      ws.ping(() => {});
-    });
-  }, 30000); // Check every 30 seconds
-
-  // Clean up on server close
-  wss.on('close', () => {
-    clearInterval(heartbeatInterval);
+    try {
+      await storage.markAllNotificationsAsRead(req.user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
   });
 
-  // Add error handler for the WebSocket server
-  wss.on('error', (error: Error) => {
-    console.error('WebSocket server error:', {
-      message: error.message,
-      stack: error.stack
-    });
-  });
-
+  const httpServer = createServer(app);
   return httpServer;
 }
