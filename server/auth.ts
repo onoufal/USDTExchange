@@ -6,8 +6,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
-import { logger } from "./utils/logger";
-import { APIError } from "./middleware/error-handler";
+import { log } from "./vite";
 
 declare global {
   namespace Express {
@@ -16,10 +15,6 @@ declare global {
 }
 
 const scryptAsync = promisify(scrypt);
-
-if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) {
-  throw new Error("SESSION_SECRET environment variable must be set and be at least 32 characters long");
-}
 
 /**
  * Hashes a password using scrypt with a random salt
@@ -51,7 +46,7 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
     const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
     return timingSafeEqual(hashedBuf, suppliedBuf);
   } catch (err) {
-    logger.error({ err }, 'Password comparison error');
+    console.error('Password comparison error:', err);
     return false;
   }
 }
@@ -61,150 +56,121 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
  * @param app Express application instance
  */
 export function setupAuth(app: Express): void {
-  // Configure session middleware with security best practices
+  // Configure session middleware
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET!,
-    name: 'sessionId',
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
     resave: false,
     saveUninitialized: false,
-    proxy: true,
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-      maxAge: 24 * 60 * 60 * 1000,
-      path: '/',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: 'lax'
     },
     store: storage.sessionStore
   };
 
-  // Security headers
-  app.use((req, res, next) => {
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    if (process.env.NODE_ENV === 'production') {
-      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-    }
-    res.setHeader('Referrer-Policy', 'same-origin');
-    res.setHeader(
-      'Content-Security-Policy',
-      "default-src 'self'; connect-src 'self' ws: wss:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
-    );
-    next();
-  });
+  // Enable proxy trust if in production
+  if (app.get('env') === 'production') {
+    app.set('trust proxy', 1);
+  }
 
   // Initialize session and passport middleware
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Configure passport strategy
+  // Configure local authentication strategy
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
-        logger.info('Login attempt', { username });
+        log(`Attempting login for username: ${username}`);
         const user = await storage.getUserByUsername(username);
 
         if (!user) {
-          logger.info('Login failed: User not found', { username });
+          log(`Login failed: User not found - ${username}`);
           return done(null, false, { message: "Invalid username or password" });
         }
 
         if (!user.isVerified) {
-          logger.info('Login failed: Email not verified', { username });
+          log(`Login failed: Email not verified - ${username}`);
           return done(null, false, { message: "Please verify your email before logging in" });
         }
 
         const isValid = await comparePasswords(password, user.password);
         if (!isValid) {
-          logger.info('Login failed: Invalid password', { username });
+          log(`Login failed: Invalid password for ${username}`);
           return done(null, false, { message: "Invalid username or password" });
         }
 
-        logger.info('Login successful', { username, userId: user.id });
+        log(`Login successful for ${username}`);
         return done(null, user);
       } catch (err) {
-        logger.error({ err }, 'Login error');
+        log(`Login error for ${username}: ${err}`);
         return done(err);
       }
     })
   );
 
-  // Passport serialization
+  // Session serialization
   passport.serializeUser((user, done) => {
-    logger.debug('Serializing user', { userId: user.id });
     done(null, user.id);
   });
 
-  // Enhanced deserializeUser to always fetch fresh user data
+  // Session deserialization - Always fetch fresh user data
   passport.deserializeUser(async (id: number, done) => {
     try {
-      logger.debug('Deserializing user session', { userId: id });
+      // Log deserialization attempt
+      log(`Deserializing user session for ID: ${id}`);
 
-      // Get fresh user data
-      const freshUser = await storage.getUser(id);
+      // Always fetch fresh user data from storage
+      const user = await storage.getUser(id);
 
-      if (!freshUser) {
-        logger.warn('Deserialization failed: User not found', { userId: id });
+      if (!user) {
+        log(`Deserialization failed: User not found - ID: ${id}`);
         return done(null, false);
       }
 
-      logger.debug('User deserialized successfully with fresh data', {
-        userId: id,
-        hasCliqNumber: !!freshUser.cliqNumber,
-        isVerified: freshUser.isVerified,
-        lastUpdate: new Date().toISOString()
+      // Log successful deserialization with user details
+      log(`User deserialized successfully:`, {
+        id: user.id,
+        cliqSettings: {
+          type: user.cliqType,
+          alias: user.cliqAlias,
+          number: user.cliqNumber
+        }
       });
 
-      done(null, freshUser);
+      done(null, user);
     } catch (err) {
-      logger.error({ err }, 'Deserialization error');
+      log(`Deserialization error for user ${id}:`, err);
       done(err);
     }
   });
 
   // Authentication routes
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err: Error | null, user: Express.User | false, info: { message: string }) => {
+    passport.authenticate("local", (err, user, info) => {
       if (err) {
-        logger.error({ err }, 'Authentication error');
-        return next(new APIError(500, "Authentication failed", "AUTH_ERROR"));
+        return next(err);
       }
       if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: info?.message || "Authentication failed"
-        });
+        return res.status(401).json({ message: info?.message || "Authentication failed" });
       }
       req.login(user, (err) => {
         if (err) {
-          logger.error({ err }, 'Session creation error');
-          return next(new APIError(500, "Failed to create session", "SESSION_ERROR"));
+          return next(err);
         }
-        logger.info('User logged in successfully', { userId: user.id });
-        res.json({
-          success: true,
-          message: "Login successful",
-          user
-        });
+        res.json(user);
       });
     })(req, res, next);
   });
 
   app.post("/api/logout", (req, res, next) => {
-    const userId = req.user?.id;
     req.logout((err) => {
-      if (err) {
-        logger.error({ err }, 'Logout error');
-        return next(new APIError(500, "Logout failed", "LOGOUT_ERROR"));
-      }
+      if (err) return next(err);
       req.session.destroy((err) => {
-        if (err) {
-          logger.error({ err }, 'Session destruction error');
-          return next(new APIError(500, "Failed to destroy session", "SESSION_ERROR"));
-        }
-        logger.info('User logged out successfully', { userId });
+        if (err) return next(err);
         res.sendStatus(200);
       });
     });
@@ -212,14 +178,8 @@ export function setupAuth(app: Express): void {
 
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) {
-      return res.status(401).json({
-        success: false,
-        message: "Not authenticated"
-      });
+      return res.sendStatus(401);
     }
-    res.json({
-      success: true,
-      user: req.user
-    });
+    res.json(req.user);
   });
 }

@@ -13,17 +13,9 @@ import {
   markAllNotificationsAsRead
 } from "./services/notification.service";
 import { insertUserSchema } from "@shared/schema";
-import cookie from "cookie";
 import { WebSocketServer, WebSocket } from "ws";
 import { logger } from "./utils/logger";
 import { initializeNotifier } from "./utils/notifier";
-import { storage } from "./storage";
-
-// WebSocket client set with authentication info
-interface AuthenticatedWebSocket extends WebSocket {
-  userId?: number;
-  isAlive: boolean;
-}
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -147,23 +139,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = updateUserCliqSchema.parse(req.body);
       const updatedUser = await UserService.updateUserCliq(req.user.id, data);
 
-      logger.debug('User CliQ settings updated', {
-        userId: req.user.id,
-        hasCliqNumber: !!updatedUser.cliqNumber
-      });
-
-      // Refresh session with updated user data
       await new Promise<void>((resolve, reject) => {
         req.login(updatedUser, (err) => {
           if (err) {
-            logger.error('Session refresh error:', err);
+            console.error('Session refresh error:', err);
             reject(err);
             return;
           }
-          logger.debug('Session refreshed with updated user data', {
-            userId: updatedUser.id,
-            hasCliqNumber: !!updatedUser.cliqNumber
-          });
           resolve();
         });
       });
@@ -173,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: error.errors[0].message });
       }
-      logger.error('CliQ details update error:', error);
+      console.error('CliQ details update error:', error);
       res.status(500).json({ message: error.message || "Failed to update CliQ settings" });
     }
   });
@@ -382,156 +364,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
 
-  // Initialize WebSocket server with proper path
   const wss = new WebSocketServer({
     server: httpServer,
     path: '/ws'
   });
 
-  // Ping interval to keep connections alive
-  const pingInterval = setInterval(() => {
-    wss.clients.forEach((ws: AuthenticatedWebSocket) => {
-      if (!ws.isAlive) {
-        logger.warn('Terminating inactive WebSocket connection');
-        return ws.terminate();
-      }
-      ws.isAlive = false;
-      ws.ping();
+  wss.on('connection', (ws) => {
+    logger.info('WebSocket client connected');
+
+    ws.on('error', (error) => {
+      logger.error({ err: error }, 'WebSocket error occurred');
     });
-  }, 30000);
 
-  wss.on('close', () => {
-    clearInterval(pingInterval);
-  });
-
-  // Handle new WebSocket connections
-  wss.on('connection', async (ws: AuthenticatedWebSocket, req) => {
-    try {
-      ws.isAlive = true;
-
-      // Enhanced connection logging
-      logger.debug('WebSocket connection attempt', {
-        headers: req.headers,
-        cookies: req.headers.cookie,
-        origin: req.headers.origin,
-        path: req.url,
-        remoteAddress: req.socket.remoteAddress
-      });
-
-      // Parse cookies from request headers
-      const cookieHeader = req.headers.cookie;
-      if (!cookieHeader) {
-        logger.warn('WebSocket connection attempt without cookies', {
-          headers: req.headers,
-          remoteAddress: req.socket.remoteAddress
-        });
-        ws.send(JSON.stringify({
-          type: 'error',
-          error: 'authentication_required',
-          message: 'No session cookie found'
-        }));
-        ws.close(1008, 'No session cookie found');
-        return;
-      }
-
-      const cookies = cookie.parse(cookieHeader);
-      const sessionId = cookies['sessionId'];
-
-      if (!sessionId) {
-        logger.warn('WebSocket connection attempt without session ID', {
-          cookies,
-          remoteAddress: req.socket.remoteAddress
-        });
-        ws.send(JSON.stringify({
-          type: 'error',
-          error: 'authentication_required',
-          message: 'No session ID found'
-        }));
-        ws.close(1008, 'No session ID found');
-        return;
-      }
-
-      // Enhanced session retrieval logging and handling
-      const session = await new Promise((resolve) => {
-        storage.sessionStore.get(sessionId, (err, session) => {
-          if (err) {
-            logger.error({ err }, 'Error retrieving session', {
-              sessionId,
-              remoteAddress: req.socket.remoteAddress
-            });
-            resolve(null);
-            return;
-          }
-          logger.debug('Session retrieved', {
-            sessionId,
-            hasSession: !!session,
-            hasPassport: !!session?.passport,
-            userId: session?.passport?.user
-          });
-          resolve(session);
-        });
-      });
-
-      if (!session?.passport?.user) {
-        logger.warn('WebSocket connection attempt with invalid session', {
-          sessionId,
-          hasSession: !!session,
-          remoteAddress: req.socket.remoteAddress
-        });
-        ws.send(JSON.stringify({
-          type: 'error',
-          error: 'authentication_required',
-          message: 'Invalid or expired session'
-        }));
-        ws.close(1008, 'Authentication required');
-        return;
-      }
-
-      // Store user ID and authenticate WebSocket
-      ws.userId = session.passport.user;
-      logger.info('Authenticated WebSocket connection established', {
-        userId: ws.userId,
-        sessionId,
-        remoteAddress: req.socket.remoteAddress
-      });
-
-      // Handle pong responses
-      ws.on('pong', () => {
-        ws.isAlive = true;
-      });
-
-      // Handle client messages
-      ws.on('message', (data: Buffer) => {
-        try {
-          const message = JSON.parse(data.toString());
-          logger.debug('Received WebSocket message', { userId: ws.userId, message });
-
-          switch (message.type) {
-            case 'ping':
-              ws.send(JSON.stringify({ type: 'pong' }));
-              break;
-            default:
-              logger.warn('Unknown message type received', { type: message.type });
-              ws.send(JSON.stringify({
-                type: 'error',
-                error: 'invalid_message',
-                message: 'Unknown message type'
-              }));
-          }
-        } catch (error) {
-          logger.error({ err: error }, 'Error processing WebSocket message');
-        }
-      });
-
-      // Handle connection close
-      ws.on('close', () => {
-        logger.info('WebSocket client disconnected', { userId: ws.userId });
-      });
-
-    } catch (error) {
-      logger.error({ err: error }, 'Error during WebSocket connection setup');
-      ws.close(1011, 'Internal server error during connection setup');
-    }
+    ws.on('close', () => {
+      logger.info('WebSocket client disconnected');
+    });
   });
 
   initializeNotifier(wss.clients);
