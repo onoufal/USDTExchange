@@ -9,6 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 // List of Jordanian banks
 export const JORDANIAN_BANKS = [
@@ -76,6 +77,23 @@ export const transactions = pgTable("transactions", {
   network: text("network"), 
   paymentMethod: text("payment_method"), 
 });
+
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  type: text("type").notNull(), // 'new_user', 'kyc_submitted', 'order_submitted', 'order_approved'
+  message: text("message").notNull(),
+  read: boolean("read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  relatedId: integer("related_id"), // Optional reference to related entity (order ID, user ID, etc.)
+});
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
 
 export const insertUserSchema = createInsertSchema(users)
   .pick({
@@ -182,6 +200,22 @@ export const updateUserBankSchema = z.object({
     .regex(/^JO\d{2}[A-Z]{4}\d{22}$/, "Invalid Jordanian IBAN format")
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications)
+  .pick({
+    userId: true,
+    type: true,
+    message: true,
+    relatedId: true,
+  })
+  .extend({
+    type: z.enum([
+      "new_user",
+      "kyc_submitted",
+      "order_submitted",
+      "order_approved"
+    ]),
+  });
+
 export type UpdateUserBank = z.infer<typeof updateUserBankSchema>;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -189,3 +223,5 @@ export type Transaction = typeof transactions.$inferSelect;
 export type UpdateUserWallet = z.infer<typeof updateUserWalletSchema>;
 export type UpdateUserCliq = z.infer<typeof updateUserCliqSchema>;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;

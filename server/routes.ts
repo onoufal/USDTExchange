@@ -58,21 +58,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('Registration request received:', req.body);
 
-      // Validate registration data using our schema
       const validatedData = insertUserSchema.parse(req.body);
       console.log('Validation passed, data:', validatedData);
 
-      // Check if email already exists
       const existingUser = await storage.getUserByEmail(validatedData.email);
       if (existingUser) {
         console.log('Email already registered:', validatedData.email);
         return res.status(400).json({ message: "Email already registered" });
       }
 
-      // Generate verification token
       const token = randomBytes(20).toString('hex');
 
-      // Create user with verification token
       const user = await storage.createUser({
         ...validatedData,
         verificationToken: token,
@@ -80,7 +76,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       console.log('User created successfully:', { id: user.id, email: user.email });
 
-      // Send verification email
+      // Create notification for admin
+      const admins = await storage.getAdminUsers();
+      for (const admin of admins) {
+        await storage.createNotification({
+          userId: admin.id,
+          type: "new_user",
+          message: `New user registration: ${user.fullName} (${user.email})`,
+          relatedId: user.id
+        });
+      }
+
       const success = await sendVerificationEmail({
         to: validatedData.email,
         verificationToken: token
@@ -171,6 +177,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       await storage.updateUserKYC(req.user.id, req.file.buffer.toString("base64"));
+
+      // Create notification for admin
+      const admins = await storage.getAdminUsers();
+      for (const admin of admins) {
+        await storage.createNotification({
+          userId: admin.id,
+          type: "kyc_submitted",
+          message: `User ${req.user.fullName} has submitted KYC documents for verification`,
+          relatedId: req.user.id
+        });
+      }
+
       res.json({ success: true });
     } catch (error) {
       console.error('KYC document upload error:', error);
@@ -200,7 +218,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
 
     try {
-      await storage.approveTransaction(parseInt(req.params.transactionId));
+      const transaction = await storage.approveTransaction(parseInt(req.params.transactionId));
+
+      // Create notification for user
+      await storage.createNotification({
+        userId: transaction.userId,
+        type: "order_approved",
+        message: `Your ${transaction.type} order for ${transaction.amount} USDT has been approved`,
+        relatedId: transaction.id
+      });
+
       res.json({ success: true });
     } catch (error) {
       console.error('Transaction approval error:', error);
@@ -332,6 +359,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const transaction = await storage.createTransaction(transactionData);
+
+      // Create notification for admin
+      const admins = await storage.getAdminUsers();
+      for (const admin of admins) {
+        await storage.createNotification({
+          userId: admin.id,
+          type: "order_submitted",
+          message: `New ${data.type} order submitted by ${req.user.fullName} for ${data.amount} USDT`,
+          relatedId: transaction.id
+        });
+      }
 
       // Debug logging for created transaction
       console.log('Created transaction:', {
@@ -478,6 +516,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error('Payment settings update error:', error);
       res.status(500).json({ message: "Failed to update payment settings" });
+    }
+  });
+
+  // Add the following routes to handle notifications
+  app.get("/api/notifications", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      const userNotifications = await storage.getUserNotifications(req.user.id);
+      res.json(userNotifications);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.post("/api/notifications/:notificationId/read", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      await storage.markNotificationAsRead(parseInt(req.params.notificationId));
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.post("/api/notifications/mark-all-read", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      await storage.markAllNotificationsAsRead(req.user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
     }
   });
 

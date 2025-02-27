@@ -20,7 +20,7 @@ export interface IStorage {
   createTransaction(transaction: Transaction): Promise<Transaction>;
   getUserTransactions(userId: number): Promise<Transaction[]>;
   getAllTransactions(): Promise<Transaction[]>;
-  approveTransaction(id: number): Promise<void>;
+  approveTransaction(id: number): Promise<Transaction>;
   getTransaction(id: number): Promise<Transaction | undefined>;
   updateUserWallet(id: number, usdtAddress: string, usdtNetwork: string): Promise<void>;
   updateUserCliq(id: number, cliqDetails: {
@@ -32,25 +32,34 @@ export interface IStorage {
   }): Promise<void>;
   getPaymentSettings(): Promise<{ [key: string]: string }>;
   updatePaymentSettings(settings: { [key: string]: string }): Promise<void>;
+  getAdminUsers(): Promise<User[]>;
+  createNotification(notification: InsertNotification): Promise<void>;
+  getUserNotifications(userId: number): Promise<Notification[]>;
+  markNotificationAsRead(notificationId: number): Promise<void>;
+  markAllNotificationsAsRead(userId: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private transactions: Map<number, Transaction>;
   private settings: Map<string, string>;
+  private notifications: Map<number, Notification>;
   sessionStore: Store;
   private currentUserId: number;
   private currentTransactionId: number;
+  private currentNotificationId: number;
 
   constructor() {
     this.users = new Map();
     this.transactions = new Map();
     this.settings = new Map();
+    this.notifications = new Map();
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000 // 24h
     });
     this.currentUserId = 1;
     this.currentTransactionId = 1;
+    this.currentNotificationId = 1;
 
     // Create a default admin user
     this.createUser({
@@ -264,24 +273,71 @@ export class MemStorage implements IStorage {
     return this.transactions.get(id);
   }
 
-  async approveTransaction(id: number): Promise<void> {
+  async approveTransaction(id: number): Promise<Transaction> {
     const transaction = this.transactions.get(id);
-    if (transaction) {
-      const updatedTransaction = {
-        ...transaction,
-        status: "approved"
-      };
-      this.transactions.set(id, updatedTransaction);
+    if (!transaction) {
+      throw new Error("Transaction not found");
+    }
 
-      // Update loyalty points
-      const user = this.users.get(transaction.userId);
-      if (user) {
-        const updatedUser = {
-          ...user,
-          loyaltyPoints: (user.loyaltyPoints || 0) + Math.floor(Number(transaction.amount) / 100)
-        };
-        this.users.set(user.id, updatedUser);
-      }
+    const updatedTransaction = {
+      ...transaction,
+      status: "approved"
+    };
+    this.transactions.set(id, updatedTransaction);
+
+    // Update loyalty points
+    const user = this.users.get(transaction.userId);
+    if (user) {
+      const updatedUser = {
+        ...user,
+        loyaltyPoints: (user.loyaltyPoints || 0) + Math.floor(Number(transaction.amount) / 100)
+      };
+      this.users.set(user.id, updatedUser);
+    }
+
+    return updatedTransaction;
+  }
+
+  async getAdminUsers(): Promise<User[]> {
+    return Array.from(this.users.values()).filter(user => user.role === "admin");
+  }
+
+  async createNotification(data: InsertNotification): Promise<void> {
+    const id = this.currentNotificationId++;
+    const notification: Notification = {
+      id,
+      ...data,
+      read: false,
+      createdAt: new Date()
+    };
+    this.notifications.set(id, notification);
+  }
+
+  async getUserNotifications(userId: number): Promise<Notification[]> {
+    return Array.from(this.notifications.values())
+      .filter(n => n.userId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async markNotificationAsRead(notificationId: number): Promise<void> {
+    const notification = this.notifications.get(notificationId);
+    if (notification) {
+      this.notifications.set(notificationId, {
+        ...notification,
+        read: true
+      });
+    }
+  }
+
+  async markAllNotificationsAsRead(userId: number): Promise<void> {
+    const userNotifications = Array.from(this.notifications.values())
+      .filter(n => n.userId === userId);
+
+    for (const notification of userNotifications) {
+      this.notifications.set(notification.id, {
+        ...notification,
+        read: true
+      });
     }
   }
 }

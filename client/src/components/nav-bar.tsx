@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 import { ThemeToggle } from "./theme-toggle";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import NotificationBell from "./notification-bell";
 
 export default function NavBar() {
   const { user, logoutMutation } = useAuth();
@@ -84,6 +85,9 @@ export default function NavBar() {
           Settings
         </Button>
       )}
+
+      {/* Notification Bell */}
+      <NotificationBell />
 
       {/* Theme Toggle */}
       <div className={isMobile ? 'w-full' : ''}>
