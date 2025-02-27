@@ -17,8 +17,8 @@ declare global {
 
 const scryptAsync = promisify(scrypt);
 
-if (!process.env.SESSION_SECRET) {
-  throw new Error("SESSION_SECRET environment variable must be set");
+if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) {
+  throw new Error("SESSION_SECRET environment variable must be set and be at least 32 characters long");
 }
 
 /**
@@ -92,25 +92,20 @@ export function setupAuth(app: Express): void {
     }
     // Referrer Policy
     res.setHeader('Referrer-Policy', 'same-origin');
-    // Content Security Policy
+    // Content Security Policy - Allowing WebSocket connections
     res.setHeader(
       'Content-Security-Policy',
-      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
+      "default-src 'self'; connect-src 'self' ws: wss:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
     );
     next();
   });
-
-  // Enable proxy trust if in production
-  if (process.env.NODE_ENV === 'production') {
-    app.set('trust proxy', 1);
-  }
 
   // Initialize session and passport middleware
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Configure local authentication strategy
+  // Configure passport strategy
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
@@ -142,18 +137,13 @@ export function setupAuth(app: Express): void {
     })
   );
 
-  // Session serialization
   passport.serializeUser((user, done) => {
     done(null, user.id);
   });
 
-  // Session deserialization - Always fetch fresh user data
   passport.deserializeUser(async (id: number, done) => {
     try {
-      // Log deserialization attempt
       logger.debug('Deserializing user session', { userId: id });
-
-      // Always fetch fresh user data from storage
       const user = await storage.getUser(id);
 
       if (!user) {
@@ -161,12 +151,7 @@ export function setupAuth(app: Express): void {
         return done(null, false);
       }
 
-      logger.debug('User deserialized successfully', { 
-        userId: id,
-        role: user.role,
-        isVerified: user.isVerified
-      });
-
+      logger.debug('User deserialized successfully', { userId: id });
       done(null, user);
     } catch (err) {
       logger.error({ err }, 'Deserialization error');
@@ -182,7 +167,7 @@ export function setupAuth(app: Express): void {
         return next(new APIError(500, "Authentication failed", "AUTH_ERROR"));
       }
       if (!user) {
-        return res.status(401).json({ 
+        return res.status(401).json({
           success: false,
           message: info?.message || "Authentication failed"
         });
@@ -193,7 +178,7 @@ export function setupAuth(app: Express): void {
           return next(new APIError(500, "Failed to create session", "SESSION_ERROR"));
         }
         logger.info('User logged in successfully', { userId: user.id });
-        res.json({ 
+        res.json({
           success: true,
           message: "Login successful",
           user
