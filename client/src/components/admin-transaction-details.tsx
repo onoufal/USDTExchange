@@ -8,27 +8,29 @@ interface TransactionDetailsProps {
 export function AdminTransactionDetails({ transaction }: TransactionDetailsProps) {
   const renderPaymentDetails = () => {
     if (transaction.type === "sell") {
+      // First get the CliQ payment type
+      const cliqPaymentType = transaction.cliqType === "number" ? "Phone Number" : "CliQ Alias";
+      // Then get the corresponding value based on the type
+      const cliqPaymentValue = transaction.cliqType === "number" 
+        ? transaction.cliqNumber 
+        : transaction.cliqAlias;
+
       return (
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">CliQ Method:</span>
-            <span className="font-medium">{transaction.cliqType === "number" ? "Phone Number" : "CliQ Alias"}</span>
+            <span className="font-medium">{cliqPaymentType}</span>
           </div>
-          {transaction.cliqType === "number" ? (
+          {cliqPaymentValue && (
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Phone Number:</span>
-              <span className="font-medium font-mono">{transaction.cliqNumber}</span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">CliQ Alias:</span>
-              <span className="font-medium">{transaction.cliqAlias}</span>
+              <span className="text-muted-foreground">{cliqPaymentType}:</span>
+              <span className="font-medium font-mono">{cliqPaymentValue}</span>
             </div>
           )}
         </div>
       );
     }
-    
+
     return (
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
