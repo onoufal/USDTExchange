@@ -430,7 +430,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cliqNumber: data.type === "sell" && req.user.cliqType === "number" ? req.user.cliqNumber : null,
       };
 
-      // Log the transaction data being saved
+      // Creating transaction with data
       console.log('Creating transaction with data:', {
         ...transactionData,
         proofOfPayment: '[REDACTED]'
