@@ -50,14 +50,14 @@ export default function WalletSettings() {
   });
 
   return (
-    <Card>
-      <CardHeader className="space-y-2">
+    <Card className="border bg-card shadow-sm">
+      <CardHeader className="space-y-2 border-b bg-muted/50 px-6 py-4">
         <CardTitle className="text-2xl font-semibold tracking-tight">USDT Wallet Settings</CardTitle>
         <CardDescription className="text-base text-muted-foreground">
           Configure your USDT wallet address to receive cryptocurrency from buy orders. Choose your preferred network and enter your wallet details below.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(data => updateWalletMutation.mutate(data))} className="space-y-8">
             <FormField
@@ -123,7 +123,7 @@ export default function WalletSettings() {
               )}
             />
 
-            <div className="pt-4">
+            <div className="pt-4 border-t">
               <Button 
                 type="submit" 
                 className="w-full h-11 text-base font-medium transition-colors"

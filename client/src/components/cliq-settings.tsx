@@ -89,14 +89,14 @@ export default function CliqSettings() {
   };
 
   return (
-    <Card>
-      <CardHeader className="space-y-2">
+    <Card className="border bg-card shadow-sm">
+      <CardHeader className="space-y-2 border-b bg-muted/50 px-6 py-4">
         <CardTitle className="text-2xl font-semibold tracking-tight">CliQ Account Settings</CardTitle>
         <CardDescription className="text-base text-muted-foreground">
           Configure your CliQ payment details to receive JOD payments from USDT sales. Enter your bank information and preferred CliQ identification method below.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
@@ -237,7 +237,7 @@ export default function CliqSettings() {
               )}
             />
 
-            <div className="pt-4">
+            <div className="pt-4 border-t">
               <Button 
                 type="submit" 
                 className="w-full h-11 text-base font-medium transition-colors"
