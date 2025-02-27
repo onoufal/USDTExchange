@@ -112,13 +112,13 @@ export default function CliqSettings() {
                   </div>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger className="h-11">
+                      <SelectTrigger className="h-11 text-base transition-colors hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2">
                         <SelectValue placeholder="Select your bank" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {JORDANIAN_BANKS.map((bank) => (
-                        <SelectItem key={bank} value={bank}>
+                        <SelectItem key={bank} value={bank} className="text-base">
                           {bank}
                         </SelectItem>
                       ))}
@@ -148,17 +148,17 @@ export default function CliqSettings() {
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem value="alias" />
+                          <RadioGroupItem value="alias" className="h-5 w-5 border-2 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2" />
                         </FormControl>
-                        <FormLabel className="text-base font-medium leading-none">
+                        <FormLabel className="text-base font-medium leading-none cursor-pointer select-none">
                           CliQ Alias
                         </FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem value="number" />
+                          <RadioGroupItem value="number" className="h-5 w-5 border-2 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2" />
                         </FormControl>
-                        <FormLabel className="text-base font-medium leading-none">
+                        <FormLabel className="text-base font-medium leading-none cursor-pointer select-none">
                           CliQ Number
                         </FormLabel>
                       </FormItem>
@@ -184,9 +184,9 @@ export default function CliqSettings() {
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="Enter your CliQ alias"
+                        placeholder="Enter your CliQ alias (e.g., JOHN123)"
                         onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                        className="h-11 text-base"
+                        className="h-11 text-base transition-colors hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2"
                       />
                     </FormControl>
                     <FormMessage className="text-sm font-medium text-destructive animate-in fade-in-50" />
@@ -209,7 +209,7 @@ export default function CliqSettings() {
                       <Input 
                         {...field} 
                         placeholder="009627xxxxxxxx" 
-                        className="h-11 text-base"
+                        className="h-11 text-base transition-colors hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2 font-mono"
                       />
                     </FormControl>
                     <FormMessage className="text-sm font-medium text-destructive animate-in fade-in-50" />
@@ -230,7 +230,11 @@ export default function CliqSettings() {
                     </FormDescription>
                   </div>
                   <FormControl>
-                    <Input {...field} className="h-11 text-base" />
+                    <Input 
+                      {...field} 
+                      placeholder="Enter the full name on your bank account"
+                      className="h-11 text-base transition-colors hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2" 
+                    />
                   </FormControl>
                   <FormMessage className="text-sm font-medium text-destructive animate-in fade-in-50" />
                 </FormItem>
@@ -240,7 +244,7 @@ export default function CliqSettings() {
             <div className="pt-4 border-t">
               <Button 
                 type="submit" 
-                className="w-full h-11 text-base font-medium transition-colors"
+                className="w-full h-11 text-base font-medium transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-offset-2"
                 disabled={mutation.isPending}
               >
                 {mutation.isPending ? (

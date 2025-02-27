@@ -79,17 +79,17 @@ export default function WalletSettings() {
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem value="tron" />
+                          <RadioGroupItem value="tron" className="h-5 w-5 border-2 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2" />
                         </FormControl>
-                        <FormLabel className="text-base font-medium leading-none">
+                        <FormLabel className="text-base font-medium leading-none cursor-pointer select-none">
                           Tron (TRC20)
                         </FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem value="bep20" />
+                          <RadioGroupItem value="bep20" className="h-5 w-5 border-2 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2" />
                         </FormControl>
-                        <FormLabel className="text-base font-medium leading-none">
+                        <FormLabel className="text-base font-medium leading-none cursor-pointer select-none">
                           BNB Smart Chain (BEP20)
                         </FormLabel>
                       </FormItem>
@@ -115,7 +115,7 @@ export default function WalletSettings() {
                     <Input 
                       placeholder="Enter your USDT wallet address" 
                       {...field}
-                      className="h-11 text-base"
+                      className="h-11 text-base transition-colors hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2"
                     />
                   </FormControl>
                   <FormMessage className="text-sm font-medium text-destructive animate-in fade-in-50" />
@@ -126,7 +126,7 @@ export default function WalletSettings() {
             <div className="pt-4 border-t">
               <Button 
                 type="submit" 
-                className="w-full h-11 text-base font-medium transition-colors"
+                className="w-full h-11 text-base font-medium transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-offset-2"
                 disabled={updateWalletMutation.isPending}
               >
                 {updateWalletMutation.isPending ? (
