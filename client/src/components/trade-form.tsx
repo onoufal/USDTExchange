@@ -930,25 +930,27 @@ export default function TradeForm() {
                   </div>
 
                   {/* Submit Button */}
-                  <div className="pt-6">
+                  <div className="pt-4">
                     <Button
                       type="submit"
                       size="lg"
-                      className="w-full text-base fontmedium h-12"
-                      disabled={isUploading || tradeMutation.isPending}
+                      className="w-full h-12 text-base font-medium bg-primary hover:bg-primary/90 transition-colors duration-200"
+                      disabled={isUploading || tradeMutation.isPending || !amount}
                     >
                       {isUploading ? (
                         <>
                           <Upload className="mr-2 h-5 w-5 animate-bounce" />
-                          Uploading...
+                          Uploading Payment Proof...
                         </>
                       ) : tradeMutation.isPending ? (
                         <>
                           <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                          Processing...
+                          Processing {type === "buy" ? "Buy" : "Sell"} Order...
                         </>
                       ) : (
-                        `Submit ${type === "buy" ? "Buy" : "Sell"} Order`
+                        <>
+                          Submit {type === "buy" ? "Buy" : "Sell"} Order
+                        </>
                       )}
                     </Button>
                   </div>
