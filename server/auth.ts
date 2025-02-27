@@ -141,6 +141,7 @@ export function setupAuth(app: Express): void {
     done(null, user.id);
   });
 
+  // Enhanced deserializeUser to always fetch fresh user data
   passport.deserializeUser(async (id: number, done) => {
     try {
       logger.debug('Deserializing user session', { userId: id });
@@ -151,8 +152,19 @@ export function setupAuth(app: Express): void {
         return done(null, false);
       }
 
-      logger.debug('User deserialized successfully', { userId: id });
-      done(null, user);
+      // Always fetch the latest user data to prevent stale session data
+      const freshUser = await storage.getUser(id);
+      if (!freshUser) {
+        logger.warn('Failed to fetch fresh user data', { userId: id });
+        return done(null, false);
+      }
+
+      logger.debug('User deserialized successfully with fresh data', { 
+        userId: id,
+        hasCliqNumber: !!freshUser.cliqNumber,
+        updatedAt: freshUser.updatedAt 
+      });
+      done(null, freshUser);
     } catch (err) {
       logger.error({ err }, 'Deserialization error');
       done(err);

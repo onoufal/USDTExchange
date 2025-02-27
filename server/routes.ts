@@ -457,7 +457,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           error: 'authentication_required',
           message: 'Invalid or expired session'
         }));
-        ws.close(1008, 'Invalid session');
+        ws.close(1008, 'Authentication required');
         return;
       }
 
@@ -495,15 +495,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               break;
             default:
               logger.warn('Unknown message type received', { type: message.type });
+              // Send error back to client
+              ws.send(JSON.stringify({
+                type: 'error',
+                error: 'invalid_message',
+                message: 'Failed to process message'
+              }));
           }
         } catch (error) {
           logger.error({ err: error }, 'Error processing WebSocket message');
-          // Send error back to client
-          ws.send(JSON.stringify({
-            type: 'error',
-            error: 'invalid_message',
-            message: 'Failed to process message'
-          }));
         }
       });
 
