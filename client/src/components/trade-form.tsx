@@ -129,7 +129,15 @@ const tradeFormSchema = z
       .min(1, "Amount is required")
       .regex(
         /^\d+(\.\d{1,2})?$/,
-        "Amount must be a valid number with up to 2 decimal places",
+        "Amount must be a valid number with up to 2 decimal places"
+      )
+      .refine(
+        (val) => Number(val) >= 1,
+        "Amount must be at least 1"
+      )
+      .refine(
+        (val) => Number(val) <= 100000,
+        "Amount cannot exceed 100,000"
       ),
     network: z.enum(["trc20", "bep20"]).optional(),
   })
@@ -141,7 +149,7 @@ const tradeFormSchema = z
       return true;
     },
     {
-      message: "Network is required for sell orders",
+      message: "Please select a network for selling USDT",
       path: ["network"],
     },
   );
@@ -570,8 +578,9 @@ export default function TradeForm() {
                             </FormControl>
                             <FormDescription className="text-sm text-muted-foreground">
                               Enter the amount you would like to {type === "buy" ? "purchase" : "sell"}
+                              {" "}(1 - 100,000 {getCurrentCurrencyLabel()})
                             </FormDescription>
-                            <FormMessage className="text-sm" />
+                            <FormMessage className="text-sm font-medium text-destructive" />
                           </FormItem>
                         )}
                       />
@@ -654,8 +663,8 @@ export default function TradeForm() {
 
                   {/* Network Selection for Sell */}
                   {type === "sell" && (
-                    <div className="space-y-8">
-                      <h2 className="text-xl font-semibold tracking-tight">Network Selection</h2>
+                    <div className="space-y-6">
+                      <h3 className="text-lg font-semibold tracking-tight">Network</h3>
                       <FormField
                         control={form.control}
                         name="network"
@@ -753,7 +762,7 @@ export default function TradeForm() {
                             <FormDescription className="text-sm text-muted-foreground">
                               Select the blockchain network for your USDT transaction
                             </FormDescription>
-                            <FormMessage className="text-sm" />
+                            <FormMessage className="text-sm font-medium text-destructive" />
                           </FormItem>
                         )}
                       />
