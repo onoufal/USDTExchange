@@ -240,7 +240,7 @@ export default function HomePage() {
                   {/* Scrollable table wrapper */}
                   <div className="overflow-x-auto -mx-4 sm:mx-0 scrollbar-thin scrollbar-thumb-muted-foreground/10 scrollbar-track-transparent">
                     <div className="min-w-full inline-block align-middle">
-                      <div className="overflow-hidden rounded-lg border border-border/40 bg-card dark:bg-card/50">
+                      <div className="overflow-hidden rounded-lg border bg-card dark:bg-card/50">
                         <table 
                           className="min-w-full divide-y divide-border dark:divide-border/50"
                           aria-label="Transaction history"
