@@ -305,6 +305,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const data = updateUserCliqSchema.parse(req.body);
+
+      // Log the incoming CliQ settings update
+      console.log('Updating CliQ settings for user:', {
+        userId: req.user.id,
+        currentSettings: {
+          cliqType: req.user.cliqType,
+          cliqAlias: req.user.cliqAlias,
+          cliqNumber: req.user.cliqNumber
+        },
+        newSettings: data
+      });
+
       await storage.updateUserCliq(req.user.id, data);
 
       // Fetch updated user data
@@ -313,29 +325,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("Failed to fetch updated user data");
       }
 
-      // Log updated user data
-      console.log('Updated user CliQ settings:', {
+      // Log the fetched updated user data
+      console.log('Updated user data fetched:', {
+        userId: updatedUser.id,
         cliqType: updatedUser.cliqType,
         cliqAlias: updatedUser.cliqAlias,
         cliqNumber: updatedUser.cliqNumber
       });
 
-      // Update the session with new user data
-      req.login(updatedUser, (err) => {
-        if (err) {
-          console.error('Session refresh error:', err);
-          return res.status(500).json({ message: "Failed to refresh session" });
-        }
+      // Wrap req.login in a promise to ensure it completes before sending response
+      await new Promise<void>((resolve, reject) => {
+        req.login(updatedUser, (err) => {
+          if (err) {
+            console.error('Session refresh error:', err);
+            reject(err);
+            return;
+          }
 
-        // Verify session update
-        console.log('Session updated, current req.user:', {
-          cliqType: req.user.cliqType,
-          cliqAlias: req.user.cliqAlias,
-          cliqNumber: req.user.cliqNumber
+          // Log the session state after update
+          console.log('Session updated, req.user now contains:', {
+            userId: req.user.id,
+            cliqType: req.user.cliqType,
+            cliqAlias: req.user.cliqAlias,
+            cliqNumber: req.user.cliqNumber
+          });
+
+          resolve();
         });
-
-        res.json({ success: true });
       });
+
+      // Send success response after session is definitely updated
+      res.json({ success: true });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: error.errors[0].message });
@@ -350,8 +370,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.file) return res.status(400).json({ message: "No payment proof uploaded" });
 
     try {
-      // Log user's CliQ settings at the start of trade
-      console.log('Current user CliQ settings in trade:', {
+      // Log the current session state at the start of trade
+      console.log('Trade request - Current user session data:', {
         userId: req.user.id,
         cliqType: req.user.cliqType,
         cliqAlias: req.user.cliqAlias,
@@ -381,6 +401,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const data = schema.parse(req.body);
 
+      // For sell orders, verify CliQ settings are present
+      if (data.type === "sell") {
+        if (!req.user.cliqType || (!req.user.cliqAlias && !req.user.cliqNumber)) {
+          console.error('Missing CliQ settings for sell order:', {
+            userId: req.user.id,
+            cliqType: req.user.cliqType,
+            hasAlias: !!req.user.cliqAlias,
+            hasNumber: !!req.user.cliqNumber
+          });
+          return res.status(400).json({ message: "CliQ settings must be configured for sell orders" });
+        }
+      }
+
       const transactionData = {
         userId: req.user.id,
         type: data.type,
@@ -397,24 +430,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cliqNumber: data.type === "sell" && req.user.cliqType === "number" ? req.user.cliqNumber : null,
       };
 
-      // Debug logging for transaction data before storage
-      console.log('Transaction data before storage:', {
+      // Log the transaction data being saved
+      console.log('Creating transaction with data:', {
         ...transactionData,
-        network: transactionData.network,
-        cliqType: transactionData.cliqType,
-        cliqAlias: transactionData.cliqAlias,
-        cliqNumber: transactionData.cliqNumber
+        proofOfPayment: '[REDACTED]'
       });
 
       const transaction = await storage.createTransaction(transactionData);
 
-      // Debug logging for created transaction
-      console.log('Created transaction:', {
+      // Log the created transaction
+      console.log('Transaction created:', {
         ...transaction,
-        network: transaction.network,
-        cliqType: transaction.cliqType,
-        cliqAlias: transaction.cliqAlias,
-        cliqNumber: transaction.cliqNumber
+        proofOfPayment: '[REDACTED]'
       });
 
       res.json(transaction);
