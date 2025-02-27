@@ -30,7 +30,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, AlertCircle } from "lucide-react";
 import { z } from "zod";
 
-// Update form validation schema
 const formSchema = z.object({
   bankName: z.enum(JORDANIAN_BANKS, {
     required_error: "Please select a bank",
@@ -42,12 +41,12 @@ const formSchema = z.object({
     .regex(/^[A-Z0-9]*[A-Z]+[A-Z0-9]*$/, "Please use uppercase letters and numbers only")
     .min(3, "Your alias should be at least 3 characters long")
     .max(10, "Your alias cannot be longer than 10 characters")
-    .optional()
-    .nullable(),
+    .nullable()
+    .optional(),
   cliqNumber: z.string()
     .regex(/^009627\d{8}$/, "Please enter a valid Jordanian phone number starting with 009627")
-    .optional()
-    .nullable(),
+    .nullable()
+    .optional(),
   accountHolderName: z.string()
     .min(3, "Please enter your full name as it appears on your bank account")
     .max(50, "Name cannot exceed 50 characters"),
@@ -88,7 +87,7 @@ export default function CliqSettings() {
       cliqNumber: user?.cliqNumber || "",
       accountHolderName: user?.accountHolderName || user?.fullName || "",
     },
-    mode: "onTouched" // Changed from onChange to onTouched for better UX
+    mode: "all"
   });
 
   const mutation = useMutation({
@@ -117,10 +116,13 @@ export default function CliqSettings() {
   });
 
   const onSubmit = (data: FormData) => {
+    // Clean up the data before submitting
     const submitData: UpdateUserCliq = {
-      ...data,
-      cliqAlias: data.cliqType === "alias" ? data.cliqAlias : undefined,
-      cliqNumber: data.cliqType === "number" ? data.cliqNumber : undefined,
+      bankName: data.bankName,
+      cliqType: data.cliqType,
+      accountHolderName: data.accountHolderName,
+      cliqAlias: data.cliqType === "alias" ? data.cliqAlias || undefined : undefined,
+      cliqNumber: data.cliqType === "number" ? data.cliqNumber || undefined : undefined,
     };
 
     mutation.mutate(submitData);
@@ -143,7 +145,6 @@ export default function CliqSettings() {
       <CardContent className="p-4 sm:p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
-            {/* Bank Name Field */}
             <FormField
               control={form.control}
               name="bankName"
@@ -187,7 +188,6 @@ export default function CliqSettings() {
               )}
             />
 
-            {/* CliQ Type Field */}
             <FormField
               control={form.control}
               name="cliqType"
@@ -239,7 +239,6 @@ export default function CliqSettings() {
               )}
             />
 
-            {/* Conditional Fields based on CliQ Type */}
             {form.watch("cliqType") === "alias" ? (
               <FormField
                 control={form.control}
@@ -311,7 +310,6 @@ export default function CliqSettings() {
               />
             )}
 
-            {/* Account Holder Name Field */}
             <FormField
               control={form.control}
               name="accountHolderName"
@@ -346,7 +344,6 @@ export default function CliqSettings() {
               )}
             />
 
-            {/* Submit Button */}
             <div className="pt-4 border-t">
               <Button
                 type="submit"
@@ -357,7 +354,7 @@ export default function CliqSettings() {
                   focus-visible:ring-2 focus-visible:ring-offset-2
                   disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
                 `}
-                disabled={!form.formState.isValid || mutation.isPending}
+                disabled={mutation.isPending}
               >
                 {mutation.isPending ? (
                   <>
