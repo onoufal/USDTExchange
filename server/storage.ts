@@ -270,7 +270,11 @@ export class MemStorage implements IStorage {
       commission: data.commission || '0',
       fee: data.fee || '0',
       network: data.type === 'sell' ? data.network : null,
-      paymentMethod: data.type === 'buy' ? data.paymentMethod : null
+      paymentMethod: data.type === 'buy' ? data.paymentMethod : null,
+      // Ensure CliQ fields are properly set
+      cliqType: data.cliqType,
+      cliqAlias: data.cliqAlias,
+      cliqNumber: data.cliqNumber
     };
     this.transactions.set(id, transaction);
 
