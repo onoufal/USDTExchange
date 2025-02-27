@@ -36,20 +36,19 @@ export default function CliqSettings() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Trigger animation after mount
     setIsVisible(true);
   }, []);
 
   const form = useForm<UpdateUserCliq>({
     resolver: zodResolver(updateUserCliqSchema.extend({
       cliqAlias: updateUserCliqSchema.shape.cliqAlias
-        .regex(/^[A-Z0-9]*[A-Z]+[A-Z0-9]*$/, "Alias must contain at least one letter and be uppercase")
-        .min(3, "Alias must be at least 3 characters")
-        .max(10, "Alias cannot exceed 10 characters"),
+        .regex(/^[A-Z0-9]*[A-Z]+[A-Z0-9]*$/, "Please use uppercase letters and numbers only")
+        .min(3, "Your alias should be at least 3 characters long")
+        .max(10, "Your alias cannot be longer than 10 characters"),
       cliqNumber: updateUserCliqSchema.shape.cliqNumber
-        .regex(/^009627\d{8}$/, "Number must start with 009627 followed by 8 digits"),
+        .regex(/^009627\d{8}$/, "Please enter a valid Jordanian phone number starting with 009627"),
       accountHolderName: updateUserCliqSchema.shape.accountHolderName
-        .min(3, "Name must be at least 3 characters")
+        .min(3, "Please enter your full name as it appears on your bank account")
         .max(50, "Name cannot exceed 50 characters")
     })),
     defaultValues: {
@@ -59,7 +58,7 @@ export default function CliqSettings() {
       cliqNumber: user?.cliqNumber || "",
       accountHolderName: user?.accountHolderName || user?.fullName || "",
     },
-    mode: "onChange" // Enable real-time validation
+    mode: "onChange"
   });
 
   const mutation = useMutation({
@@ -74,14 +73,14 @@ export default function CliqSettings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
-        title: "Success",
-        description: "Your CliQ settings have been updated.",
+        title: "Settings Saved Successfully",
+        description: "Your CliQ payment details have been updated and are ready to use.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Unable to Save Changes",
+        description: error.message || "Please check your details and try again.",
         variant: "destructive",
       });
     },
@@ -96,8 +95,8 @@ export default function CliqSettings() {
 
     if (!data.cliqAlias && !data.cliqNumber) {
       toast({
-        title: "Error",
-        description: "Please provide either a CliQ alias or number",
+        title: "Validation Error",
+        description: "Please provide either a CliQ alias or number to continue.",
         variant: "destructive",
       });
       return;
@@ -107,7 +106,7 @@ export default function CliqSettings() {
   };
 
   return (
-    <Card
+    <Card 
       className={`
         border bg-card shadow-sm w-full 
         transition-all duration-300 ease-out
@@ -131,7 +130,7 @@ export default function CliqSettings() {
                   <div className="space-y-1">
                     <FormLabel className="text-sm font-semibold">Bank Name</FormLabel>
                     <FormDescription className="text-sm text-muted-foreground">
-                      Select your bank from the list of supported Jordanian banks
+                      Select your bank from the list of supported Jordanian banks for CliQ transfers
                     </FormDescription>
                   </div>
                   <Select onValueChange={field.onChange} value={field.value}>
@@ -145,7 +144,7 @@ export default function CliqSettings() {
                           ${form.formState.errors.bankName ? "border-destructive" : ""}
                         `}
                       >
-                        <SelectValue placeholder="Select your bank" />
+                        <SelectValue placeholder="Choose your bank" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -156,7 +155,12 @@ export default function CliqSettings() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50" />
+                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
+                    {form.formState.errors.bankName?.message && (
+                      <AlertCircle className="h-4 w-4" />
+                    )}
+                    {form.formState.errors.bankName?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -167,9 +171,9 @@ export default function CliqSettings() {
               render={({ field }) => (
                 <FormItem className="space-y-4">
                   <div className="space-y-1">
-                    <FormLabel className="text-sm font-semibold">CliQ Account Type</FormLabel>
+                    <FormLabel className="text-sm font-semibold">CliQ Method</FormLabel>
                     <FormDescription className="text-sm text-muted-foreground">
-                      Choose how you want to receive CliQ payments
+                      Choose how you want to receive CliQ payments - via your alias or phone number
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -197,12 +201,17 @@ export default function CliqSettings() {
                           />
                         </FormControl>
                         <FormLabel className="text-base font-medium leading-none cursor-pointer select-none">
-                          CliQ Number
+                          Phone Number
                         </FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>
-                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50" />
+                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
+                    {form.formState.errors.cliqType?.message && (
+                      <AlertCircle className="h-4 w-4" />
+                    )}
+                    {form.formState.errors.cliqType?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -214,9 +223,9 @@ export default function CliqSettings() {
                 render={({ field }) => (
                   <FormItem className="space-y-4">
                     <div className="space-y-1">
-                      <FormLabel className="text-sm font-semibold">CliQ Alias/Username</FormLabel>
+                      <FormLabel className="text-sm font-semibold">CliQ Alias</FormLabel>
                       <FormDescription className="text-sm text-muted-foreground">
-                        Your unique CliQ alias for receiving payments. Must contain at least one letter and can include numbers.
+                        Your unique CliQ alias for receiving payments (e.g., JOHN123). Must be uppercase and can include numbers.
                       </FormDescription>
                     </div>
                     <FormControl>
@@ -233,7 +242,12 @@ export default function CliqSettings() {
                         `}
                       />
                     </FormControl>
-                    <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50" />
+                    <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
+                      {form.formState.errors.cliqAlias?.message && (
+                        <AlertCircle className="h-4 w-4" />
+                      )}
+                      {form.formState.errors.cliqAlias?.message}
+                    </FormMessage>
                   </FormItem>
                 )}
               />
@@ -244,9 +258,9 @@ export default function CliqSettings() {
                 render={({ field }) => (
                   <FormItem className="space-y-4">
                     <div className="space-y-1">
-                      <FormLabel className="text-sm font-semibold">CliQ Number</FormLabel>
+                      <FormLabel className="text-sm font-semibold">Phone Number</FormLabel>
                       <FormDescription className="text-sm text-muted-foreground">
-                        Your phone number for receiving CliQ payments. Must start with 009627 followed by 8 digits.
+                        Your mobile number for receiving CliQ payments. Must start with 009627 followed by your 8-digit number.
                       </FormDescription>
                     </div>
                     <FormControl>
@@ -262,7 +276,12 @@ export default function CliqSettings() {
                         `}
                       />
                     </FormControl>
-                    <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50" />
+                    <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
+                      {form.formState.errors.cliqNumber?.message && (
+                        <AlertCircle className="h-4 w-4" />
+                      )}
+                      {form.formState.errors.cliqNumber?.message}
+                    </FormMessage>
                   </FormItem>
                 )}
               />
@@ -276,13 +295,13 @@ export default function CliqSettings() {
                   <div className="space-y-1">
                     <FormLabel className="text-sm font-semibold">Account Holder Name</FormLabel>
                     <FormDescription className="text-sm text-muted-foreground">
-                      The name associated with your bank account for verification purposes
+                      Enter your full name exactly as it appears on your bank account for verification
                     </FormDescription>
                   </div>
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Enter the full name on your bank account"
+                      placeholder="Enter your full name as shown on bank account"
                       className={`
                         h-11 text-base 
                         transition-all duration-200
@@ -292,7 +311,12 @@ export default function CliqSettings() {
                       `}
                     />
                   </FormControl>
-                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50" />
+                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
+                    {form.formState.errors.accountHolderName?.message && (
+                      <AlertCircle className="h-4 w-4" />
+                    )}
+                    {form.formState.errors.accountHolderName?.message}
+                  </FormMessage>
                 </FormItem>
               )}
             />
@@ -305,7 +329,7 @@ export default function CliqSettings() {
                   transition-all duration-200
                   hover:bg-primary/90 hover:-translate-y-[1px]
                   focus-visible:ring-2 focus-visible:ring-offset-2
-                  disabled:transform-none
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
                 `}
                 disabled={!form.formState.isValid || mutation.isPending}
               >

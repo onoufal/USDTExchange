@@ -19,16 +19,15 @@ export default function WalletSettings() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Trigger animation after mount
     setIsVisible(true);
   }, []);
 
   const form = useForm<UpdateUserWallet>({
     resolver: zodResolver(updateUserWalletSchema.extend({
       usdtAddress: updateUserWalletSchema.shape.usdtAddress
-        .min(30, "USDT address must be at least 30 characters")
-        .max(50, "USDT address cannot exceed 50 characters")
-        .regex(/^[a-zA-Z0-9]+$/, "USDT address can only contain letters and numbers"),
+        .min(30, "Your USDT address seems too short. Please check and try again.")
+        .max(50, "Your USDT address seems too long. Please verify it's correct.")
+        .regex(/^[a-zA-Z0-9]+$/, "USDT addresses can only contain letters and numbers."),
     })),
     defaultValues: {
       usdtAddress: user?.usdtAddress || "",
@@ -49,14 +48,14 @@ export default function WalletSettings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
-        title: "Success",
-        description: "Your USDT wallet settings have been updated.",
+        title: "Settings Saved Successfully",
+        description: "Your USDT wallet details have been updated and are ready to use.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Unable to Save Changes",
+        description: error.message || "Please check your details and try again.",
         variant: "destructive",
       });
     },
@@ -85,9 +84,9 @@ export default function WalletSettings() {
               render={({ field }) => (
                 <FormItem className="space-y-4">
                   <div className="space-y-1">
-                    <FormLabel className="text-sm font-semibold">USDT Network</FormLabel>
+                    <FormLabel className="text-sm font-semibold">Network Type</FormLabel>
                     <FormDescription className="text-sm text-muted-foreground">
-                      Select the blockchain network you'll use for USDT transactions
+                      Select the blockchain network you'll use for receiving USDT. This cannot be changed for individual transactions.
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -136,17 +135,18 @@ export default function WalletSettings() {
               render={({ field }) => (
                 <FormItem className="space-y-4">
                   <div className="space-y-1">
-                    <FormLabel className="text-sm font-semibold">USDT Address</FormLabel>
+                    <FormLabel className="text-sm font-semibold">Wallet Address</FormLabel>
                     <FormDescription className="text-sm text-muted-foreground">
-                      Enter your wallet address carefully. This will be used to receive USDT from all buy orders.
+                      Enter your USDT wallet address carefully. Double-check to ensure it matches your selected network.
                     </FormDescription>
                   </div>
                   <FormControl>
                     <Input 
-                      placeholder="Enter your USDT wallet address" 
+                      placeholder="Enter your USDT wallet address for receiving payments" 
                       {...field}
                       className={`
-                        h-11 text-base transition-all duration-200
+                        h-11 text-base font-mono
+                        transition-all duration-200
                         hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2
                         ${form.formState.errors.usdtAddress ? "border-destructive" : ""}
                         transform-gpu hover:-translate-y-[1px]
@@ -171,7 +171,7 @@ export default function WalletSettings() {
                   transition-all duration-200
                   hover:bg-primary/90 hover:-translate-y-[1px]
                   focus-visible:ring-2 focus-visible:ring-offset-2
-                  disabled:transform-none
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
                 `}
                 disabled={!form.formState.isValid || updateWalletMutation.isPending}
               >
