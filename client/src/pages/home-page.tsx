@@ -40,6 +40,12 @@ const cardStyles = {
   headerPadding: "px-5 sm:px-6 py-5 sm:py-6",
   iconWrapper: "w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30",
   link: "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300",
+  // Add typography styles
+  heading: "text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent",
+  subheading: "text-base sm:text-lg text-muted-foreground",
+  cardTitle: "text-lg font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent",
+  cardDescription: "text-sm text-muted-foreground mt-1",
+  sectionTitle: "text-xl sm:text-2xl font-semibold tracking-tight",
 };
 
 export default function HomePage() {
@@ -56,17 +62,17 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       <main className="container mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8 sm:space-y-10">
-        {/* Welcome Section */}
+        {/* Welcome Section - Updated typography */}
         <div className="animate-fade-up [--animation-delay:0ms]">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          <h1 className={cardStyles.heading}>
             Welcome back, {user.fullName}
           </h1>
-          <p className="text-base sm:text-lg text-muted-foreground mt-3">
+          <p className={cardStyles.subheading}>
             Your trusted platform for USDT-JOD exchange
           </p>
         </div>
 
-        {/* Quick Actions Grid */}
+        {/* Quick Actions Grid - Updated typography */}
         <section aria-labelledby="quick-actions-heading" className="py-2">
           <h2 id="quick-actions-heading" className="sr-only">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
@@ -81,8 +87,8 @@ export default function HomePage() {
                     <CreditCard className="w-5 h-5 text-primary" aria-hidden="true" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Start Trading</h3>
-                    <p className="text-sm text-muted-foreground">Buy or sell USDT instantly</p>
+                    <h3 className={cardStyles.cardTitle}>Start Trading</h3>
+                    <p className={cardStyles.cardDescription}>Buy or sell USDT instantly</p>
                   </div>
                 </CardContent>
               </Card>
@@ -99,8 +105,8 @@ export default function HomePage() {
                     <Settings className="w-5 h-5 text-primary" aria-hidden="true" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Payment Methods</h3>
-                    <p className="text-sm text-muted-foreground">Manage your payment options</p>
+                    <h3 className={cardStyles.cardTitle}>Payment Methods</h3>
+                    <p className={cardStyles.cardDescription}>Manage your payment options</p>
                   </div>
                 </CardContent>
               </Card>
@@ -118,8 +124,8 @@ export default function HomePage() {
                     <Share2 className="w-5 h-5 text-primary" aria-hidden="true" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Refer a Friend</h3>
-                    <p className="text-sm text-muted-foreground">Earn rewards for referrals</p>
+                    <h3 className={cardStyles.cardTitle}>Refer a Friend</h3>
+                    <p className={cardStyles.cardDescription}>Earn rewards for referrals</p>
                   </div>
                 </CardContent>
               </Card>
@@ -139,7 +145,7 @@ export default function HomePage() {
                     <ClipboardList className="w-5 h-5 text-primary" aria-hidden="true" />
                     <h2 
                       id="trade-section-title" 
-                      className="text-xl sm:text-2xl font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent"
+                      className={cardStyles.sectionTitle}
                     >
                       Trade USDT
                     </h2>
@@ -163,7 +169,7 @@ export default function HomePage() {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  <CardDescription className="text-sm sm:text-base text-muted-foreground/90 mt-2">
+                  <CardDescription className="text-base text-muted-foreground/90 mt-2">
                     Buy or sell USDT for Jordanian Dinar (JOD)
                   </CardDescription>
                 </CardHeader>
@@ -171,7 +177,7 @@ export default function HomePage() {
                   {showKYCWarning ? (
                     <Alert variant="warning" className="flex items-center gap-3">
                       <AlertCircle className="h-5 w-5 text-warning-foreground shrink-0" aria-hidden="true" />
-                      <AlertDescription className="text-sm sm:text-base font-medium">
+                      <AlertDescription className="text-base font-medium">
                         Please complete mobile verification and KYC before trading
                       </AlertDescription>
                     </Alert>
@@ -190,7 +196,7 @@ export default function HomePage() {
                     <History className="w-5 h-5 text-primary" aria-hidden="true" />
                     <h2 
                       id="transactions-section-title" 
-                      className="text-xl sm:text-2xl font-semibold tracking-tight"
+                      className={cardStyles.sectionTitle}
                     >
                       Recent Transactions
                     </h2>
@@ -214,7 +220,7 @@ export default function HomePage() {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
-                  <CardDescription className="text-sm sm:text-base text-muted-foreground/90 mt-2">
+                  <CardDescription className="text-base text-muted-foreground/90 mt-2">
                     View and track your USDT trades
                   </CardDescription>
                 </CardHeader>
@@ -363,12 +369,12 @@ export default function HomePage() {
                     <FileText className="w-5 h-5 text-primary" aria-hidden="true" />
                     <h2 
                       id="verification-section-title" 
-                      className="text-xl sm:text-2xl font-semibold tracking-tight"
+                      className={cardStyles.sectionTitle}
                     >
                       Verification Status
                     </h2>
                   </div>
-                  <CardDescription className="text-sm sm:text-base text-muted-foreground/90 mt-2">
+                  <CardDescription className="text-base text-muted-foreground/90 mt-2">
                     Complete verification to start trading
                   </CardDescription>
                 </CardHeader>
