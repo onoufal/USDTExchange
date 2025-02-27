@@ -27,7 +27,7 @@ export default function WalletSettings() {
       usdtAddress: user?.usdtAddress || "",
       usdtNetwork: user?.usdtNetwork as "tron" | "bep20" || "tron"
     },
-    mode: "onChange" // Enable real-time validation
+    mode: "onChange" 
   });
 
   const updateWalletMutation = useMutation({
@@ -56,16 +56,16 @@ export default function WalletSettings() {
   });
 
   return (
-    <Card className="border bg-card shadow-sm">
-      <CardHeader className="space-y-2 border-b bg-muted/50 px-6 py-4">
-        <CardTitle className="text-2xl font-semibold tracking-tight">USDT Wallet Settings</CardTitle>
-        <CardDescription className="text-base text-muted-foreground">
+    <Card className="border bg-card shadow-sm w-full">
+      <CardHeader className="space-y-2 border-b bg-muted/50 px-4 sm:px-6 py-4">
+        <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight">USDT Wallet Settings</CardTitle>
+        <CardDescription className="text-sm sm:text-base text-muted-foreground">
           Configure your USDT wallet address to receive cryptocurrency from buy orders. Choose your preferred network and enter your wallet details below.
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(data => updateWalletMutation.mutate(data))} className="space-y-8">
+          <form onSubmit={form.handleSubmit(data => updateWalletMutation.mutate(data))} className="space-y-6 sm:space-y-8">
             <FormField
               control={form.control}
               name="usdtNetwork"
