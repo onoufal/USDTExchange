@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateUserCliqSchema, JORDANIAN_BANKS } from "@shared/schema";
-import type { UpdateUserCliq } from "@shared/schema";
+import { JORDANIAN_BANKS, type UpdateUserCliq } from "@shared/schema";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -31,9 +30,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, AlertCircle } from "lucide-react";
 import { z } from "zod";
 
-const cliqSettingsSchema = z.object({
-  bankName: z.enum(JORDANIAN_BANKS),
-  cliqType: z.enum(["alias", "number"]),
+// Form validation schema
+const formSchema = z.object({
+  bankName: z.enum(JORDANIAN_BANKS, {
+    required_error: "Please select a bank",
+  }),
+  cliqType: z.enum(["alias", "number"], {
+    required_error: "Please select how you want to receive payments",
+  }),
   cliqAlias: z.string()
     .regex(/^[A-Z0-9]*[A-Z]+[A-Z0-9]*$/, "Please use uppercase letters and numbers only")
     .min(3, "Your alias should be at least 3 characters long")
@@ -45,7 +49,23 @@ const cliqSettingsSchema = z.object({
   accountHolderName: z.string()
     .min(3, "Please enter your full name as it appears on your bank account")
     .max(50, "Name cannot exceed 50 characters"),
-});
+}).refine(
+  (data) => {
+    if (data.cliqType === "alias" && !data.cliqAlias) {
+      return false;
+    }
+    if (data.cliqType === "number" && !data.cliqNumber) {
+      return false;
+    }
+    return true;
+  },
+  {
+    message: "Please provide either a CliQ alias or phone number based on your selection",
+    path: ["cliqType"],
+  }
+);
+
+type FormData = z.infer<typeof formSchema>;
 
 export default function CliqSettings() {
   const { user } = useAuth();
@@ -56,11 +76,11 @@ export default function CliqSettings() {
     setIsVisible(true);
   }, []);
 
-  const form = useForm<z.infer<typeof cliqSettingsSchema>>({
-    resolver: zodResolver(cliqSettingsSchema),
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      bankName: user?.bankName || JORDANIAN_BANKS[0],
-      cliqType: user?.cliqType || "alias",
+      bankName: user?.bankName as (typeof JORDANIAN_BANKS)[number] || JORDANIAN_BANKS[0],
+      cliqType: user?.cliqType as "alias" | "number" || "alias",
       cliqAlias: user?.cliqAlias || "",
       cliqNumber: user?.cliqNumber || "",
       accountHolderName: user?.accountHolderName || user?.fullName || "",
@@ -93,23 +113,14 @@ export default function CliqSettings() {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof cliqSettingsSchema>) => {
-    if (data.cliqType === "alias") {
-      data.cliqNumber = "";
-    } else {
-      data.cliqAlias = "";
-    }
+  const onSubmit = (data: FormData) => {
+    const submitData: UpdateUserCliq = {
+      ...data,
+      cliqAlias: data.cliqType === "alias" ? data.cliqAlias : undefined,
+      cliqNumber: data.cliqType === "number" ? data.cliqNumber : undefined,
+    };
 
-    if (!data.cliqAlias && !data.cliqNumber) {
-      toast({
-        title: "Validation Error",
-        description: "Please provide either a CliQ alias or number to continue.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    mutation.mutate(data as UpdateUserCliq);
+    mutation.mutate(submitData);
   };
 
   return (
@@ -123,12 +134,13 @@ export default function CliqSettings() {
       <CardHeader className="space-y-2 border-b bg-muted/50 px-4 sm:px-6 py-4">
         <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight">CliQ Account Settings</CardTitle>
         <CardDescription className="text-sm sm:text-base text-muted-foreground">
-          Configure your CliQ payment details to receive JOD payments from USDT sales. Enter your bank information and preferred CliQ identification method below.
+          Configure your CliQ payment details to receive JOD payments from USDT sales
         </CardDescription>
       </CardHeader>
       <CardContent className="p-4 sm:p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8">
+            {/* Bank Name Field */}
             <FormField
               control={form.control}
               name="bankName"
@@ -137,7 +149,7 @@ export default function CliqSettings() {
                   <div className="space-y-1">
                     <FormLabel className="text-sm font-semibold">Bank Name</FormLabel>
                     <FormDescription className="text-sm text-muted-foreground">
-                      Select your bank from the list of supported Jordanian banks for CliQ transfers
+                      Select your bank from the list of supported Jordanian banks
                     </FormDescription>
                   </div>
                   <Select onValueChange={field.onChange} value={field.value}>
@@ -172,6 +184,7 @@ export default function CliqSettings() {
               )}
             />
 
+            {/* CliQ Type Field */}
             <FormField
               control={form.control}
               name="cliqType"
@@ -180,7 +193,7 @@ export default function CliqSettings() {
                   <div className="space-y-1">
                     <FormLabel className="text-sm font-semibold">CliQ Method</FormLabel>
                     <FormDescription className="text-sm text-muted-foreground">
-                      Choose how you want to receive CliQ payments - via your alias or phone number
+                      Choose how you want to receive CliQ payments
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -223,6 +236,7 @@ export default function CliqSettings() {
               )}
             />
 
+            {/* Conditional Fields based on CliQ Type */}
             {form.watch("cliqType") === "alias" ? (
               <FormField
                 control={form.control}
@@ -232,7 +246,7 @@ export default function CliqSettings() {
                     <div className="space-y-1">
                       <FormLabel className="text-sm font-semibold">CliQ Alias</FormLabel>
                       <FormDescription className="text-sm text-muted-foreground">
-                        Your unique CliQ alias for receiving payments (e.g., JOHN123). Must be uppercase and can include numbers.
+                        Your unique CliQ alias for receiving payments (e.g., JOHN123)
                       </FormDescription>
                     </div>
                     <FormControl>
@@ -267,13 +281,13 @@ export default function CliqSettings() {
                     <div className="space-y-1">
                       <FormLabel className="text-sm font-semibold">Phone Number</FormLabel>
                       <FormDescription className="text-sm text-muted-foreground">
-                        Your mobile number for receiving CliQ payments. Must start with 009627 followed by your 8-digit number.
+                        Your mobile number for receiving CliQ payments (e.g., 009627XXXXXXXX)
                       </FormDescription>
                     </div>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="009627xxxxxxxx"
+                        placeholder="009627XXXXXXXX"
                         className={`
                           h-11 text-base font-mono
                           transition-all duration-200
@@ -294,6 +308,7 @@ export default function CliqSettings() {
               />
             )}
 
+            {/* Account Holder Name Field */}
             <FormField
               control={form.control}
               name="accountHolderName"
@@ -302,7 +317,7 @@ export default function CliqSettings() {
                   <div className="space-y-1">
                     <FormLabel className="text-sm font-semibold">Account Holder Name</FormLabel>
                     <FormDescription className="text-sm text-muted-foreground">
-                      Enter your full name exactly as it appears on your bank account for verification
+                      Enter your full name exactly as it appears on your bank account
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -328,6 +343,7 @@ export default function CliqSettings() {
               )}
             />
 
+            {/* Submit Button */}
             <div className="pt-4 border-t">
               <Button
                 type="submit"
@@ -342,7 +358,7 @@ export default function CliqSettings() {
               >
                 {mutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving Changes...
                   </>
                 ) : (
