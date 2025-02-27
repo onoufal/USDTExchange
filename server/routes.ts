@@ -7,19 +7,18 @@ import { updateUserWalletSchema, updateUserCliqSchema } from "@shared/schema";
 import { UserService } from "./services/user.service";
 import { KYCService } from "./services/kyc.service";
 import { TransactionService } from "./services/transaction.service";
-import {
-  getUserNotifications,
-  markNotificationAsRead,
-  markAllNotificationsAsRead
+import { 
+  getUserNotifications, 
+  markNotificationAsRead, 
+  markAllNotificationsAsRead 
 } from "./services/notification.service";
-import { insertUserSchema } from "@shared/schema";
-import { WebSocketServer, WebSocket } from "ws";
-import { logger } from "./utils/logger";
-import { initializeNotifier } from "./utils/notifier";
+import { insertUserSchema } from "@shared/schema"; // Assuming this schema is defined elsewhere
+
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Add security headers middleware
   app.use((req, res, next) => {
     res.setHeader(
       "Content-Security-Policy",
@@ -28,8 +27,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
+  // Setup auth first
   setupAuth(app);
 
+  // Email verification endpoint
   app.get("/api/auth/verify", async (req, res) => {
     const token = req.query.token as string;
     if (!token) {
@@ -45,12 +46,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Registration endpoint
   app.post("/api/register", async (req, res) => {
     try {
       const validatedData = insertUserSchema.parse(req.body);
       const user = await UserService.createUser(validatedData);
-      res.json({
-        message: "Registration successful. Please check your email to verify your account."
+      res.json({ 
+        message: "Registration successful. Please check your email to verify your account." 
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -94,6 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin routes
   app.get("/api/admin/users", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
     const users = await UserService.getAllUsers();
@@ -130,6 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User settings routes
   app.post("/api/user/settings/cliq", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Unauthorized" });
@@ -139,6 +143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = updateUserCliqSchema.parse(req.body);
       const updatedUser = await UserService.updateUserCliq(req.user.id, data);
 
+      // Refresh session with updated user data
       await new Promise<void>((resolve, reject) => {
         req.login(updatedUser, (err) => {
           if (err) {
@@ -160,6 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Trade routes
   app.post("/api/trade", upload.single("proofOfPayment"), async (req, res) => {
     if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
     if (!req.file) return res.status(400).json({ message: "No payment proof uploaded" });
@@ -181,26 +187,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Notification routes
   app.get("/api/notifications", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
     try {
       const notifications = await getUserNotifications(req.user.id);
-      res.json({
-        success: true,
-        message: "Notifications retrieved successfully",
-        data: {
-          notifications,
-          count: notifications.length
-        }
-      });
+      res.json(notifications);
     } catch (error) {
       console.error('Error fetching notifications:', error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to fetch notifications",
-        error: error.message
-      });
+      res.status(500).json({ message: "Failed to fetch notifications" });
     }
   });
 
@@ -209,18 +205,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       await markNotificationAsRead(parseInt(req.params.notificationId));
-      res.json({
-        success: true,
-        message: "Notification marked as read",
-        data: { notificationId: parseInt(req.params.notificationId) }
-      });
+      res.json({ success: true });
     } catch (error) {
       console.error('Error marking notification as read:', error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to mark notification as read",
-        error: error.message
-      });
+      res.status(500).json({ message: "Failed to mark notification as read" });
     }
   });
 
@@ -229,17 +217,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       await markAllNotificationsAsRead(req.user.id);
-      res.json({
-        success: true,
-        message: "All notifications marked as read"
-      });
+      res.json({ success: true });
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to mark all notifications as read",
-        error: error.message
-      });
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
     }
   });
 
@@ -254,6 +235,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const buffer = Buffer.from(user.kycDocument, 'base64');
 
+      // Check the file signature to determine the actual file type
       const isPdf = buffer.toString('ascii', 0, 5) === '%PDF-';
       const isPng = buffer.toString('hex', 0, 8) === '89504e470d0a1a0a';
       const isJpg = buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[buffer.length - 2] === 0xFF && buffer[buffer.length - 1] === 0xD9;
@@ -272,6 +254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         extension = '.jpg';
       }
 
+      // Set proper headers for preview and download
       res.setHeader('Content-Type', contentType);
       res.setHeader('Content-Length', buffer.length);
       res.setHeader('Accept-Ranges', 'bytes');
@@ -284,6 +267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.setHeader('Content-Disposition', 'inline');
       }
 
+      // Send the raw buffer data
       res.send(buffer);
     } catch (error) {
       console.error('Error fetching KYC document:', error);
@@ -318,6 +302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get platform payment settings (public)
   app.get("/api/settings/payment", async (req, res) => {
     try {
       const settings = await TransactionService.getPaymentSettings();
@@ -328,20 +313,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update platform payment settings (admin only)
   app.post("/api/admin/settings/payment", async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
 
     try {
       const schema = z.object({
+        // Exchange Rate Settings
         buyRate: z.number().min(0, "Buy rate must be positive"),
         buyCommissionPercentage: z.number().min(0, "Buy commission must be positive").max(100, "Buy commission cannot exceed 100%"),
         sellRate: z.number().min(0, "Sell rate must be positive"),
         sellCommissionPercentage: z.number().min(0, "Sell commission must be positive").max(100, "Sell commission cannot exceed 100%"),
+        // USDT Addresses
         usdtAddressTRC20: z.string().min(30, "TRC20 address is too short").max(50, "TRC20 address is too long"),
         usdtAddressBEP20: z.string().min(30, "BEP20 address is too short").max(50, "BEP20 address is too long"),
+        // CliQ Settings
         cliqAlias: z.string().min(1, "CliQ alias is required"),
         cliqBankName: z.string().min(1, "Bank name is required"),
         cliqAccountHolder: z.string().min(1, "Account holder name is required"),
+        // Mobile Wallet Settings
         mobileWallet: z.string().regex(/^07[789]\d{7}$/, {
           message: "Invalid Jordanian mobile number format"
         }),
@@ -350,7 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const settings = schema.parse(req.body);
-      console.log('Saving payment settings:', settings);
+      console.log('Saving payment settings:', settings); // Debug log
       await TransactionService.updatePaymentSettings(settings);
       res.json({ success: true });
     } catch (error) {
@@ -363,25 +353,5 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
-
-  const wss = new WebSocketServer({
-    server: httpServer,
-    path: '/ws'
-  });
-
-  wss.on('connection', (ws) => {
-    logger.info('WebSocket client connected');
-
-    ws.on('error', (error) => {
-      logger.error({ err: error }, 'WebSocket error occurred');
-    });
-
-    ws.on('close', () => {
-      logger.info('WebSocket client disconnected');
-    });
-  });
-
-  initializeNotifier(wss.clients);
-
   return httpServer;
 }
