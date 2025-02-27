@@ -29,6 +29,23 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, AlertCircle } from "lucide-react";
+import { z } from "zod";
+
+const cliqSettingsSchema = z.object({
+  bankName: z.enum(JORDANIAN_BANKS),
+  cliqType: z.enum(["alias", "number"]),
+  cliqAlias: z.string()
+    .regex(/^[A-Z0-9]*[A-Z]+[A-Z0-9]*$/, "Please use uppercase letters and numbers only")
+    .min(3, "Your alias should be at least 3 characters long")
+    .max(10, "Your alias cannot be longer than 10 characters")
+    .optional(),
+  cliqNumber: z.string()
+    .regex(/^009627\d{8}$/, "Please enter a valid Jordanian phone number starting with 009627")
+    .optional(),
+  accountHolderName: z.string()
+    .min(3, "Please enter your full name as it appears on your bank account")
+    .max(50, "Name cannot exceed 50 characters"),
+});
 
 export default function CliqSettings() {
   const { user } = useAuth();
@@ -39,18 +56,8 @@ export default function CliqSettings() {
     setIsVisible(true);
   }, []);
 
-  const form = useForm<UpdateUserCliq>({
-    resolver: zodResolver(updateUserCliqSchema.extend({
-      cliqAlias: updateUserCliqSchema.shape.cliqAlias
-        .regex(/^[A-Z0-9]*[A-Z]+[A-Z0-9]*$/, "Please use uppercase letters and numbers only")
-        .min(3, "Your alias should be at least 3 characters long")
-        .max(10, "Your alias cannot be longer than 10 characters"),
-      cliqNumber: updateUserCliqSchema.shape.cliqNumber
-        .regex(/^009627\d{8}$/, "Please enter a valid Jordanian phone number starting with 009627"),
-      accountHolderName: updateUserCliqSchema.shape.accountHolderName
-        .min(3, "Please enter your full name as it appears on your bank account")
-        .max(50, "Name cannot exceed 50 characters")
-    })),
+  const form = useForm<z.infer<typeof cliqSettingsSchema>>({
+    resolver: zodResolver(cliqSettingsSchema),
     defaultValues: {
       bankName: user?.bankName || JORDANIAN_BANKS[0],
       cliqType: user?.cliqType || "alias",
@@ -86,7 +93,7 @@ export default function CliqSettings() {
     },
   });
 
-  const onSubmit = (data: UpdateUserCliq) => {
+  const onSubmit = (data: z.infer<typeof cliqSettingsSchema>) => {
     if (data.cliqType === "alias") {
       data.cliqNumber = "";
     } else {
@@ -102,7 +109,7 @@ export default function CliqSettings() {
       return;
     }
 
-    mutation.mutate(data);
+    mutation.mutate(data as UpdateUserCliq);
   };
 
   return (
