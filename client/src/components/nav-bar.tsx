@@ -34,20 +34,13 @@ export default function NavBar() {
   }
 
   const navigationItems = (isMobile: boolean) => (
-    <div 
-      className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}
-      role={isMobile ? 'menu' : undefined}
-    >
+    <div className={`flex ${isMobile ? 'flex-col' : 'items-center'} gap-4`}>
       {/* Points Display */}
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div 
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/15 transition-colors duration-200"
-              role="status"
-              aria-label="Loyalty Points"
-            >
-              <Wallet className="h-4 w-4" aria-hidden="true" />
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/15 transition-colors duration-200">
+              <Wallet className="h-4 w-4" />
               <span className="text-sm font-medium tracking-tight">{user.loyaltyPoints} points</span>
             </div>
           </TooltipTrigger>
@@ -64,16 +57,15 @@ export default function NavBar() {
         <Button 
           variant="ghost"
           size="sm"
-          className={`flex items-center gap-2 font-medium transition-colors duration-200 hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+          className={`flex items-center gap-2 font-medium transition-colors duration-200 hover:bg-primary/10 ${
             isMobile ? 'w-full justify-start min-h-[44px]' : ''
           }`}
           onClick={() => {
             setLocation('/admin');
             setMobileMenuOpen(false);
           }}
-          aria-label="Admin Panel"
         >
-          <Shield className="h-4 w-4" aria-hidden="true" />
+          <Shield className="h-4 w-4" />
           <span>Admin Panel</span>
         </Button>
       )}
@@ -83,14 +75,13 @@ export default function NavBar() {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start font-medium transition-colors duration-200 hover:bg-primary/10 min-h-[44px] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="w-full justify-start font-medium transition-colors duration-200 hover:bg-primary/10 min-h-[44px]"
           onClick={() => {
             setLocation('/settings');
             setMobileMenuOpen(false);
           }}
-          aria-label="Settings"
         >
-          <Settings className="h-4 w-4 mr-2" aria-hidden="true" />
+          <Settings className="h-4 w-4 mr-2" />
           Settings
         </Button>
       )}
@@ -109,10 +100,9 @@ export default function NavBar() {
           variant="ghost"
           size="sm"
           onClick={handleLogout}
-          className="w-full justify-start text-destructive hover:text-destructive focus:text-destructive hover:bg-destructive/10 transition-all duration-200 min-h-[44px] focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2"
-          aria-label="Sign Out"
+          className="w-full justify-start text-destructive hover:text-destructive focus:text-destructive hover:bg-destructive/10 transition-all duration-200 min-h-[44px]"
         >
-          <LogOut className="h-4 w-4 mr-2" aria-hidden="true" />
+          <LogOut className="h-4 w-4 mr-2" />
           Sign Out
         </Button>
       )}
@@ -124,10 +114,9 @@ export default function NavBar() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="flex items-center gap-2 font-medium hover:bg-primary/10 transition-all duration-200 min-h-[44px] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-              aria-label="User menu"
+              className="flex items-center gap-2 font-medium hover:bg-primary/10 transition-all duration-200 min-h-[44px]"
             >
-              <UserCircle className="h-4 w-4" aria-hidden="true" />
+              <UserCircle className="h-4 w-4" />
               <span className="hidden sm:inline">{user.fullName}</span>
             </Button>
           </DropdownMenuTrigger>
@@ -137,9 +126,8 @@ export default function NavBar() {
                 href="/settings" 
                 className="flex items-center gap-2 cursor-pointer font-medium transition-colors duration-200 hover:bg-primary/10 focus:bg-primary/15 focus:outline-none min-h-[40px]"
                 onClick={() => setMobileMenuOpen(false)}
-                role="menuitem"
               >
-                <Settings className="h-4 w-4" aria-hidden="true" />
+                <Settings className="h-4 w-4" />
                 Settings
               </Link>
             </DropdownMenuItem>
@@ -147,9 +135,8 @@ export default function NavBar() {
             <DropdownMenuItem 
               className="flex items-center gap-2 cursor-pointer font-medium text-destructive hover:text-destructive focus:text-destructive transition-colors duration-200 hover:bg-destructive/10 focus:bg-destructive/15 min-h-[40px]"
               onClick={handleLogout}
-              role="menuitem"
             >
-              <LogOut className="h-4 w-4" aria-hidden="true" />
+              <LogOut className="h-4 w-4" />
               Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -159,11 +146,7 @@ export default function NavBar() {
   );
 
   return (
-    <nav 
-      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-      role="navigation"
-      aria-label="Main navigation"
-    >
+    <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-14 sm:h-16 items-center justify-between">
           {/* Logo/Brand with improved touch target */}
@@ -171,10 +154,9 @@ export default function NavBar() {
             href="/" 
             className="flex items-center gap-2 group min-h-[48px] px-2 -ml-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300"
             onClick={() => setMobileMenuOpen(false)}
-            aria-label="USDT Exchange Home"
           >
             <div className="w-8 sm:w-9 h-8 sm:h-9 rounded-full bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20">
-              <CreditCard className="w-4 sm:w-5 h-4 sm:h-5 text-primary" aria-hidden="true" />
+              <CreditCard className="w-4 sm:w-5 h-4 sm:h-5 text-primary" />
             </div>
             <span className="text-base sm:text-lg font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               USDT Exchange
@@ -194,9 +176,9 @@ export default function NavBar() {
                   variant="ghost" 
                   size="icon"
                   className="h-10 w-10 transition-colors duration-200 hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                  aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                  aria-label="Open menu"
                 >
-                  <Menu className="h-5 w-5" aria-hidden="true" />
+                  <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent 
@@ -207,14 +189,14 @@ export default function NavBar() {
                   {/* Mobile user info */}
                   <div className="flex items-center gap-3 min-h-[48px]">
                     <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <UserCircle className="h-6 w-6 text-primary" aria-hidden="true" />
+                      <UserCircle className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex flex-col">
                       <span className="font-medium tracking-tight text-foreground">{user.fullName}</span>
                       <span className="text-sm text-muted-foreground">{user.username}</span>
                     </div>
                   </div>
-                  <div className="border-t border-border/40" role="separator" />
+                  <div className="border-t border-border/40" />
                   {/* Navigation items with consistent touch targets */}
                   {navigationItems(true)}
                 </div>
