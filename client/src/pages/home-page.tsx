@@ -36,15 +36,15 @@ function sortTransactions(transactions: Transaction[] = []) {
 
 const cardStyles = {
   base: "border-0 shadow-lg bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:bg-card/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50",
-  contentPadding: "p-5 sm:p-6",
+  contentPadding: "p-6 sm:p-7", // Increased padding for better touch targets
   headerPadding: "px-5 sm:px-6 py-5 sm:py-6",
-  iconWrapper: "w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30",
-  link: "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-transform hover:scale-[1.02] duration-300",
-  // Add typography styles
+  iconWrapper: "w-12 h-12 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30",
+  link: "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group",
+  // Typography styles
   heading: "text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent",
   subheading: "text-base sm:text-lg text-muted-foreground",
-  cardTitle: "text-lg font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent",
-  cardDescription: "text-sm text-muted-foreground mt-1",
+  cardTitle: "text-lg font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary transition-all duration-300",
+  cardDescription: "text-sm text-muted-foreground mt-2",
   sectionTitle: "text-xl sm:text-2xl font-semibold tracking-tight",
 };
 
@@ -81,10 +81,10 @@ export default function HomePage() {
               className={`${cardStyles.link} animate-fade-up [--animation-delay:100ms]`}
               aria-label="Start Trading USDT"
             >
-              <Card className={cardStyles.base}>
-                <CardContent className={`${cardStyles.contentPadding} flex items-center gap-4`}>
+              <Card className={`${cardStyles.base} group-hover:border-primary/20`}>
+                <CardContent className={`${cardStyles.contentPadding} flex items-center gap-5`}>
                   <div className={cardStyles.iconWrapper}>
-                    <CreditCard className="w-5 h-5 text-primary" aria-hidden="true" />
+                    <CreditCard className="w-6 h-6 text-primary transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                   </div>
                   <div>
                     <h3 className={cardStyles.cardTitle}>Start Trading</h3>
@@ -99,10 +99,10 @@ export default function HomePage() {
               className={`${cardStyles.link} animate-fade-up [--animation-delay:200ms]`}
               aria-label="Manage Payment Methods"
             >
-              <Card className={cardStyles.base}>
-                <CardContent className={`${cardStyles.contentPadding} flex items-center gap-4`}>
+              <Card className={`${cardStyles.base} group-hover:border-primary/20`}>
+                <CardContent className={`${cardStyles.contentPadding} flex items-center gap-5`}>
                   <div className={cardStyles.iconWrapper}>
-                    <Settings className="w-5 h-5 text-primary" aria-hidden="true" />
+                    <Settings className="w-6 h-6 text-primary transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                   </div>
                   <div>
                     <h3 className={cardStyles.cardTitle}>Payment Methods</h3>
@@ -118,10 +118,10 @@ export default function HomePage() {
               className="p-0 h-auto hover:bg-transparent animate-fade-up [--animation-delay:300ms]"
               aria-label="Learn about our referral program"
             >
-              <Card className={`${cardStyles.base} w-full`}>
-                <CardContent className={`${cardStyles.contentPadding} flex items-center gap-4`}>
+              <Card className={`${cardStyles.base} group-hover:border-primary/20 w-full`}>
+                <CardContent className={`${cardStyles.contentPadding} flex items-center gap-5`}>
                   <div className={cardStyles.iconWrapper}>
-                    <Share2 className="w-5 h-5 text-primary" aria-hidden="true" />
+                    <Share2 className="w-6 h-6 text-primary transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                   </div>
                   <div>
                     <h3 className={cardStyles.cardTitle}>Refer a Friend</h3>
