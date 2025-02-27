@@ -297,21 +297,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update the CliQ settings route to match the client's expected path
+  app.post("/api/user/settings/cliq", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    try {
+      const data = updateUserCliqSchema.parse(req.body);
+      await storage.updateUserCliq(req.user.id, data);
+
+      // Fetch updated user data
+      const updatedUser = await storage.getUser(req.user.id);
+      if (!updatedUser) {
+        throw new Error("Failed to fetch updated user data");
+      }
+
+      // Log updated user data
+      console.log('Updated user CliQ settings:', {
+        cliqType: updatedUser.cliqType,
+        cliqAlias: updatedUser.cliqAlias,
+        cliqNumber: updatedUser.cliqNumber
+      });
+
+      // Update the session with new user data
+      req.login(updatedUser, (err) => {
+        if (err) {
+          console.error('Session refresh error:', err);
+          return res.status(500).json({ message: "Failed to refresh session" });
+        }
+
+        // Verify session update
+        console.log('Session updated, current req.user:', {
+          cliqType: req.user.cliqType,
+          cliqAlias: req.user.cliqAlias,
+          cliqNumber: req.user.cliqNumber
+        });
+
+        res.json({ success: true });
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: error.errors[0].message });
+      }
+      console.error('CliQ details update error:', error);
+      res.status(500).json({ message: "Failed to update CliQ settings" });
+    }
+  });
+
   app.post("/api/trade", upload.single("proofOfPayment"), async (req, res) => {
     if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
     if (!req.file) return res.status(400).json({ message: "No payment proof uploaded" });
 
     try {
-      // Debug logging for request body
-      console.log('Trade request body:', {
-        type: req.body.type,
-        amount: req.body.amount,
-        network: req.body.network,
-        paymentMethod: req.body.paymentMethod,
-        rate: req.body.rate,
-        cliqType: req.body.cliqType,
-        cliqAlias: req.body.cliqAlias,
-        cliqNumber: req.body.cliqNumber
+      // Log user's CliQ settings at the start of trade
+      console.log('Current user CliQ settings in trade:', {
+        userId: req.user.id,
+        cliqType: req.user.cliqType,
+        cliqAlias: req.user.cliqAlias,
+        cliqNumber: req.user.cliqNumber
       });
 
       const schema = z.object({
@@ -363,17 +407,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const transaction = await storage.createTransaction(transactionData);
-
-      // Create notification for admin
-      const admins = await storage.getAdminUsers();
-      for (const admin of admins) {
-        await storage.createNotification({
-          userId: admin.id,
-          type: "order_submitted",
-          message: `New ${data.type} order submitted by ${req.user.fullName} for ${data.amount} USDT`,
-          relatedId: transaction.id
-        });
-      }
 
       // Debug logging for created transaction
       console.log('Created transaction:', {
@@ -457,40 +490,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to update wallet settings" });
     }
   });
-
-  // Update the CliQ settings route to match the client's expected path
-  app.post("/api/user/settings/cliq", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
-    try {
-      const data = updateUserCliqSchema.parse(req.body);
-      await storage.updateUserCliq(req.user.id, data);
-
-      // Fetch updated user data
-      const updatedUser = await storage.getUser(req.user.id);
-      if (!updatedUser) {
-        throw new Error("Failed to fetch updated user data");
-      }
-
-      // Update the session with new user data
-      req.login(updatedUser, (err) => {
-        if (err) {
-          console.error('Session refresh error:', err);
-          return res.status(500).json({ message: "Failed to refresh session" });
-        }
-        res.json({ success: true });
-      });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: error.errors[0].message });
-      }
-      console.error('CliQ details update error:', error);
-      res.status(500).json({ message: "Failed to update CliQ settings" });
-    }
-  });
-
 
   // Get platform payment settings (public)
   app.get("/api/settings/payment", async (req, res) => {
