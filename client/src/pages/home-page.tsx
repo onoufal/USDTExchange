@@ -34,17 +34,18 @@ function sortTransactions(transactions: Transaction[] = []) {
   return [...pendingTransactions, ...approvedTransactions];
 }
 
+// Update cardStyles to enhance accessibility
 const cardStyles = {
-  base: "border-0 shadow-lg bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:bg-card/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50",
-  contentPadding: "p-6 sm:p-7", // Increased padding for better touch targets
-  headerPadding: "px-5 sm:px-6 py-5 sm:py-6",
+  base: "border-0 shadow-lg bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:bg-card/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+  contentPadding: "p-6 sm:p-7", // Maintains large touch targets
+  headerPadding: "px-6 sm:px-7 py-6", // Consistent with content padding
   iconWrapper: "w-12 h-12 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30",
-  link: "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group",
-  // Typography styles
-  heading: "text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent",
-  subheading: "text-base sm:text-lg text-muted-foreground",
-  cardTitle: "text-lg font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary transition-all duration-300",
-  cardDescription: "text-sm text-muted-foreground mt-2",
+  link: "min-h-[64px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group focus-visible:ring-offset-2",
+  // Typography with enhanced contrast
+  heading: "text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent dark:from-primary dark:to-primary/90",
+  subheading: "text-base sm:text-lg text-foreground dark:text-foreground/90",
+  cardTitle: "text-lg font-semibold tracking-tight bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-primary transition-all duration-300 dark:from-primary dark:to-primary/90",
+  cardDescription: "text-sm text-foreground/90 dark:text-foreground/80 mt-2",
   sectionTitle: "text-xl sm:text-2xl font-semibold tracking-tight",
 };
 
