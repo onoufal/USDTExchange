@@ -486,16 +486,16 @@ export default function TradeForm() {
           onValueChange={(value) => form.setValue("type", value)}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-2 px-1 py-[3px] bg-muted/50 rounded-lg">
+          <TabsList className="grid w-full grid-cols-2 p-1 h-[3.5rem] sm:h-12 bg-muted/50 rounded-lg">
             <TabsTrigger
               value="buy"
-              className="text-base rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
+              className="text-base rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary min-h-[2.75rem] sm:min-h-10"
             >
               Buy USDT
             </TabsTrigger>
             <TabsTrigger
               value="sell"
-              className="text-base rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
+              className="text-base rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary min-h-[2.75rem] sm:min-h-10"
             >
               Sell USDT
             </TabsTrigger>
@@ -547,9 +547,9 @@ export default function TradeForm() {
                               onValueChange={(value: "native" | "foreign") =>
                                 setCurrencyBasis(value)
                               }
-                              className="flex flex-col space-y-3 sm:flex-row sm:space-x-6 sm:space-y-0"
+                              className="flex flex-col space-y-3"
                             >
-                              <FormItem className="flex items-center space-x-3">
+                              <FormItem className="flex items-center space-x-3 min-h-[2.75rem]">
                                 <FormControl>
                                   <RadioGroupItem value="native" />
                                 </FormControl>
@@ -557,7 +557,7 @@ export default function TradeForm() {
                                   Enter in {type === "buy" ? "JOD" : "USDT"}
                                 </FormLabel>
                               </FormItem>
-                              <FormItem className="flex items-center space-x-3">
+                              <FormItem className="flex items-center space-x-3 min-h-[2.75rem]">
                                 <FormControl>
                                   <RadioGroupItem value="foreign" />
                                 </FormControl>
@@ -573,7 +573,7 @@ export default function TradeForm() {
                                 step="0.01"
                                 {...field}
                                 placeholder={`Enter amount in ${getCurrentCurrencyLabel()}`}
-                                className="text-base p-6"
+                                className="text-base p-6 min-h-[3.5rem]"
                               />
                             </FormControl>
                             <FormDescription className="text-sm text-muted-foreground">
@@ -679,7 +679,7 @@ export default function TradeForm() {
                                 <Card className="border bg-card/50">
                                   <CardContent className="p-6">
                                     <div className="space-y-4">
-                                      <FormItem className="flex items-center space-x-3">
+                                      <FormItem className="flex items-center space-x-3 min-h-[2.75rem]">
                                         <FormControl>
                                           <RadioGroupItem value="trc20" />
                                         </FormControl>
@@ -720,7 +720,7 @@ export default function TradeForm() {
                                 <Card className="border bg-card/50">
                                   <CardContent className="p-6">
                                     <div className="space-y-4">
-                                      <FormItem className="flex items-center space-x-3">
+                                      <FormItem className="flex items-center space-x-3 min-h-[2.75rem]">
                                         <FormControl>
                                           <RadioGroupItem value="bep20" />
                                         </FormControl>
@@ -785,7 +785,7 @@ export default function TradeForm() {
                           >
                             {paymentSettings?.cliqAlias && (
                               <div className="space-y-4">
-                                <FormItem className="flex items-center space-x-3">
+                                <FormItem className="flex items-center space-x-3 min-h-[2.75rem]">
                                   <FormControl>
                                     <RadioGroupItem value="cliq" />
                                   </FormControl>
@@ -839,7 +839,7 @@ export default function TradeForm() {
 
                             {paymentSettings?.mobileWallet && (
                               <div className="space-y-4">
-                                <FormItem className="flex items-center space-x-3">
+                                <FormItem className="flex items-center space-x-3 min-h-[2.75rem]">
                                   <FormControl>
                                     <RadioGroupItem value="wallet" />
                                   </FormControl>
@@ -912,7 +912,7 @@ export default function TradeForm() {
                             className="hidden"
                             id="payment-proof"
                           />
-                          <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                          <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer min-h-[10rem]"
                             onClick={() => document.getElementById("payment-proof")?.click()}
                           >
                             <Upload className="h-10 w-10 mb-4 text-muted-foreground" />
@@ -943,7 +943,7 @@ export default function TradeForm() {
                     <Button
                       type="submit"
                       size="lg"
-                      className="w-full h-12 text-base font-medium bg-primary hover:bg-primary/90 transition-colors duration-200"
+                      className="w-full min-h-[3.5rem] sm:h-12 text-base font-medium bg-primary hover:bg-primary/90 transition-colors duration-200"
                       disabled={isUploading || tradeMutation.isPending || !amount}
                     >
                       {isUploading ? (
