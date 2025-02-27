@@ -36,8 +36,8 @@ const formSchema = z.object({
   cliqType: z.enum(["alias", "number"], {
     required_error: "Please select how you want to receive payments",
   }),
-  cliqAlias: z.string().nullable(),
-  cliqNumber: z.string().nullable(),
+  cliqAlias: z.string().optional(),
+  cliqNumber: z.string().optional(),
   accountHolderName: z.string()
     .min(3, "Please enter your full name as it appears on your bank account")
     .max(50, "Name cannot exceed 50 characters"),
@@ -87,18 +87,27 @@ export default function CliqSettings() {
         bankName: data.bankName,
         cliqType: data.cliqType,
         accountHolderName: data.accountHolderName,
-        cliqAlias: data.cliqType === "alias" ? data.cliqAlias : null,
-        cliqNumber: data.cliqType === "number" ? data.cliqNumber : null,
+        cliqAlias: data.cliqType === "alias" ? data.cliqAlias : undefined,
+        cliqNumber: data.cliqType === "number" ? data.cliqNumber : undefined,
       };
 
       const res = await apiRequest("POST", "/api/user/settings/cliq", submitData);
+
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to save CliQ settings");
+        // Try to parse error as JSON first
+        try {
+          const error = await res.json();
+          throw new Error(error.message || "Failed to save CliQ settings");
+        } catch (e) {
+          // If JSON parsing fails, use the status text
+          throw new Error(`Failed to save CliQ settings: ${res.statusText}`);
+        }
       }
-      return res.json();
+
+      const result = await res.json();
+      return result;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
         title: "Settings Saved Successfully",
@@ -123,9 +132,7 @@ export default function CliqSettings() {
   };
 
   return (
-    <Card
-      className={`border bg-card shadow-sm w-full transition-all duration-300 ease-out ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}
-    >
+    <Card className={`border bg-card shadow-sm w-full transition-all duration-300 ease-out ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
       <CardHeader className="space-y-2">
         <CardTitle className="text-2xl font-semibold tracking-tight">CliQ Account Settings</CardTitle>
         <CardDescription>
