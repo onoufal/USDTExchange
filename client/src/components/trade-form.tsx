@@ -470,445 +470,448 @@ export default function TradeForm() {
 
   return (
     <div className="space-y-8">
-      {/* Trade Type Selection */}
-      <Tabs
-        defaultValue="buy"
-        onValueChange={(value) => form.setValue("type", value)}
-        className="w-full"
-      >
-        <TabsList className="grid w-full grid-cols-2 px-1 py-[3px] bg-muted/50 rounded-lg">
-          <TabsTrigger value="buy" className="text-base rounded-md data-[state=active]:bg-background">
-            Buy USDT
-          </TabsTrigger>
-          <TabsTrigger value="sell" className="text-base rounded-md data-[state=active]:bg-background">
-            Sell USDT
-          </TabsTrigger>
-        </TabsList>
+      {/* Trade Options Section */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold tracking-tight">Trade Options</h2>
+        <Tabs
+          defaultValue="buy"
+          onValueChange={(value) => form.setValue("type", value)}
+          className="w-full"
+        >
+          <TabsList className="grid w-full grid-cols-2 px-1 py-[3px] bg-muted/50 rounded-lg">
+            <TabsTrigger value="buy" className="text-base rounded-md data-[state=active]:bg-background">
+              Buy USDT
+            </TabsTrigger>
+            <TabsTrigger value="sell" className="text-base rounded-md data-[state=active]:bg-background">
+              Sell USDT
+            </TabsTrigger>
+          </TabsList>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10 mt-8">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
-              <>
-                {/* Warning Alerts */}
-                {type === "sell" && !hasUsdtAddress && (
-                  <Alert className="bg-destructive/10 text-destructive border-none mb-8">
-                    <AlertDescription>
-                      Please set your USDT wallet address in settings before selling
-                    </AlertDescription>
-                  </Alert>
-                )}
-                {type === "buy" && !hasCliqSettings && (
-                  <Alert className="bg-destructive/10 text-destructive border-none mb-8">
-                    <AlertDescription>
-                      Please set your CliQ account details in settings before buying
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {/* Amount Input Section */}
-                <div className="space-y-8">
-                  <div className="space-y-6">
-                    <h3 className="text-lg font-semibold tracking-tight">Amount</h3>
-                    <FormField
-                      control={form.control}
-                      name="amount"
-                      render={({ field }) => (
-                        <FormItem className="space-y-6">
-                          <RadioGroup
-                            value={currencyBasis}
-                            onValueChange={(value: "native" | "foreign") =>
-                              setCurrencyBasis(value)
-                            }
-                            className="flex flex-col space-y-3 sm:flex-row sm:space-x-6 sm:space-y-0"
-                          >
-                            <FormItem className="flex items-center space-x-3">
-                              <FormControl>
-                                <RadioGroupItem value="native" />
-                              </FormControl>
-                              <FormLabel className="text-sm font-medium">
-                                Enter in {type === "buy" ? "JOD" : "USDT"}
-                              </FormLabel>
-                            </FormItem>
-                            <FormItem className="flex items-center space-x-3">
-                              <FormControl>
-                                <RadioGroupItem value="foreign" />
-                              </FormControl>
-                              <FormLabel className="text-sm font-medium">
-                                Enter in {type === "buy" ? "USDT" : "JOD"}
-                              </FormLabel>
-                            </FormItem>
-                          </RadioGroup>
-
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              {...field}
-                              placeholder={`Enter amount in ${getCurrentCurrencyLabel()}`}
-                              className="text-base p-6"
-                            />
-                          </FormControl>
-                          <FormDescription className="text-sm text-muted-foreground">
-                            Enter the amount you would like to {type === "buy" ? "purchase" : "sell"}
-                          </FormDescription>
-                          <FormMessage className="text-sm" />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Exchange Rate Summary */}
-                  <Card className="border bg-card/50">
-                    <CardContent className="p-6 space-y-4">
-                      <div className="flex flex-wrap justify-between gap-3">
-                        <span className="text-sm font-medium">Exchange Rate</span>
-                        <span className="text-sm font-mono">
-                          1 USDT = {currentRate ? currentRate.toFixed(2) : "0.00"} JOD
-                        </span>
-                      </div>
-                      {amount && (
-                        <>
-                          <div className="flex flex-wrap justify-between gap-3">
-                            <span className="text-sm font-medium">Base Amount</span>
-                            <span className="text-sm font-mono">
-                              {equivalentAmount} {getEquivalentCurrencyLabel()}
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap justify-between gap-3 text-muted-foreground">
-                            <span className="text-sm">
-                              Commission ({currentCommission ? currentCommission.toFixed(2) : "0.00"}%)
-                            </span>
-                            <span className="text-sm font-mono">{commission}</span>
-                          </div>
-                          <div className="flex flex-wrap justify-between gap-3 pt-3 border-t">
-                            <span className="text-sm font-medium">
-                              {type === "buy"
-                                ? currencyBasis === "foreign"
-                                  ? "Total to Pay"
-                                  : "Total to Receive"
-                                : currencyBasis === "foreign"
-                                ? "Total to Pay"
-                                : "Total to Receive"}
-                            </span>
-                            <span className="text-base font-medium font-mono">
-                              {finalAmount} {getEquivalentCurrencyLabel()}
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </CardContent>
-                  </Card>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10 mt-8">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
+              ) : (
+                <>
+                  {/* Warning Alerts */}
+                  {type === "sell" && !hasUsdtAddress && (
+                    <Alert className="bg-destructive/10 text-destructive border-none mb-8">
+                      <AlertDescription>
+                        Please set your USDT wallet address in settings before selling
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  {type === "buy" && !hasCliqSettings && (
+                    <Alert className="bg-destructive/10 text-destructive border-none mb-8">
+                      <AlertDescription>
+                        Please set your CliQ account details in settings before buying
+                      </AlertDescription>
+                    </Alert>
+                  )}
 
-                {/* Network Selection for Sell */}
-                {type === "sell" && (
-                  <div className="space-y-6">
-                    <h3 className="text-lg font-semibold tracking-tight">Network</h3>
-                    <FormField
-                      control={form.control}
-                      name="network"
-                      render={({ field }) => (
-                        <FormItem className="space-y-6">
-                          <FormControl>
+                  {/* Amount & Currency Section */}
+                  <div className="space-y-8">
+                    <h2 className="text-xl font-semibold tracking-tight">Amount & Currency</h2>
+                    <div className="space-y-6">
+                      <FormField
+                        control={form.control}
+                        name="amount"
+                        render={({ field }) => (
+                          <FormItem className="space-y-6">
                             <RadioGroup
-                              onValueChange={field.onChange}
-                              value={field.value}
-                              className="space-y-4"
+                              value={currencyBasis}
+                              onValueChange={(value: "native" | "foreign") =>
+                                setCurrencyBasis(value)
+                              }
+                              className="flex flex-col space-y-3 sm:flex-row sm:space-x-6 sm:space-y-0"
                             >
-                              <Card className="border bg-card/50">
-                                <CardContent className="p-6">
-                                  <div className="space-y-4">
-                                    <FormItem className="flex items-center space-x-3">
-                                      <FormControl>
-                                        <RadioGroupItem value="trc20" />
-                                      </FormControl>
-                                      <FormLabel className="text-sm font-medium">
-                                        TRC20 Network
-                                      </FormLabel>
-                                    </FormItem>
-                                    {field.value === "trc20" && (
-                                      <div className="ml-7 text-sm bg-muted/50 p-4 rounded-md">
-                                        <div className="flex items-center justify-between">
-                                          <p className="font-mono break-all mr-2">
-                                            {paymentSettings?.usdtAddressTRC20}
-                                          </p>
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="shrink-0"
-                                            onClick={() =>
-                                              copyToClipboard(
-                                                paymentSettings?.usdtAddressTRC20 || "",
-                                                "trc20",
-                                              )
-                                            }
-                                          >
-                                            {copyingField === "trc20" ? (
-                                              <Check className="h-4 w-4" />
-                                            ) : (
-                                              <Copy className="h-4 w-4" />
-                                            )}
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                </CardContent>
-                              </Card>
-
-                              <Card className="border bg-card/50">
-                                <CardContent className="p-6">
-                                  <div className="space-y-4">
-                                    <FormItem className="flex items-center space-x-3">
-                                      <FormControl>
-                                        <RadioGroupItem value="bep20" />
-                                      </FormControl>
-                                      <FormLabel className="text-sm font-medium">
-                                        BEP20 Network
-                                      </FormLabel>
-                                    </FormItem>
-                                    {field.value === "bep20" && (
-                                      <div className="ml-7 text-sm bg-muted/50 p-4 rounded-md">
-                                        <div className="flex items-center justify-between">
-                                          <p className="font-mono break-all mr-2">
-                                            {paymentSettings?.usdtAddressBEP20}
-                                          </p>
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="shrink-0"
-                                            onClick={() =>
-                                              copyToClipboard(
-                                                paymentSettings?.usdtAddressBEP20 || "",
-                                                "bep20",
-                                              )
-                                            }
-                                          >
-                                            {copyingField === "bep20" ? (
-                                              <Check className="h-4 w-4" />
-                                            ) : (
-                                              <Copy className="h-4 w-4" />
-                                            )}
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                </CardContent>
-                              </Card>
+                              <FormItem className="flex items-center space-x-3">
+                                <FormControl>
+                                  <RadioGroupItem value="native" />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">
+                                  Enter in {type === "buy" ? "JOD" : "USDT"}
+                                </FormLabel>
+                              </FormItem>
+                              <FormItem className="flex items-center space-x-3">
+                                <FormControl>
+                                  <RadioGroupItem value="foreign" />
+                                </FormControl>
+                                <FormLabel className="text-sm font-medium">
+                                  Enter in {type === "buy" ? "USDT" : "JOD"}
+                                </FormLabel>
+                              </FormItem>
                             </RadioGroup>
-                          </FormControl>
-                          <FormDescription className="text-sm text-muted-foreground">
-                            Select the blockchain network for your USDT transaction
-                          </FormDescription>
-                          <FormMessage className="text-sm" />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
 
-                {/* Payment Method Selection for Buy */}
-                {type === "buy" && (
-                  <div className="space-y-6">
-                    <h3 className="text-lg font-semibold tracking-tight">Payment Method</h3>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                {...field}
+                                placeholder={`Enter amount in ${getCurrentCurrencyLabel()}`}
+                                className="text-base p-6"
+                              />
+                            </FormControl>
+                            <FormDescription className="text-sm text-muted-foreground">
+                              Enter the amount you would like to {type === "buy" ? "purchase" : "sell"}
+                            </FormDescription>
+                            <FormMessage className="text-sm" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Exchange Rate Summary */}
                     <Card className="border bg-card/50">
-                      <CardContent className="p-6">
-                        <RadioGroup
-                          defaultValue="cliq"
-                          className="space-y-6"
-                          value={paymentMethod}
-                          onValueChange={(value: "cliq" | "wallet") =>
-                            setPaymentMethod(value)
-                          }
-                        >
-                          {paymentSettings?.cliqAlias && (
-                            <div className="space-y-4">
-                              <FormItem className="flex items-center space-x-3">
-                                <FormControl>
-                                  <RadioGroupItem value="cliq" />
-                                </FormControl>
-                                <FormLabel className="text-sm font-medium">
-                                  CliQ Payment
-                                </FormLabel>
-                              </FormItem>
-                              {paymentMethod === "cliq" && (
-                                <div className="ml-7 text-sm bg-muted/50 p-4 rounded-md space-y-3">
-                                  <div className="flex items-center justify-between">
-                                    <p className="truncate mr-2">
-                                      <span className="text-muted-foreground">
-                                        Cliq Alias:
-                                      </span>{" "}
-                                      {paymentSettings.cliqAlias}
-                                    </p>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="shrink-0"
-                                      onClick={() =>
-                                        copyToClipboard(
-                                          paymentSettings.cliqAlias,
-                                          "cliqAlias",
-                                        )
-                                      }
-                                    >
-                                      {copyingField === "cliqAlias" ? (
-                                        <Check className="h-4 w-4" />
-                                      ) : (
-                                        <Copy className="h-4 w-4" />
-                                      )}
-                                    </Button>
-                                  </div>
-                                  <p>
-                                    <span className="text-muted-foreground">
-                                      Bank:
-                                    </span>{" "}
-                                    {paymentSettings.cliqBankName}
-                                  </p>
-                                  <p>
-                                    <span className="text-muted-foreground">
-                                      Account Holder:
-                                    </span>{" "}
-                                    {paymentSettings.cliqAccountHolder}
-                                  </p>
-                                </div>
-                              )}
+                      <CardContent className="p-6 space-y-4">
+                        <div className="flex flex-wrap justify-between gap-3">
+                          <span className="text-sm font-medium">Exchange Rate</span>
+                          <span className="text-sm font-mono">
+                            1 USDT = {currentRate ? currentRate.toFixed(2) : "0.00"} JOD
+                          </span>
+                        </div>
+                        {amount && (
+                          <>
+                            <div className="flex flex-wrap justify-between gap-3">
+                              <span className="text-sm font-medium">Base Amount</span>
+                              <span className="text-sm font-mono">
+                                {equivalentAmount} {getEquivalentCurrencyLabel()}
+                              </span>
                             </div>
-                          )}
-
-                          {paymentSettings?.mobileWallet && (
-                            <div className="space-y-4">
-                              <FormItem className="flex items-center space-x-3">
-                                <FormControl>
-                                  <RadioGroupItem value="wallet" />
-                                </FormControl>
-                                <FormLabel className="text-sm font-medium">
-                                  Mobile Wallet
-                                </FormLabel>
-                              </FormItem>
-                              {paymentMethod === "wallet" && (
-                                <div className="ml-7 text-sm bg-muted/50 p-4 rounded-md space-y-3">
-                                  <div className="flex items-center justify-between">
-                                    <p>
-                                      <span className="text-muted-foreground">
-                                        Number:
-                                      </span>{" "}
-                                      {paymentSettings.mobileWallet}
-                                    </p>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="shrink-0"
-                                      onClick={() =>
-                                        copyToClipboard(
-                                          paymentSettings.mobileWallet,
-                                          "mobileWallet",
-                                        )
-                                      }
-                                    >
-                                      {copyingField === "mobileWallet" ? (
-                                        <Check className="h-4 w-4" />
-                                      ) : (
-                                        <Copy className="h-4 w-4" />
-                                      )}
-                                    </Button>
-                                  </div>
-                                  <p>
-                                    <span className="text-muted-foreground">
-                                      Wallet Type:
-                                    </span>{" "}
-                                    {paymentSettings.walletType}
-                                  </p>
-                                  <p>
-                                    <span className="text-muted-foreground">
-                                      Holder Name:
-                                    </span>{" "}
-                                    {paymentSettings.walletHolderName}
-                                  </p>
-                                </div>
-                              )}
+                            <div className="flex flex-wrap justify-between gap-3 text-muted-foreground">
+                              <span className="text-sm">
+                                Commission ({currentCommission ? currentCommission.toFixed(2) : "0.00"}%)
+                              </span>
+                              <span className="text-sm font-mono">{commission}</span>
                             </div>
-                          )}
-                        </RadioGroup>
+                            <div className="flex flex-wrap justify-between gap-3 pt-3 border-t">
+                              <span className="text-sm font-medium">
+                                {type === "buy"
+                                  ? currencyBasis === "foreign"
+                                    ? "Total to Pay"
+                                    : "Total to Receive"
+                                  : currencyBasis === "foreign"
+                                  ? "Total to Pay"
+                                  : "Total to Receive"}
+                              </span>
+                              <span className="text-base font-medium font-mono">
+                                {finalAmount} {getEquivalentCurrencyLabel()}
+                              </span>
+                            </div>
+                          </>
+                        )}
                       </CardContent>
                     </Card>
-                    <FormDescription className="text-sm text-muted-foreground">
-                      Choose how you'd like to make your payment
-                    </FormDescription>
                   </div>
-                )}
 
-                {/* Payment Proof Upload Section */}
-                <div className="space-y-6">
-                  <h3 className="text-lg font-semibold tracking-tight">Payment Proof</h3>
-                  <Card className="border bg-card/50">
-                    <CardContent className="p-6">
-                      <div className="space-y-6">
-                        <input
-                          type="file"
-                          accept="image/jpeg,image/png,image/jpg"
-                          onChange={handleFileChange}
-                          className="hidden"
-                          id="payment-proof"
-                        />
-                        <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
-                          onClick={() => document.getElementById("payment-proof")?.click()}
-                        >
-                          <Upload className="h-10 w-10 mb-4 text-muted-foreground" />
-                          <p className="text-base text-center">
-                            Upload payment confirmation
-                            <br />
-                            <span className="text-sm text-muted-foreground mt-1 block">
-                              Click to upload a JPG or PNG image (max 5MB)
-                            </span>
-                          </p>
-                        </div>
-                        {file && (
-                          <div className="text-sm">
-                            <p className="font-medium mb-2">Selected file:</p>
-                            <p className="text-muted-foreground">{file.name}</p>
-                            {uploadProgress > 0 && (
-                              <Progress value={uploadProgress} className="mt-3" />
-                            )}
-                          </div>
+                  {/* Network Selection for Sell */}
+                  {type === "sell" && (
+                    <div className="space-y-8">
+                      <h2 className="text-xl font-semibold tracking-tight">Network Selection</h2>
+                      <FormField
+                        control={form.control}
+                        name="network"
+                        render={({ field }) => (
+                          <FormItem className="space-y-6">
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                className="space-y-4"
+                              >
+                                <Card className="border bg-card/50">
+                                  <CardContent className="p-6">
+                                    <div className="space-y-4">
+                                      <FormItem className="flex items-center space-x-3">
+                                        <FormControl>
+                                          <RadioGroupItem value="trc20" />
+                                        </FormControl>
+                                        <FormLabel className="text-sm font-medium">
+                                          TRC20 Network
+                                        </FormLabel>
+                                      </FormItem>
+                                      {field.value === "trc20" && (
+                                        <div className="ml-7 text-sm bg-muted/50 p-4 rounded-md">
+                                          <div className="flex items-center justify-between">
+                                            <p className="font-mono break-all mr-2">
+                                              {paymentSettings?.usdtAddressTRC20}
+                                            </p>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="shrink-0"
+                                              onClick={() =>
+                                                copyToClipboard(
+                                                  paymentSettings?.usdtAddressTRC20 || "",
+                                                  "trc20",
+                                                )
+                                              }
+                                            >
+                                              {copyingField === "trc20" ? (
+                                                <Check className="h-4 w-4" />
+                                              ) : (
+                                                <Copy className="h-4 w-4" />
+                                              )}
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                <Card className="border bg-card/50">
+                                  <CardContent className="p-6">
+                                    <div className="space-y-4">
+                                      <FormItem className="flex items-center space-x-3">
+                                        <FormControl>
+                                          <RadioGroupItem value="bep20" />
+                                        </FormControl>
+                                        <FormLabel className="text-sm font-medium">
+                                          BEP20 Network
+                                        </FormLabel>
+                                      </FormItem>
+                                      {field.value === "bep20" && (
+                                        <div className="ml-7 text-sm bg-muted/50 p-4 rounded-md">
+                                          <div className="flex items-center justify-between">
+                                            <p className="font-mono break-all mr-2">
+                                              {paymentSettings?.usdtAddressBEP20}
+                                            </p>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="shrink-0"
+                                              onClick={() =>
+                                                copyToClipboard(
+                                                  paymentSettings?.usdtAddressBEP20 || "",
+                                                  "bep20",
+                                                )
+                                              }
+                                            >
+                                              {copyingField === "bep20" ? (
+                                                <Check className="h-4 w-4" />
+                                              ) : (
+                                                <Copy className="h-4 w-4" />
+                                              )}
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </RadioGroup>
+                            </FormControl>
+                            <FormDescription className="text-sm text-muted-foreground">
+                              Select the blockchain network for your USDT transaction
+                            </FormDescription>
+                            <FormMessage className="text-sm" />
+                          </FormItem>
                         )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                      />
+                    </div>
+                  )}
 
-                {/* Submit Button */}
-                <div className="pt-4">
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="w-full text-base font-medium h-12"
-                    disabled={isUploading || tradeMutation.isPending}
-                  >
-                    {isUploading ? (
-                      <>
-                        <Upload className="mr-2 h-5 w-5 animate-bounce" />
-                        Uploading...
-                      </>
-                    ) : tradeMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      `Submit ${type === "buy" ? "Buy" : "Sell"} Order`
-                    )}
-                  </Button>
-                </div>
-              </>
-            )}
-          </form>
-        </Form>
-      </Tabs>
+                  {/* Payment Method Selection for Buy */}
+                  {type === "buy" && (
+                    <div className="space-y-8">
+                      <h2 className="text-xl font-semibold tracking-tight">Payment Method</h2>
+                      <Card className="border bg-card/50">
+                        <CardContent className="p-6">
+                          <RadioGroup
+                            defaultValue="cliq"
+                            className="space-y-6"
+                            value={paymentMethod}
+                            onValueChange={(value: "cliq" | "wallet") =>
+                              setPaymentMethod(value)
+                            }
+                          >
+                            {paymentSettings?.cliqAlias && (
+                              <div className="space-y-4">
+                                <FormItem className="flex items-center space-x-3">
+                                  <FormControl>
+                                    <RadioGroupItem value="cliq" />
+                                  </FormControl>
+                                  <FormLabel className="text-sm font-medium">
+                                    CliQ Payment
+                                  </FormLabel>
+                                </FormItem>
+                                {paymentMethod === "cliq" && (
+                                  <div className="ml-7 text-sm bg-muted/50 p-4 rounded-md space-y-3">
+                                    <div className="flex items-center justify-between">
+                                      <p className="truncate mr-2">
+                                        <span className="text-muted-foreground">
+                                          Cliq Alias:
+                                        </span>{" "}
+                                        {paymentSettings.cliqAlias}
+                                      </p>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="shrink-0"
+                                        onClick={() =>
+                                          copyToClipboard(
+                                            paymentSettings.cliqAlias,
+                                            "cliqAlias",
+                                          )
+                                        }
+                                      >
+                                        {copyingField === "cliqAlias" ? (
+                                          <Check className="h-4 w-4" />
+                                        ) : (
+                                          <Copy className="h-4 w-4" />
+                                        )}
+                                      </Button>
+                                    </div>
+                                    <p>
+                                      <span className="text-muted-foreground">
+                                        Bank:
+                                      </span>{" "}
+                                      {paymentSettings.cliqBankName}
+                                    </p>
+                                    <p>
+                                      <span className="text-muted-foreground">
+                                        Account Holder:
+                                      </span>{" "}
+                                      {paymentSettings.cliqAccountHolder}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {paymentSettings?.mobileWallet && (
+                              <div className="space-y-4">
+                                <FormItem className="flex items-center space-x-3">
+                                  <FormControl>
+                                    <RadioGroupItem value="wallet" />
+                                  </FormControl>
+                                  <FormLabel className="text-sm font-medium">
+                                    Mobile Wallet
+                                  </FormLabel>
+                                </FormItem>
+                                {paymentMethod === "wallet" && (
+                                  <div className="ml-7 text-sm bg-muted/50 p-4 rounded-md space-y-3">
+                                    <div className="flex items-center justify-between">
+                                      <p>
+                                        <span className="text-muted-foreground">
+                                          Number:
+                                        </span>{" "}
+                                        {paymentSettings.mobileWallet}
+                                      </p>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="shrink-0"
+                                        onClick={() =>
+                                          copyToClipboard(
+                                            paymentSettings.mobileWallet,
+                                            "mobileWallet",
+                                          )
+                                        }
+                                      >
+                                        {copyingField === "mobileWallet" ? (
+                                          <Check className="h-4 w-4" />
+                                        ) : (
+                                          <Copy className="h-4 w-4" />
+                                        )}
+                                      </Button>
+                                    </div>
+                                    <p>
+                                      <span className="text-muted-foreground">
+                                        Wallet Type:
+                                      </span>{" "}
+                                      {paymentSettings.walletType}
+                                    </p>
+                                    <p>
+                                      <span className="text-muted-foreground">
+                                        Holder Name:
+                                      </span>{" "}
+                                      {paymentSettings.walletHolderName}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </RadioGroup>
+                        </CardContent>
+                      </Card>
+                      <FormDescription className="text-sm text-muted-foreground">
+                        Choose how you'd like to make your payment
+                      </FormDescription>
+                    </div>
+                  )}
+
+                  {/* Payment Proof Upload Section */}
+                  <div className="space-y-8">
+                    <h2 className="text-xl font-semibold tracking-tight">Payment Proof</h2>
+                    <Card className="border bg-card/50">
+                      <CardContent className="p-6">
+                        <div className="space-y-6">
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/jpg"
+                            onChange={handleFileChange}
+                            className="hidden"
+                            id="payment-proof"
+                          />
+                          <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                            onClick={() => document.getElementById("payment-proof")?.click()}
+                          >
+                            <Upload className="h-10 w-10 mb-4 text-muted-foreground" />
+                            <p className="text-base text-center">
+                              Upload payment confirmation
+                              <br />
+                              <span className="text-sm text-muted-foreground mt-1 block">
+                                Click to upload a JPG or PNG image (max 5MB)
+                              </span>
+                            </p>
+                          </div>
+                          {file && (
+                            <div className="text-sm">
+                              <p className="font-medium mb-2">Selected file:</p>
+                              <p className="text-muted-foreground">{file.name}</p>
+                              {uploadProgress > 0 && (
+                                <Progress value={uploadProgress} className="mt-3" />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="pt-6">
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="w-full text-base font-medium h-12"
+                      disabled={isUploading || tradeMutation.isPending}
+                    >
+                      {isUploading ? (
+                        <>
+                          <Upload className="mr-2 h-5 w-5 animate-bounce" />
+                          Uploading...
+                        </>
+                      ) : tradeMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        `Submit ${type === "buy" ? "Buy" : "Sell"} Order`
+                      )}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </form>
+          </Form>
+        </Tabs>
+      </div>
     </div>
   );
 }
