@@ -469,7 +469,8 @@ export default function TradeForm() {
   const isUploading = tradeMutation.isPending && uploadProgress > 0;
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-6">
+      {/* Trade Type Selection */}
       <Tabs
         defaultValue="buy"
         onValueChange={(value) => form.setValue("type", value)}
@@ -485,7 +486,7 @@ export default function TradeForm() {
         </TabsList>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mt-6">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -494,33 +495,29 @@ export default function TradeForm() {
               <>
                 {/* Warning Alerts */}
                 {type === "sell" && !hasUsdtAddress && (
-                  <Alert variant="destructive">
-                    <AlertDescription className="text-sm">
-                      Please set your CliQ account details in settings before
-                      selling
+                  <Alert className="bg-destructive/10 text-destructive border-none">
+                    <AlertDescription>
+                      Please set your USDT wallet address in settings before selling
                     </AlertDescription>
                   </Alert>
                 )}
                 {type === "buy" && !hasCliqSettings && (
-                  <Alert variant="destructive">
-                    <AlertDescription className="text-sm">
-                      Please set your USDT wallet address in settings before
-                      buying
+                  <Alert className="bg-destructive/10 text-destructive border-none">
+                    <AlertDescription>
+                      Please set your CliQ account details in settings before buying
                     </AlertDescription>
                   </Alert>
                 )}
 
-                {/* Amount Field Group */}
+                {/* Amount Input Section */}
                 <div className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-base font-semibold">
-                          Amount
-                        </FormLabel>
-                        <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Enter Amount</h3>
+                    <FormField
+                      control={form.control}
+                      name="amount"
+                      render={({ field }) => (
+                        <FormItem className="space-y-4">
                           <RadioGroup
                             value={currencyBasis}
                             onValueChange={(value: "native" | "foreign") =>
@@ -555,15 +552,15 @@ export default function TradeForm() {
                               className="text-base"
                             />
                           </FormControl>
-                        </div>
-                        <FormDescription className="text-sm text-muted-foreground">
-                          Enter the amount you want to {type} in{" "}
-                          {getCurrentCurrencyLabel()}
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormDescription>
+                            Enter the amount you want to {type} in{" "}
+                            {getCurrentCurrencyLabel()}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   {/* Exchange Rate Summary */}
                   <Card className="border bg-card/50">
@@ -571,8 +568,7 @@ export default function TradeForm() {
                       <div className="flex flex-wrap justify-between gap-2 text-sm">
                         <span className="font-medium">Exchange Rate</span>
                         <span className="font-mono">
-                          1 USDT ={" "}
-                          {currentRate ? currentRate.toFixed(2) : "0.00"} JOD
+                          1 USDT = {currentRate ? currentRate.toFixed(2) : "0.00"} JOD
                         </span>
                       </div>
                       {amount && (
@@ -585,11 +581,7 @@ export default function TradeForm() {
                           </div>
                           <div className="flex flex-wrap justify-between gap-2 text-xs sm:text-sm text-muted-foreground">
                             <span>
-                              Commission (
-                              {currentCommission
-                                ? currentCommission.toFixed(2)
-                                : "0.00"}
-                              %)
+                              Commission ({currentCommission ? currentCommission.toFixed(2) : "0.00"}%)
                             </span>
                             <span className="font-mono">{commission}</span>
                           </div>
@@ -616,14 +608,12 @@ export default function TradeForm() {
                 {/* Network Selection for Sell */}
                 {type === "sell" && (
                   <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Select Network</h3>
                     <FormField
                       control={form.control}
                       name="network"
                       render={({ field }) => (
                         <FormItem className="space-y-4">
-                          <FormLabel className="text-base font-semibold">
-                            Select Network
-                          </FormLabel>
                           <FormControl>
                             <RadioGroup
                               onValueChange={field.onChange}
@@ -653,8 +643,7 @@ export default function TradeForm() {
                                             className="shrink-0"
                                             onClick={() =>
                                               copyToClipboard(
-                                                paymentSettings?.usdtAddressTRC20 ||
-                                                  "",
+                                                paymentSettings?.usdtAddressTRC20 || "",
                                                 "trc20",
                                               )
                                             }
@@ -695,8 +684,7 @@ export default function TradeForm() {
                                             className="shrink-0"
                                             onClick={() =>
                                               copyToClipboard(
-                                                paymentSettings?.usdtAddressBEP20 ||
-                                                  "",
+                                                paymentSettings?.usdtAddressBEP20 || "",
                                                 "bep20",
                                               )
                                             }
@@ -725,9 +713,7 @@ export default function TradeForm() {
                 {/* Payment Method Selection for Buy */}
                 {type === "buy" && (
                   <div className="space-y-4">
-                    <h3 className="text-base font-semibold">
-                      Select Payment Method
-                    </h3>
+                    <h3 className="text-lg font-semibold">Payment Method</h3>
                     <Card className="border bg-card/50">
                       <CardContent className="p-4">
                         <RadioGroup
@@ -851,42 +837,51 @@ export default function TradeForm() {
                   </div>
                 )}
 
-                {/* Payment Proof Upload */}
+                {/* Payment Proof Upload Section */}
                 <div className="space-y-4">
-                  <div className="flex flex-col gap-2">
-                    <h3 className="text-base font-semibold">Payment Proof</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Upload a screenshot or photo of your payment confirmation
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Input
-                      type="file"
-                      onChange={handleFileChange}
-                      accept="image/jpeg,image/png,image/jpg"
-                      className="text-sm file:text-sm"
-                    />
-                    {uploadProgress > 0 && (
-                      <Progress value={uploadProgress} className="w-[100px]" />
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Supported formats: JPG, PNG (Max size: 5MB)
-                  </p>
+                  <h3 className="text-lg font-semibold">Payment Proof</h3>
+                  <Card className="border bg-card/50">
+                    <CardContent className="p-4">
+                      <div className="space-y-4">
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/jpg"
+                          onChange={handleFileChange}
+                          className="hidden"
+                          id="payment-proof"
+                        />
+                        <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                          onClick={() => document.getElementById("payment-proof")?.click()}
+                        >
+                          <Upload className="h-8 w-8 mb-2 text-muted-foreground" />
+                          <p className="text-sm text-center text-muted-foreground">
+                            Click to upload payment proof
+                            <br />
+                            <span className="text-xs">
+                              JPG or PNG, max 5MB
+                            </span>
+                          </p>
+                        </div>
+                        {file && (
+                          <div className="text-sm">
+                            <p className="font-medium mb-2">Selected file:</p>
+                            <p className="text-muted-foreground">{file.name}</p>
+                            {uploadProgress > 0 && (
+                              <Progress value={uploadProgress} className="mt-2" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  size="lg"
-                  className="w-full font-medium bg-primary hover:bg-primary/90"
-                  disabled={isUploading || tradeMutation.isPending || !amount}
+                  className="w-full"
+                  disabled={isUploading || tradeMutation.isPending}
                 >
-                  {isUploading ? (
-                    <Upload className="mr-2 h-4 w-4 animate-bounce" />
-                  ) : tradeMutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
                   {isUploading
                     ? "Uploading..."
                     : tradeMutation.isPending
