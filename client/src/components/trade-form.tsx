@@ -479,13 +479,27 @@ export default function TradeForm() {
           className="w-full"
         >
           <TabsList className="grid w-full grid-cols-2 px-1 py-[3px] bg-muted/50 rounded-lg">
-            <TabsTrigger value="buy" className="text-base rounded-md data-[state=active]:bg-background">
+            <TabsTrigger
+              value="buy"
+              className="text-base rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
+            >
               Buy USDT
             </TabsTrigger>
-            <TabsTrigger value="sell" className="text-base rounded-md data-[state=active]:bg-background">
+            <TabsTrigger
+              value="sell"
+              className="text-base rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary"
+            >
               Sell USDT
             </TabsTrigger>
           </TabsList>
+
+          <div className="mt-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              {type === "buy"
+                ? "You're buying USDT with JOD"
+                : "You're selling USDT for JOD"}
+            </p>
+          </div>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10 mt-8">
