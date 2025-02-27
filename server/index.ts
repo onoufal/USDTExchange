@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { errorHandler, notFoundHandler } from "./middleware/error-handler";
+import { logger } from "./utils/logger";
 
 const app = express();
 
@@ -29,21 +31,16 @@ app.use((req, res, next) => {
   res.on("finish", () => {
     const duration = Date.now() - start;
     if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      log(logLine);
+      logger.info({
+        method: req.method,
+        path,
+        statusCode: res.statusCode,
+        duration: `${duration}ms`
+      }, `${req.method} ${path}`);
     }
   });
 
   next();
-});
-
-// Error handling middleware
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error("Error occurred:", err);
-  const status = err.status || err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
-  log(`Error: ${err.stack}`);
-  res.status(status).json({ message });
 });
 
 (async () => {
@@ -57,24 +54,31 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       serveStatic(app);
     }
 
+    // Add 404 handler after all routes
+    app.use(notFoundHandler);
+
+    // Add error handler last
+    app.use(errorHandler);
+
     const port = process.env.PORT || 5000;
-    server.listen(port, "0.0.0.0", () => {
-      log(`Server is running on port ${port}`);
+    server.listen(port, () => {
+      logger.info(`Server is running on port ${port}`);
     });
 
     // Handle server errors
     server.on('error', (error: any) => {
       if (error.syscall !== 'listen') {
+        logger.error({ err: error }, 'Server error occurred');
         throw error;
       }
 
       switch (error.code) {
         case 'EACCES':
-          console.error(`Port ${port} requires elevated privileges`);
+          logger.error(`Port ${port} requires elevated privileges`);
           process.exit(1);
           break;
         case 'EADDRINUSE':
-          console.error(`Port ${port} is already in use`);
+          logger.error(`Port ${port} is already in use`);
           process.exit(1);
           break;
         default:
@@ -83,7 +87,7 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     });
 
   } catch (error) {
-    console.error("Failed to start server:", error);
+    logger.error({ err: error }, 'Failed to start server');
     process.exit(1);
   }
 })();
