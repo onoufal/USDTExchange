@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { JORDANIAN_BANKS, type UpdateUserCliq } from "@shared/schema";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, AlertCircle } from "lucide-react";
 import { z } from "zod";
@@ -83,8 +82,8 @@ export default function CliqSettings() {
     defaultValues: {
       bankName: user?.bankName as (typeof JORDANIAN_BANKS)[number] || JORDANIAN_BANKS[0],
       cliqType: user?.cliqType as "alias" | "number" || "alias",
-      cliqAlias: user?.cliqAlias || "",
-      cliqNumber: user?.cliqNumber || "",
+      cliqAlias: user?.cliqAlias || null,
+      cliqNumber: user?.cliqNumber || null,
       accountHolderName: user?.accountHolderName || user?.fullName || "",
     },
     mode: "all"
@@ -92,7 +91,7 @@ export default function CliqSettings() {
 
   const mutation = useMutation({
     mutationFn: async (data: UpdateUserCliq) => {
-      const res = await apiRequest("POST", "/api/settings/cliq", data);
+      const res = await apiRequest("POST", "/api/user/settings/cliq", data);
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || "Failed to save CliQ settings");
@@ -121,10 +120,11 @@ export default function CliqSettings() {
       bankName: data.bankName,
       cliqType: data.cliqType,
       accountHolderName: data.accountHolderName,
-      cliqAlias: data.cliqType === "alias" ? data.cliqAlias || undefined : undefined,
-      cliqNumber: data.cliqType === "number" ? data.cliqNumber || undefined : undefined,
+      cliqAlias: data.cliqType === "alias" ? data.cliqAlias || null : null,
+      cliqNumber: data.cliqType === "number" ? data.cliqNumber || null : null,
     };
 
+    console.log('Submitting CliQ settings:', submitData);
     mutation.mutate(submitData);
   };
 
@@ -254,6 +254,7 @@ export default function CliqSettings() {
                     <FormControl>
                       <Input
                         {...field}
+                        value={field.value || ""}
                         placeholder="Enter your CliQ alias (e.g., JOHN123)"
                         onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                         className={`
@@ -289,6 +290,7 @@ export default function CliqSettings() {
                     <FormControl>
                       <Input
                         {...field}
+                        value={field.value || ""}
                         placeholder="009627XXXXXXXX"
                         className={`
                           h-11 text-base font-mono
