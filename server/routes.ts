@@ -399,19 +399,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       ws.isAlive = true;
 
+      // Add detailed connection logging
+      logger.debug('WebSocket connection attempt', {
+        headers: req.headers,
+        cookies: req.headers.cookie,
+        origin: req.headers.origin,
+        path: req.url,
+        remoteAddress: req.socket.remoteAddress
+      });
+
       // Parse cookies from request headers
       const cookieHeader = req.headers.cookie;
       if (!cookieHeader) {
-        logger.warn('WebSocket connection attempt without cookies');
+        logger.warn('WebSocket connection attempt without cookies', {
+          headers: req.headers
+        });
         ws.close(1008, 'No session cookie found');
         return;
       }
 
       const cookies = cookie.parse(cookieHeader);
-      const sessionId = cookies['sessionId']; // Match the name we set in auth.ts
+      const sessionId = cookies['sessionId'];
 
       if (!sessionId) {
-        logger.warn('WebSocket connection attempt without session ID');
+        logger.warn('WebSocket connection attempt without session ID', {
+          cookies: cookies
+        });
         ws.close(1008, 'No session ID found');
         return;
       }
@@ -420,16 +433,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const session = await new Promise((resolve) => {
         storage.sessionStore.get(sessionId, (err, session) => {
           if (err) {
-            logger.error({ err }, 'Error retrieving session');
+            logger.error({ err }, 'Error retrieving session', {
+              sessionId: sessionId
+            });
             resolve(null);
             return;
           }
+          logger.debug('Session retrieved', {
+            sessionId: sessionId,
+            session: session
+          });
           resolve(session);
         });
       });
 
       if (!session?.passport?.user) {
-        logger.warn('WebSocket connection attempt with invalid session');
+        logger.warn('WebSocket connection attempt with invalid session', {
+          sessionId: sessionId,
+          session: session
+        });
+        ws.send(JSON.stringify({
+          type: 'error',
+          error: 'authentication_required',
+          message: 'Invalid or expired session'
+        }));
         ws.close(1008, 'Invalid session');
         return;
       }
@@ -472,7 +499,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } catch (error) {
           logger.error({ err: error }, 'Error processing WebSocket message');
           // Send error back to client
-          ws.send(JSON.stringify({ 
+          ws.send(JSON.stringify({
             type: 'error',
             error: 'invalid_message',
             message: 'Failed to process message'
