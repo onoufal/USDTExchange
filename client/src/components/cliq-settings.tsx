@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { JORDANIAN_BANKS, type UpdateUserCliq } from "@shared/schema";
@@ -73,10 +73,6 @@ export default function CliqSettings() {
   const { toast } = useToast();
   const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -91,12 +87,17 @@ export default function CliqSettings() {
 
   const mutation = useMutation({
     mutationFn: async (data: UpdateUserCliq) => {
-      const res = await apiRequest("POST", "/api/user/settings/cliq", data);
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to save CliQ settings");
+      try {
+        const res = await apiRequest("POST", "/api/user/settings/cliq", data);
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({ message: "Failed to save CliQ settings" }));
+          throw new Error(error.message || "Failed to save CliQ settings");
+        }
+        return await res.json();
+      } catch (error) {
+        console.error("CliQ settings mutation error:", error);
+        throw error;
       }
-      return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
@@ -114,8 +115,7 @@ export default function CliqSettings() {
     },
   });
 
-  const onSubmit = (data: FormData) => {
-    // Clean up the data before submitting
+  const onSubmit = async (data: FormData) => {
     const submitData: UpdateUserCliq = {
       bankName: data.bankName,
       cliqType: data.cliqType,
@@ -124,8 +124,12 @@ export default function CliqSettings() {
       cliqNumber: data.cliqType === "number" ? data.cliqNumber || null : null,
     };
 
-    console.log('Submitting CliQ settings:', submitData);
-    mutation.mutate(submitData);
+    try {
+      await mutation.mutateAsync(submitData);
+    } catch (error) {
+      // Error will be handled by mutation's onError
+      console.error("Form submission error:", error);
+    }
   };
 
   return (
@@ -178,12 +182,7 @@ export default function CliqSettings() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
-                    {form.formState.errors.bankName?.message && (
-                      <AlertCircle className="h-4 w-4" />
-                    )}
-                    {form.formState.errors.bankName?.message}
-                  </FormMessage>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -207,34 +206,23 @@ export default function CliqSettings() {
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem
-                            value="alias"
-                            className="h-5 w-5 border-2 transition-all duration-200 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2"
-                          />
+                          <RadioGroupItem value="alias" />
                         </FormControl>
-                        <FormLabel className="text-base font-medium leading-none cursor-pointer select-none">
+                        <FormLabel className="text-base font-medium leading-none cursor-pointer">
                           CliQ Alias
                         </FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem
-                            value="number"
-                            className="h-5 w-5 border-2 transition-all duration-200 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2"
-                          />
+                          <RadioGroupItem value="number" />
                         </FormControl>
-                        <FormLabel className="text-base font-medium leading-none cursor-pointer select-none">
+                        <FormLabel className="text-base font-medium leading-none cursor-pointer">
                           Phone Number
                         </FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>
-                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
-                    {form.formState.errors.cliqType?.message && (
-                      <AlertCircle className="h-4 w-4" />
-                    )}
-                    {form.formState.errors.cliqType?.message}
-                  </FormMessage>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -266,12 +254,7 @@ export default function CliqSettings() {
                         `}
                       />
                     </FormControl>
-                    <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
-                      {form.formState.errors.cliqAlias?.message && (
-                        <AlertCircle className="h-4 w-4" />
-                      )}
-                      {form.formState.errors.cliqAlias?.message}
-                    </FormMessage>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -301,12 +284,7 @@ export default function CliqSettings() {
                         `}
                       />
                     </FormControl>
-                    <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
-                      {form.formState.errors.cliqNumber?.message && (
-                        <AlertCircle className="h-4 w-4" />
-                      )}
-                      {form.formState.errors.cliqNumber?.message}
-                    </FormMessage>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -336,12 +314,7 @@ export default function CliqSettings() {
                       `}
                     />
                   </FormControl>
-                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
-                    {form.formState.errors.accountHolderName?.message && (
-                      <AlertCircle className="h-4 w-4" />
-                    )}
-                    {form.formState.errors.accountHolderName?.message}
-                  </FormMessage>
+                  <FormMessage />
                 </FormItem>
               )}
             />
