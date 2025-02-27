@@ -1,5 +1,6 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { setupAuth } from "./auth";
 import multer from "multer";
 import { z } from "zod";
@@ -406,5 +407,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+
+  // Initialize WebSocket server on a specific path
+  const wss = new WebSocketServer({ 
+    server: httpServer, 
+    path: '/ws',
+    clientTracking: true,
+    perMessageDeflate: {
+      zlibDeflateOptions: {
+        chunkSize: 1024,
+        memLevel: 7,
+        level: 3
+      },
+      zlibInflateOptions: {
+        chunkSize: 10 * 1024
+      },
+      clientNoContextTakeover: true, 
+      serverNoContextTakeover: true, 
+      serverMaxWindowBits: 10, 
+      concurrencyLimit: 10, 
+      threshold: 1024 
+    }
+  });
+
+  // Connection handling
+  wss.on('connection', (ws: WebSocket, req: Request) => {
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    console.log(`WebSocket connection established from ${clientIp}`);
+
+    // Set up ping-pong heartbeat
+    ws.isAlive = true;
+    ws.on('pong', () => {
+      ws.isAlive = true;
+      console.log(`Received pong from client ${clientIp}`);
+    });
+
+    // Handle incoming messages
+    ws.on('message', (data: Buffer) => {
+      try {
+        console.log(`Received message from ${clientIp}:`, data.toString());
+        // Handle message processing here
+        ws.send(JSON.stringify({ status: 'received' }));
+      } catch (error) {
+        console.error('Error processing message:', error);
+        ws.send(JSON.stringify({ error: 'Failed to process message' }));
+      }
+    });
+
+    // Handle connection close
+    ws.on('close', (code: number, reason: Buffer) => {
+      console.log(`Client ${clientIp} disconnected:`, {
+        code,
+        reason: reason.toString()
+      });
+    });
+
+    // Handle errors
+    ws.on('error', (error: Error) => {
+      console.error(`WebSocket error for client ${clientIp}:`, {
+        message: error.message,
+        stack: error.stack
+      });
+    });
+
+    // Send initial connection success message
+    ws.send(JSON.stringify({ status: 'connected' }));
+  });
+
+  // Implement heartbeat interval
+  const heartbeatInterval = setInterval(() => {
+    wss.clients.forEach((ws: WebSocket) => {
+      if (ws.isAlive === false) {
+        console.log('Terminating inactive connection');
+        return ws.terminate();
+      }
+
+      ws.isAlive = false;
+      ws.ping(() => {});
+    });
+  }, 30000); // Check every 30 seconds
+
+  // Clean up on server close
+  wss.on('close', () => {
+    clearInterval(heartbeatInterval);
+  });
+
+  // Add error handler for the WebSocket server
+  wss.on('error', (error: Error) => {
+    console.error('WebSocket server error:', {
+      message: error.message,
+      stack: error.stack
+    });
+  });
+
   return httpServer;
 }
