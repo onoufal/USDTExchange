@@ -63,16 +63,16 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
 export function setupAuth(app: Express): void {
   // Configure session middleware with security best practices
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET,
-    name: 'sessionId', // Change from default 'connect.sid'
+    secret: process.env.SESSION_SECRET!,
+    name: 'sessionId',
     resave: false,
     saveUninitialized: false,
-    proxy: true, // Trust the reverse proxy
+    proxy: true,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // Force HTTPS in production
-      httpOnly: true, // Prevent XSS
-      sameSite: 'lax', // CSRF protection
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
       path: '/',
     },
     store: storage.sessionStore
@@ -80,19 +80,13 @@ export function setupAuth(app: Express): void {
 
   // Security headers
   app.use((req, res, next) => {
-    // Prevent clickjacking
     res.setHeader('X-Frame-Options', 'DENY');
-    // Enable XSS filter
     res.setHeader('X-XSS-Protection', '1; mode=block');
-    // Prevent MIME type sniffing
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    // Strict Transport Security
     if (process.env.NODE_ENV === 'production') {
       res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     }
-    // Referrer Policy
     res.setHeader('Referrer-Policy', 'same-origin');
-    // Content Security Policy - Allow WebSocket connections
     res.setHeader(
       'Content-Security-Policy',
       "default-src 'self'; connect-src 'self' ws: wss:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
@@ -159,10 +153,10 @@ export function setupAuth(app: Express): void {
         return done(null, false);
       }
 
-      logger.debug('User deserialized successfully with fresh data', { 
+      logger.debug('User deserialized successfully with fresh data', {
         userId: id,
         hasCliqNumber: !!freshUser.cliqNumber,
-        updatedAt: freshUser.updatedAt 
+        updatedAt: freshUser.updatedAt
       });
       done(null, freshUser);
     } catch (err) {

@@ -399,7 +399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       ws.isAlive = true;
 
-      // Add detailed connection logging
+      // Enhanced connection logging
       logger.debug('WebSocket connection attempt', {
         headers: req.headers,
         cookies: req.headers.cookie,
@@ -412,8 +412,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cookieHeader = req.headers.cookie;
       if (!cookieHeader) {
         logger.warn('WebSocket connection attempt without cookies', {
-          headers: req.headers
+          headers: req.headers,
+          remoteAddress: req.socket.remoteAddress
         });
+        ws.send(JSON.stringify({
+          type: 'error',
+          error: 'authentication_required',
+          message: 'No session cookie found'
+        }));
         ws.close(1008, 'No session cookie found');
         return;
       }
@@ -423,25 +429,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!sessionId) {
         logger.warn('WebSocket connection attempt without session ID', {
-          cookies: cookies
+          cookies,
+          remoteAddress: req.socket.remoteAddress
         });
+        ws.send(JSON.stringify({
+          type: 'error',
+          error: 'authentication_required',
+          message: 'No session ID found'
+        }));
         ws.close(1008, 'No session ID found');
         return;
       }
 
-      // Get session from store using the imported storage instance
+      // Enhanced session retrieval logging and handling
       const session = await new Promise((resolve) => {
         storage.sessionStore.get(sessionId, (err, session) => {
           if (err) {
             logger.error({ err }, 'Error retrieving session', {
-              sessionId: sessionId
+              sessionId,
+              remoteAddress: req.socket.remoteAddress
             });
             resolve(null);
             return;
           }
           logger.debug('Session retrieved', {
-            sessionId: sessionId,
-            session: session
+            sessionId,
+            hasSession: !!session,
+            hasPassport: !!session?.passport,
+            userId: session?.passport?.user
           });
           resolve(session);
         });
@@ -449,8 +464,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!session?.passport?.user) {
         logger.warn('WebSocket connection attempt with invalid session', {
-          sessionId: sessionId,
-          session: session
+          sessionId,
+          hasSession: !!session,
+          remoteAddress: req.socket.remoteAddress
         });
         ws.send(JSON.stringify({
           type: 'error',
@@ -461,10 +477,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
 
+      // Store user ID and authenticate WebSocket
       ws.userId = session.passport.user;
       logger.info('Authenticated WebSocket connection established', {
         userId: ws.userId,
-        sessionId: sessionId
+        sessionId,
+        remoteAddress: req.socket.remoteAddress
       });
 
       // Handle pong responses
@@ -472,39 +490,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ws.isAlive = true;
       });
 
-      // Handle errors
-      ws.on('error', (error) => {
-        logger.error({ err: error }, 'WebSocket error occurred');
-      });
-
-      // Handle connection close
-      ws.on('close', () => {
-        logger.info('WebSocket client disconnected', { userId: ws.userId });
-      });
-
-      // Handle messages
+      // Handle client messages
       ws.on('message', (data: Buffer) => {
         try {
           const message = JSON.parse(data.toString());
           logger.debug('Received WebSocket message', { userId: ws.userId, message });
 
-          // Process message based on type
           switch (message.type) {
             case 'ping':
               ws.send(JSON.stringify({ type: 'pong' }));
               break;
             default:
               logger.warn('Unknown message type received', { type: message.type });
-              // Send error back to client
               ws.send(JSON.stringify({
                 type: 'error',
                 error: 'invalid_message',
-                message: 'Failed to process message'
+                message: 'Unknown message type'
               }));
           }
         } catch (error) {
           logger.error({ err: error }, 'Error processing WebSocket message');
         }
+      });
+
+      // Handle connection close
+      ws.on('close', () => {
+        logger.info('WebSocket client disconnected', { userId: ws.userId });
       });
 
     } catch (error) {

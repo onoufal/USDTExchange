@@ -18,6 +18,8 @@ export function initializeWebSocket(): WebSocket {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   const wsUrl = `${protocol}//${window.location.host}/ws`;
 
+  logger.debug('Attempting WebSocket connection', { wsUrl });
+
   socket = new WebSocket(wsUrl);
 
   socket.addEventListener('open', () => {
@@ -35,17 +37,20 @@ export function initializeWebSocket(): WebSocket {
       wasClean: event.wasClean
     });
 
-    // Handle authentication failures specially
+    // Stop reconnection attempts on authentication failures
     if (event.code === 1008) {
-      logger.error('Authentication failed for WebSocket connection:', event.reason);
-      // Don't retry on auth failures until the user re-authenticates
+      logger.error('Authentication failed for WebSocket connection', {
+        reason: event.reason
+      });
       socket = null;
       return;
     }
 
     if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
       const delay = getReconnectDelay();
-      logger.info(`Attempting to reconnect in ${delay}ms`, { attempt: reconnectAttempts + 1 });
+      logger.info(`Attempting to reconnect in ${delay}ms`, {
+        attempt: reconnectAttempts + 1
+      });
       setTimeout(() => {
         reconnectAttempts++;
         initializeWebSocket();
@@ -60,20 +65,23 @@ export function initializeWebSocket(): WebSocket {
     logger.error('WebSocket error:', error);
   });
 
-  // Handle incoming messages
   socket.addEventListener('message', (event) => {
     try {
       const message = JSON.parse(event.data);
       logger.debug('Received message:', message);
 
-      if (message.type === 'pong') {
-        logger.debug('Received pong response');
-      } else if (message.type === 'error') {
-        logger.error('Server error:', message.error);
-        // Handle specific error types
-        if (message.error === 'authentication_required') {
-          socket?.close(1008, 'Authentication required');
-        }
+      switch (message.type) {
+        case 'pong':
+          logger.debug('Received pong response');
+          break;
+        case 'error':
+          logger.error('Server error:', message.error);
+          if (message.error === 'authentication_required') {
+            socket?.close(1008, 'Authentication required');
+          }
+          break;
+        default:
+          logger.warn('Unknown message type:', message.type);
       }
     } catch (error) {
       logger.error('Failed to parse WebSocket message:', error);

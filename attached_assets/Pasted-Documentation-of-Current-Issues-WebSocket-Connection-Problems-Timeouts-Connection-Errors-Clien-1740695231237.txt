@@ -30,6 +30,6 @@ Debug logs from the /api/trade endpoint show that when a sell order is submitted
 This documentation should help us understand the scope of the problems with WebSocket connections and authentication. It will also guide us in developing a troubleshooting plan to:
 
 Investigate network configurations and server initialization for WebSocket stability.
-Examine Passport’s session management and deserializeUser function to ensure that updated user details are correctly loaded into req.user.
+Examine Passport's session management and deserializeUser function to ensure that updated user details are correctly loaded into req.user.
 Determine whether to temporarily simplify the authentication mechanism to stabilize sessions before adding more complex WebSocket features.
 Please review this documentation and let me know if we should proceed with a detailed troubleshooting plan based on these observations.
