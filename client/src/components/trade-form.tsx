@@ -614,6 +614,38 @@ export default function TradeForm() {
                                 {finalAmount} {getEquivalentCurrencyLabel()}
                               </span>
                             </div>
+
+                            {/* Summary Message */}
+                            <div className="mt-4 pt-3 border-t text-center">
+                              <p className="text-sm">
+                                {type === "buy" ? (
+                                  currencyBasis === "foreign" ? (
+                                    <>
+                                      You will pay <span className="font-medium">{finalAmount} JOD</span> to receive{" "}
+                                      <span className="font-medium">{amount} USDT</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      You will receive <span className="font-medium">{finalAmount} USDT</span> for{" "}
+                                      <span className="font-medium">{amount} JOD</span>
+                                    </>
+                                  )
+                                ) : currencyBasis === "foreign" ? (
+                                  <>
+                                    You will receive <span className="font-medium">{finalAmount} USDT</span> for{" "}
+                                    <span className="font-medium">{amount} JOD</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    You will receive <span className="font-medium">{finalAmount} JOD</span> for{" "}
+                                    <span className="font-medium">{amount} USDT</span>
+                                  </>
+                                )}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Includes {currentCommission}% commission fee
+                              </p>
+                            </div>
                           </>
                         )}
                       </CardContent>
@@ -902,7 +934,7 @@ export default function TradeForm() {
                     <Button
                       type="submit"
                       size="lg"
-                      className="w-full text-base font-medium h-12"
+                      className="w-full text-base fontmedium h-12"
                       disabled={isUploading || tradeMutation.isPending}
                     >
                       {isUploading ? (
