@@ -370,12 +370,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.file) return res.status(400).json({ message: "No payment proof uploaded" });
 
     try {
-      // Log the current session state at the start of trade
-      console.log('Trade request - Current user session data:', {
+      // Detailed session data logging at the start
+      console.log('Trade request - Initial session data:', {
         userId: req.user.id,
-        cliqType: req.user.cliqType,
-        cliqAlias: req.user.cliqAlias,
-        cliqNumber: req.user.cliqNumber
+        cliqSettings: {
+          type: req.user.cliqType,
+          alias: req.user.cliqAlias,
+          number: req.user.cliqNumber,
+          accountHolder: req.user.accountHolderName,
+          bankName: req.user.bankName
+        },
+        requestType: req.body.type
       });
 
       const schema = z.object({
@@ -401,7 +406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const data = schema.parse(req.body);
 
-      // For sell orders, verify CliQ settings are present
+      // Verify CliQ settings for sell orders
       if (data.type === "sell") {
         if (!req.user.cliqType || (!req.user.cliqAlias && !req.user.cliqNumber)) {
           console.error('Missing CliQ settings for sell order:', {
@@ -414,6 +419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Prepare transaction data
       const transactionData = {
         userId: req.user.id,
         type: data.type,
@@ -430,18 +436,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cliqNumber: data.type === "sell" && req.user.cliqType === "number" ? req.user.cliqNumber : null,
       };
 
-      // Creating transaction with data
-      console.log('Creating transaction with data:', {
+      // Log transaction data before creation
+      console.log('Creating transaction - Data preparation:', {
         ...transactionData,
-        proofOfPayment: '[REDACTED]'
+        proofOfPayment: '[REDACTED]',
+        cliqDetails: {
+          type: transactionData.cliqType,
+          alias: transactionData.cliqAlias,
+          number: transactionData.cliqNumber
+        }
       });
 
       const transaction = await storage.createTransaction(transactionData);
 
-      // Log the created transaction
-      console.log('Created transaction:', {
-        ...transaction,
-        proofOfPayment: '[REDACTED]'
+      // Log created transaction
+      console.log('Transaction created - Final data:', {
+        id: transaction.id,
+        type: transaction.type,
+        cliqDetails: {
+          type: transaction.cliqType,
+          alias: transaction.cliqAlias,
+          number: transaction.cliqNumber
+        }
       });
 
       res.json(transaction);
