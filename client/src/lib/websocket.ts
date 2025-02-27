@@ -35,6 +35,14 @@ export function initializeWebSocket(): WebSocket {
       wasClean: event.wasClean
     });
 
+    // Handle authentication failures specially
+    if (event.code === 1008) {
+      logger.error('Authentication failed for WebSocket connection:', event.reason);
+      // Don't retry on auth failures until the user re-authenticates
+      socket = null;
+      return;
+    }
+
     if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
       const delay = getReconnectDelay();
       logger.info(`Attempting to reconnect in ${delay}ms`, { attempt: reconnectAttempts + 1 });
@@ -60,6 +68,12 @@ export function initializeWebSocket(): WebSocket {
 
       if (message.type === 'pong') {
         logger.debug('Received pong response');
+      } else if (message.type === 'error') {
+        logger.error('Server error:', message.error);
+        // Handle specific error types
+        if (message.error === 'authentication_required') {
+          socket?.close(1008, 'Authentication required');
+        }
       }
     } catch (error) {
       logger.error('Failed to parse WebSocket message:', error);

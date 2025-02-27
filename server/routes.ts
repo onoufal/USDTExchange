@@ -471,6 +471,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         } catch (error) {
           logger.error({ err: error }, 'Error processing WebSocket message');
+          // Send error back to client
+          ws.send(JSON.stringify({ 
+            type: 'error',
+            error: 'invalid_message',
+            message: 'Failed to process message'
+          }));
         }
       });
 
