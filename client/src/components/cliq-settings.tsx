@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { JORDANIAN_BANKS, type UpdateUserCliq } from "@shared/schema";
@@ -26,7 +26,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -40,12 +40,10 @@ const formSchema = z.object({
     .regex(/^[A-Z0-9]*[A-Z]+[A-Z0-9]*$/, "Please use uppercase letters and numbers only")
     .min(3, "Your alias should be at least 3 characters long")
     .max(10, "Your alias cannot be longer than 10 characters")
-    .nullable()
-    .optional(),
+    .nullable(),
   cliqNumber: z.string()
     .regex(/^009627\d{8}$/, "Please enter a valid Jordanian phone number starting with 009627")
-    .nullable()
-    .optional(),
+    .nullable(),
   accountHolderName: z.string()
     .min(3, "Please enter your full name as it appears on your bank account")
     .max(50, "Name cannot exceed 50 characters"),
@@ -73,16 +71,21 @@ export default function CliqSettings() {
   const { toast } = useToast();
   const [isVisible, setIsVisible] = useState(false);
 
+  useEffect(() => {
+    // Add a small delay to ensure smooth animation
+    const timer = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bankName: user?.bankName as (typeof JORDANIAN_BANKS)[number] || JORDANIAN_BANKS[0],
-      cliqType: user?.cliqType as "alias" | "number" || "alias",
+      bankName: (user?.bankName as (typeof JORDANIAN_BANKS)[number]) || JORDANIAN_BANKS[0],
+      cliqType: (user?.cliqType as "alias" | "number") || "alias",
       cliqAlias: user?.cliqAlias || null,
       cliqNumber: user?.cliqNumber || null,
       accountHolderName: user?.accountHolderName || user?.fullName || "",
     },
-    mode: "all"
   });
 
   const mutation = useMutation({
@@ -120,14 +123,13 @@ export default function CliqSettings() {
       bankName: data.bankName,
       cliqType: data.cliqType,
       accountHolderName: data.accountHolderName,
-      cliqAlias: data.cliqType === "alias" ? data.cliqAlias || null : null,
-      cliqNumber: data.cliqType === "number" ? data.cliqNumber || null : null,
+      cliqAlias: data.cliqType === "alias" ? data.cliqAlias : null,
+      cliqNumber: data.cliqType === "number" ? data.cliqNumber : null,
     };
 
     try {
       await mutation.mutateAsync(submitData);
     } catch (error) {
-      // Error will be handled by mutation's onError
       console.error("Form submission error:", error);
     }
   };
@@ -162,15 +164,7 @@ export default function CliqSettings() {
                   </div>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger
-                        className={`
-                          h-11 text-base 
-                          transition-all duration-200
-                          hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2
-                          hover:-translate-y-[1px]
-                          ${form.formState.errors.bankName ? "border-destructive" : ""}
-                        `}
-                      >
+                      <SelectTrigger className="h-11 text-base">
                         <SelectValue placeholder="Choose your bank" />
                       </SelectTrigger>
                     </FormControl>
@@ -245,13 +239,7 @@ export default function CliqSettings() {
                         value={field.value || ""}
                         placeholder="Enter your CliQ alias (e.g., JOHN123)"
                         onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                        className={`
-                          h-11 text-base 
-                          transition-all duration-200
-                          hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2
-                          ${form.formState.errors.cliqAlias ? "border-destructive" : ""}
-                          transform-gpu hover:-translate-y-[1px]
-                        `}
+                        className="h-11 text-base"
                       />
                     </FormControl>
                     <FormMessage />
@@ -275,13 +263,7 @@ export default function CliqSettings() {
                         {...field}
                         value={field.value || ""}
                         placeholder="009627XXXXXXXX"
-                        className={`
-                          h-11 text-base font-mono
-                          transition-all duration-200
-                          hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2
-                          ${form.formState.errors.cliqNumber ? "border-destructive" : ""}
-                          transform-gpu hover:-translate-y-[1px]
-                        `}
+                        className="h-11 text-base font-mono"
                       />
                     </FormControl>
                     <FormMessage />
@@ -305,13 +287,7 @@ export default function CliqSettings() {
                     <Input
                       {...field}
                       placeholder="Enter your full name as shown on bank account"
-                      className={`
-                        h-11 text-base 
-                        transition-all duration-200
-                        hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2
-                        ${form.formState.errors.accountHolderName ? "border-destructive" : ""}
-                        transform-gpu hover:-translate-y-[1px]
-                      `}
+                      className="h-11 text-base"
                     />
                   </FormControl>
                   <FormMessage />
@@ -322,13 +298,7 @@ export default function CliqSettings() {
             <div className="pt-4 border-t">
               <Button
                 type="submit"
-                className={`
-                  w-full h-11 text-base font-medium 
-                  transition-all duration-200
-                  hover:bg-primary/90 hover:-translate-y-[1px]
-                  focus-visible:ring-2 focus-visible:ring-offset-2
-                  disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
-                `}
+                className="w-full h-11 text-base font-medium"
                 disabled={mutation.isPending}
               >
                 {mutation.isPending ? (
