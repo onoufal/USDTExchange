@@ -63,12 +63,7 @@ type FormData = z.infer<typeof formSchema>;
 export default function CliqSettings() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
+  const [isVisible, setIsVisible] = useState(true);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -83,7 +78,7 @@ export default function CliqSettings() {
 
   const mutation = useMutation({
     mutationFn: async (formData: FormData) => {
-      const submitData = {
+      const submitData: UpdateUserCliq = {
         bankName: formData.bankName,
         cliqType: formData.cliqType,
         accountHolderName: formData.accountHolderName,
@@ -91,34 +86,23 @@ export default function CliqSettings() {
         cliqNumber: formData.cliqType === "number" ? formData.cliqNumber : null,
       };
 
-      const response = await fetch("/api/user/settings/cliq", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submitData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({
-          message: "Failed to save CliQ settings",
-        }));
-        throw new Error(errorData.message || "Failed to save CliQ settings");
+      const res = await apiRequest("POST", "/api/user/settings/cliq", submitData);
+      if (!res.ok) {
+        throw new Error("Failed to save CliQ settings");
       }
-
-      return response.json();
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
-        title: "Settings Saved Successfully",
-        description: "Your CliQ payment details have been updated",
+        title: "Settings Saved",
+        description: "Your CliQ settings have been updated successfully",
       });
     },
-    onError: (error: Error) => {
+    onError: () => {
       toast({
-        title: "Unable to Save Changes",
-        description: error.message,
+        title: "Error",
+        description: "Failed to save CliQ settings. Please try again.",
         variant: "destructive",
       });
     },
@@ -133,7 +117,7 @@ export default function CliqSettings() {
   };
 
   return (
-    <Card className={`border bg-card shadow-sm w-full transition-all duration-300 ease-out ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+    <Card className="border bg-card shadow-sm w-full">
       <CardHeader className="space-y-2">
         <CardTitle className="text-2xl font-semibold tracking-tight">CliQ Account Settings</CardTitle>
         <CardDescription>
