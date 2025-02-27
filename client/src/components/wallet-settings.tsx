@@ -51,32 +51,37 @@ export default function WalletSettings() {
 
   return (
     <Card>
-      <CardHeader className="space-y-1.5">
+      <CardHeader className="space-y-2">
         <CardTitle className="text-2xl font-semibold tracking-tight">USDT Wallet Settings</CardTitle>
-        <CardDescription className="text-sm text-muted-foreground">
-          Set your USDT wallet address where you'll receive USDT from buy orders
+        <CardDescription className="text-base text-muted-foreground">
+          Configure your USDT wallet address to receive cryptocurrency from buy orders. Choose your preferred network and enter your wallet details below.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(data => updateWalletMutation.mutate(data))} className="space-y-6">
+          <form onSubmit={form.handleSubmit(data => updateWalletMutation.mutate(data))} className="space-y-8">
             <FormField
               control={form.control}
               name="usdtNetwork"
               render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel className="text-sm font-medium">USDT Network</FormLabel>
+                <FormItem className="space-y-4">
+                  <div className="space-y-1">
+                    <FormLabel className="text-sm font-semibold">USDT Network</FormLabel>
+                    <FormDescription className="text-sm text-muted-foreground">
+                      Select the blockchain network you'll use for USDT transactions
+                    </FormDescription>
+                  </div>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      className="grid gap-3"
+                      className="grid gap-4"
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
                           <RadioGroupItem value="tron" />
                         </FormControl>
-                        <FormLabel className="text-sm font-medium">
+                        <FormLabel className="text-base font-medium leading-none">
                           Tron (TRC20)
                         </FormLabel>
                       </FormItem>
@@ -84,15 +89,12 @@ export default function WalletSettings() {
                         <FormControl>
                           <RadioGroupItem value="bep20" />
                         </FormControl>
-                        <FormLabel className="text-sm font-medium">
+                        <FormLabel className="text-base font-medium leading-none">
                           BNB Smart Chain (BEP20)
                         </FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>
-                  <FormDescription className="text-sm text-muted-foreground">
-                    Select the blockchain network for your USDT transactions
-                  </FormDescription>
                   <FormMessage className="text-sm font-medium text-destructive animate-in fade-in-50" />
                 </FormItem>
               )}
@@ -102,33 +104,35 @@ export default function WalletSettings() {
               control={form.control}
               name="usdtAddress"
               render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel className="text-sm font-medium">USDT Address</FormLabel>
+                <FormItem className="space-y-4">
+                  <div className="space-y-1">
+                    <FormLabel className="text-sm font-semibold">USDT Address</FormLabel>
+                    <FormDescription className="text-sm text-muted-foreground">
+                      Enter your wallet address carefully. This will be used to receive USDT from all buy orders.
+                    </FormDescription>
+                  </div>
                   <FormControl>
                     <Input 
                       placeholder="Enter your USDT wallet address" 
                       {...field}
-                      className="h-10"
+                      className="h-11 text-base"
                     />
                   </FormControl>
-                  <FormDescription className="text-sm text-muted-foreground">
-                    This address will be used to receive USDT from buy orders
-                  </FormDescription>
                   <FormMessage className="text-sm font-medium text-destructive animate-in fade-in-50" />
                 </FormItem>
               )}
             />
 
-            <div className="pt-2">
+            <div className="pt-4">
               <Button 
                 type="submit" 
-                className="w-full h-10 font-medium transition-colors"
+                className="w-full h-11 text-base font-medium transition-colors"
                 disabled={updateWalletMutation.isPending}
               >
                 {updateWalletMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Saving Changes...
                   </>
                 ) : (
                   "Save Wallet Settings"

@@ -70,14 +70,12 @@ export default function CliqSettings() {
   });
 
   const onSubmit = (data: UpdateUserCliq) => {
-    // Clear the field that's not being used based on cliqType
     if (data.cliqType === "alias") {
-      data.cliqNumber = ""; // Clear number when using alias
+      data.cliqNumber = "";
     } else {
-      data.cliqAlias = ""; // Clear alias when using number
+      data.cliqAlias = "";
     }
 
-    // Validate that at least one of alias or number is set
     if (!data.cliqAlias && !data.cliqNumber) {
       toast({
         title: "Error",
@@ -92,24 +90,29 @@ export default function CliqSettings() {
 
   return (
     <Card>
-      <CardHeader className="space-y-1.5">
+      <CardHeader className="space-y-2">
         <CardTitle className="text-2xl font-semibold tracking-tight">CliQ Account Settings</CardTitle>
-        <CardDescription className="text-sm text-muted-foreground">
-          Configure your CliQ payment details for receiving JOD from USDT sales
+        <CardDescription className="text-base text-muted-foreground">
+          Configure your CliQ payment details to receive JOD payments from USDT sales. Enter your bank information and preferred CliQ identification method below.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               control={form.control}
               name="bankName"
               render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel className="text-sm font-medium">Bank Name</FormLabel>
+                <FormItem className="space-y-4">
+                  <div className="space-y-1">
+                    <FormLabel className="text-sm font-semibold">Bank Name</FormLabel>
+                    <FormDescription className="text-sm text-muted-foreground">
+                      Select your bank from the list of supported Jordanian banks
+                    </FormDescription>
+                  </div>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="h-11">
                         <SelectValue placeholder="Select your bank" />
                       </SelectTrigger>
                     </FormControl>
@@ -130,19 +133,24 @@ export default function CliqSettings() {
               control={form.control}
               name="cliqType"
               render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel className="text-sm font-medium">CliQ Account Type</FormLabel>
+                <FormItem className="space-y-4">
+                  <div className="space-y-1">
+                    <FormLabel className="text-sm font-semibold">CliQ Account Type</FormLabel>
+                    <FormDescription className="text-sm text-muted-foreground">
+                      Choose how you want to receive CliQ payments
+                    </FormDescription>
+                  </div>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
                       value={field.value}
-                      className="grid gap-3"
+                      className="grid gap-4"
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
                           <RadioGroupItem value="alias" />
                         </FormControl>
-                        <FormLabel className="text-sm font-medium">
+                        <FormLabel className="text-base font-medium leading-none">
                           CliQ Alias
                         </FormLabel>
                       </FormItem>
@@ -150,7 +158,7 @@ export default function CliqSettings() {
                         <FormControl>
                           <RadioGroupItem value="number" />
                         </FormControl>
-                        <FormLabel className="text-sm font-medium">
+                        <FormLabel className="text-base font-medium leading-none">
                           CliQ Number
                         </FormLabel>
                       </FormItem>
@@ -166,19 +174,21 @@ export default function CliqSettings() {
                 control={form.control}
                 name="cliqAlias"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel className="text-sm font-medium">CliQ Alias/Username</FormLabel>
+                  <FormItem className="space-y-4">
+                    <div className="space-y-1">
+                      <FormLabel className="text-sm font-semibold">CliQ Alias/Username</FormLabel>
+                      <FormDescription className="text-sm text-muted-foreground">
+                        Your unique CliQ alias for receiving payments. Must contain at least one letter and can include numbers.
+                      </FormDescription>
+                    </div>
                     <FormControl>
                       <Input
                         {...field}
                         placeholder="Enter your CliQ alias"
                         onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                        className="h-10"
+                        className="h-11 text-base"
                       />
                     </FormControl>
-                    <FormDescription className="text-sm text-muted-foreground">
-                      Must contain at least one letter, can include numbers, and not exceed 10 characters
-                    </FormDescription>
                     <FormMessage className="text-sm font-medium text-destructive animate-in fade-in-50" />
                   </FormItem>
                 )}
@@ -188,18 +198,20 @@ export default function CliqSettings() {
                 control={form.control}
                 name="cliqNumber"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel className="text-sm font-medium">CliQ Number</FormLabel>
+                  <FormItem className="space-y-4">
+                    <div className="space-y-1">
+                      <FormLabel className="text-sm font-semibold">CliQ Number</FormLabel>
+                      <FormDescription className="text-sm text-muted-foreground">
+                        Your phone number for receiving CliQ payments. Must start with 009627 followed by 8 digits.
+                      </FormDescription>
+                    </div>
                     <FormControl>
                       <Input 
                         {...field} 
                         placeholder="009627xxxxxxxx" 
-                        className="h-10"
+                        className="h-11 text-base"
                       />
                     </FormControl>
-                    <FormDescription className="text-sm text-muted-foreground">
-                      Format: 009627 followed by 8 digits
-                    </FormDescription>
                     <FormMessage className="text-sm font-medium text-destructive animate-in fade-in-50" />
                   </FormItem>
                 )}
@@ -210,26 +222,31 @@ export default function CliqSettings() {
               control={form.control}
               name="accountHolderName"
               render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel className="text-sm font-medium">Account Holder Name</FormLabel>
+                <FormItem className="space-y-4">
+                  <div className="space-y-1">
+                    <FormLabel className="text-sm font-semibold">Account Holder Name</FormLabel>
+                    <FormDescription className="text-sm text-muted-foreground">
+                      The name associated with your bank account for verification purposes
+                    </FormDescription>
+                  </div>
                   <FormControl>
-                    <Input {...field} className="h-10" />
+                    <Input {...field} className="h-11 text-base" />
                   </FormControl>
                   <FormMessage className="text-sm font-medium text-destructive animate-in fade-in-50" />
                 </FormItem>
               )}
             />
 
-            <div className="pt-2">
+            <div className="pt-4">
               <Button 
                 type="submit" 
-                className="w-full h-10 font-medium transition-colors"
+                className="w-full h-11 text-base font-medium transition-colors"
                 disabled={mutation.isPending}
               >
                 {mutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Saving Changes...
                   </>
                 ) : (
                   "Save CliQ Settings"
