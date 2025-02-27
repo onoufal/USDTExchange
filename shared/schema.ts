@@ -137,6 +137,7 @@ export const updateUserCliqSchema = z.object({
     errorMap: () => ({ message: "Please select either Alias or CliQ number" })
   }),
   cliqAlias: z.string()
+    .nullable()
     .optional()
     .refine(val => !val || /^[A-Z0-9]{1,10}$/.test(val), {
       message: "CliQ alias must not exceed 10 characters and use uppercase letters/numbers"
@@ -145,6 +146,7 @@ export const updateUserCliqSchema = z.object({
       message: "CliQ alias must contain at least one letter"
     }),
   cliqNumber: z.string()
+    .nullable()
     .optional()
     .refine(val => !val || /^009627[0-9]{8}$/.test(val), {
       message: "CliQ number must be in format 009627xxxxxxxx"
