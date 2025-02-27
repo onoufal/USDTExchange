@@ -23,6 +23,9 @@ export function initializeWebSocket(): WebSocket {
   socket.addEventListener('open', () => {
     logger.info('WebSocket connection established');
     reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+
+    // Send initial ping to verify connection
+    sendWebSocketMessage({ type: 'ping' });
   });
 
   socket.addEventListener('close', (event) => {
@@ -47,6 +50,20 @@ export function initializeWebSocket(): WebSocket {
 
   socket.addEventListener('error', (error) => {
     logger.error('WebSocket error:', error);
+  });
+
+  // Handle incoming messages
+  socket.addEventListener('message', (event) => {
+    try {
+      const message = JSON.parse(event.data);
+      logger.debug('Received message:', message);
+
+      if (message.type === 'pong') {
+        logger.debug('Received pong response');
+      }
+    } catch (error) {
+      logger.error('Failed to parse WebSocket message:', error);
+    }
   });
 
   return socket;

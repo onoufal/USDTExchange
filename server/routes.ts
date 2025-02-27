@@ -13,9 +13,17 @@ import {
   markAllNotificationsAsRead
 } from "./services/notification.service";
 import { insertUserSchema } from "@shared/schema";
+import cookie from "cookie";
 import { WebSocketServer, WebSocket } from "ws";
 import { logger } from "./utils/logger";
 import { initializeNotifier } from "./utils/notifier";
+import { storage } from "./storage";
+
+// WebSocket client set with authentication info
+interface AuthenticatedWebSocket extends WebSocket {
+  userId?: number;
+  isAlive: boolean;
+}
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -364,21 +372,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
 
+  // Initialize WebSocket server with proper path
   const wss = new WebSocketServer({
     server: httpServer,
     path: '/ws'
   });
 
-  wss.on('connection', (ws) => {
-    logger.info('WebSocket client connected');
-
-    ws.on('error', (error) => {
-      logger.error({ err: error }, 'WebSocket error occurred');
+  // Ping interval to keep connections alive
+  const pingInterval = setInterval(() => {
+    wss.clients.forEach((ws: AuthenticatedWebSocket) => {
+      if (!ws.isAlive) {
+        logger.warn('Terminating inactive WebSocket connection');
+        return ws.terminate();
+      }
+      ws.isAlive = false;
+      ws.ping();
     });
+  }, 30000);
 
-    ws.on('close', () => {
-      logger.info('WebSocket client disconnected');
-    });
+  wss.on('close', () => {
+    clearInterval(pingInterval);
+  });
+
+  // Handle new WebSocket connections
+  wss.on('connection', async (ws: AuthenticatedWebSocket, req) => {
+    try {
+      ws.isAlive = true;
+
+      // Parse cookies from request headers
+      const cookieHeader = req.headers.cookie;
+      if (!cookieHeader) {
+        logger.warn('WebSocket connection attempt without cookies');
+        ws.close(1008, 'No session cookie found');
+        return;
+      }
+
+      const cookies = cookie.parse(cookieHeader);
+      const sessionId = cookies['sessionId']; // Match the name we set in auth.ts
+
+      if (!sessionId) {
+        logger.warn('WebSocket connection attempt without session ID');
+        ws.close(1008, 'No session ID found');
+        return;
+      }
+
+      // Get session from store using the imported storage instance
+      const session = await new Promise((resolve) => {
+        storage.sessionStore.get(sessionId, (err, session) => {
+          if (err) {
+            logger.error({ err }, 'Error retrieving session');
+            resolve(null);
+            return;
+          }
+          resolve(session);
+        });
+      });
+
+      if (!session?.passport?.user) {
+        logger.warn('WebSocket connection attempt with invalid session');
+        ws.close(1008, 'Invalid session');
+        return;
+      }
+
+      ws.userId = session.passport.user;
+      logger.info('Authenticated WebSocket connection established', {
+        userId: ws.userId,
+        sessionId: sessionId
+      });
+
+      // Handle pong responses
+      ws.on('pong', () => {
+        ws.isAlive = true;
+      });
+
+      // Handle errors
+      ws.on('error', (error) => {
+        logger.error({ err: error }, 'WebSocket error occurred');
+      });
+
+      // Handle connection close
+      ws.on('close', () => {
+        logger.info('WebSocket client disconnected', { userId: ws.userId });
+      });
+
+      // Handle messages
+      ws.on('message', (data: Buffer) => {
+        try {
+          const message = JSON.parse(data.toString());
+          logger.debug('Received WebSocket message', { userId: ws.userId, message });
+
+          // Process message based on type
+          switch (message.type) {
+            case 'ping':
+              ws.send(JSON.stringify({ type: 'pong' }));
+              break;
+            default:
+              logger.warn('Unknown message type received', { type: message.type });
+          }
+        } catch (error) {
+          logger.error({ err: error }, 'Error processing WebSocket message');
+        }
+      });
+
+    } catch (error) {
+      logger.error({ err: error }, 'Error during WebSocket connection setup');
+      ws.close(1011, 'Internal server error during connection setup');
+    }
   });
 
   initializeNotifier(wss.clients);

@@ -92,7 +92,7 @@ export function setupAuth(app: Express): void {
     }
     // Referrer Policy
     res.setHeader('Referrer-Policy', 'same-origin');
-    // Content Security Policy - Allowing WebSocket connections
+    // Content Security Policy - Allow WebSocket connections
     res.setHeader(
       'Content-Security-Policy',
       "default-src 'self'; connect-src 'self' ws: wss:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
