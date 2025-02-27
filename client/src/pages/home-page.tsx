@@ -34,7 +34,7 @@ function sortTransactions(transactions: Transaction[] = []) {
   return [...pendingTransactions, ...approvedTransactions];
 }
 
-// Update cardStyles to enhance accessibility
+// Update cardStyles to ensure consistency
 const cardStyles = {
   base: "border-0 shadow-lg bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:bg-card/40 transition-all duration-200 hover:shadow-xl hover:bg-card/60 dark:hover:bg-card/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
   contentPadding: "p-6 sm:p-7", // Maintains large touch targets
@@ -73,7 +73,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Quick Actions Grid - Updated typography */}
+        {/* Quick Actions Grid */}
         <section aria-labelledby="quick-actions-heading" className="py-2">
           <h2 id="quick-actions-heading" className="sr-only">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
