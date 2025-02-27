@@ -367,8 +367,8 @@ export default function TradeForm() {
         ? "JOD"
         : "USDT"
       : currencyBasis === "native"
-        ? "USDT"
-        : "JOD";
+      ? "USDT"
+      : "JOD";
   };
 
   /** Label for the "other" currency displayed as the equivalent */
@@ -378,8 +378,8 @@ export default function TradeForm() {
         ? "USDT"
         : "JOD"
       : currencyBasis === "native"
-        ? "JOD"
-        : "USDT";
+      ? "JOD"
+      : "USDT";
   };
 
   /** Final form submission handler */
@@ -475,7 +475,7 @@ export default function TradeForm() {
         onValueChange={(value) => form.setValue("type", value)}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-2 mb-6">
+        <TabsList className="grid w-full grid-cols-2 mb-4">
           <TabsTrigger value="buy" className="text-base">
             Buy USDT
           </TabsTrigger>
@@ -890,8 +890,8 @@ export default function TradeForm() {
                   {isUploading
                     ? "Uploading..."
                     : tradeMutation.isPending
-                      ? "Processing..."
-                      : `Submit ${type === "buy" ? "Buy" : "Sell"} Order`}
+                    ? "Processing..."
+                    : `Submit ${type === "buy" ? "Buy" : "Sell"} Order`}
                 </Button>
               </>
             )}
