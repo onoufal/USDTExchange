@@ -147,13 +147,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = updateUserCliqSchema.parse(req.body);
       const updatedUser = await UserService.updateUserCliq(req.user.id, data);
 
+      logger.debug('User CliQ settings updated', {
+        userId: req.user.id,
+        hasCliqNumber: !!updatedUser.cliqNumber
+      });
+
+      // Refresh session with updated user data
       await new Promise<void>((resolve, reject) => {
         req.login(updatedUser, (err) => {
           if (err) {
-            console.error('Session refresh error:', err);
+            logger.error('Session refresh error:', err);
             reject(err);
             return;
           }
+          logger.debug('Session refreshed with updated user data', {
+            userId: updatedUser.id,
+            hasCliqNumber: !!updatedUser.cliqNumber
+          });
           resolve();
         });
       });
@@ -163,7 +173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: error.errors[0].message });
       }
-      console.error('CliQ details update error:', error);
+      logger.error('CliQ details update error:', error);
       res.status(500).json({ message: error.message || "Failed to update CliQ settings" });
     }
   });

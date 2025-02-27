@@ -131,7 +131,9 @@ export function setupAuth(app: Express): void {
     })
   );
 
+  // Passport serialization
   passport.serializeUser((user, done) => {
+    logger.debug('Serializing user', { userId: user.id });
     done(null, user.id);
   });
 
@@ -139,25 +141,22 @@ export function setupAuth(app: Express): void {
   passport.deserializeUser(async (id: number, done) => {
     try {
       logger.debug('Deserializing user session', { userId: id });
-      const user = await storage.getUser(id);
 
-      if (!user) {
-        logger.warn('Deserialization failed: User not found', { userId: id });
-        return done(null, false);
-      }
-
-      // Always fetch the latest user data to prevent stale session data
+      // Get fresh user data
       const freshUser = await storage.getUser(id);
+
       if (!freshUser) {
-        logger.warn('Failed to fetch fresh user data', { userId: id });
+        logger.warn('Deserialization failed: User not found', { userId: id });
         return done(null, false);
       }
 
       logger.debug('User deserialized successfully with fresh data', {
         userId: id,
         hasCliqNumber: !!freshUser.cliqNumber,
-        updatedAt: freshUser.updatedAt
+        isVerified: freshUser.isVerified,
+        lastUpdate: new Date().toISOString()
       });
+
       done(null, freshUser);
     } catch (err) {
       logger.error({ err }, 'Deserialization error');
