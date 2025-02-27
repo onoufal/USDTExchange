@@ -475,7 +475,7 @@ export default function TradeForm() {
         onValueChange={(value) => form.setValue("type", value)}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-2 p-1 bg-muted/50 rounded-lg">
+        <TabsList className="grid w-full grid-cols-2 px-1 py-[3px] bg-muted/50 rounded-lg">
           <TabsTrigger value="buy" className="text-base rounded-md data-[state=active]:bg-background">
             Buy USDT
           </TabsTrigger>
