@@ -36,8 +36,8 @@ const formSchema = z.object({
   cliqType: z.enum(["alias", "number"], {
     required_error: "Please select how you want to receive payments",
   }),
-  cliqAlias: z.string().optional(),
-  cliqNumber: z.string().optional(),
+  cliqAlias: z.string().nullable(),
+  cliqNumber: z.string().nullable(),
   accountHolderName: z.string()
     .min(3, "Please enter your full name as it appears on your bank account")
     .max(50, "Name cannot exceed 50 characters"),
@@ -73,51 +73,52 @@ export default function CliqSettings() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bankName: (user?.bankName as (typeof JORDANIAN_BANKS)[number]) || JORDANIAN_BANKS[0],
-      cliqType: (user?.cliqType as "alias" | "number") || "alias",
-      cliqAlias: user?.cliqAlias || "",
-      cliqNumber: user?.cliqNumber || "",
+      bankName: user?.bankName || JORDANIAN_BANKS[0],
+      cliqType: user?.cliqType || "alias",
+      cliqAlias: user?.cliqAlias || null,
+      cliqNumber: user?.cliqNumber || null,
       accountHolderName: user?.accountHolderName || user?.fullName || "",
     },
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: FormData) => {
-      const submitData: UpdateUserCliq = {
-        bankName: data.bankName,
-        cliqType: data.cliqType,
-        accountHolderName: data.accountHolderName,
-        cliqAlias: data.cliqType === "alias" ? data.cliqAlias : undefined,
-        cliqNumber: data.cliqType === "number" ? data.cliqNumber : undefined,
+    mutationFn: async (formData: FormData) => {
+      const submitData = {
+        bankName: formData.bankName,
+        cliqType: formData.cliqType,
+        accountHolderName: formData.accountHolderName,
+        cliqAlias: formData.cliqType === "alias" ? formData.cliqAlias : null,
+        cliqNumber: formData.cliqType === "number" ? formData.cliqNumber : null,
       };
 
-      const res = await apiRequest("POST", "/api/user/settings/cliq", submitData);
+      const response = await fetch("/api/user/settings/cliq", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submitData),
+      });
 
-      if (!res.ok) {
-        // Try to parse error as JSON first
-        try {
-          const error = await res.json();
-          throw new Error(error.message || "Failed to save CliQ settings");
-        } catch (e) {
-          // If JSON parsing fails, use the status text
-          throw new Error(`Failed to save CliQ settings: ${res.statusText}`);
-        }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({
+          message: "Failed to save CliQ settings",
+        }));
+        throw new Error(errorData.message || "Failed to save CliQ settings");
       }
 
-      const result = await res.json();
-      return result;
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
         title: "Settings Saved Successfully",
-        description: "Your CliQ payment details have been updated and are ready to use.",
+        description: "Your CliQ payment details have been updated",
       });
     },
     onError: (error: Error) => {
       toast({
         title: "Unable to Save Changes",
-        description: error.message || "Please check your details and try again.",
+        description: error.message,
         variant: "destructive",
       });
     },
