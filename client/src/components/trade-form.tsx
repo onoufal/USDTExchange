@@ -475,17 +475,17 @@ export default function TradeForm() {
         onValueChange={(value) => form.setValue("type", value)}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-2 mb-3">
-          <TabsTrigger value="buy" className="text-base">
+        <TabsList className="grid w-full grid-cols-2 p-1 bg-muted/50 rounded-lg">
+          <TabsTrigger value="buy" className="text-base rounded-md data-[state=active]:bg-background">
             Buy USDT
           </TabsTrigger>
-          <TabsTrigger value="sell" className="text-base">
+          <TabsTrigger value="sell" className="text-base rounded-md data-[state=active]:bg-background">
             Sell USDT
           </TabsTrigger>
         </TabsList>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
