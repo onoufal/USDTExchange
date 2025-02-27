@@ -467,7 +467,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const data = updateUserCliqSchema.parse(req.body);
       await storage.updateUserCliq(req.user.id, data);
-      res.json({ success: true });
+
+      // Fetch updated user data
+      const updatedUser = await storage.getUser(req.user.id);
+      if (!updatedUser) {
+        throw new Error("Failed to fetch updated user data");
+      }
+
+      // Update the session with new user data
+      req.login(updatedUser, (err) => {
+        if (err) {
+          console.error('Session refresh error:', err);
+          return res.status(500).json({ message: "Failed to refresh session" });
+        }
+        res.json({ success: true });
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: error.errors[0].message });
