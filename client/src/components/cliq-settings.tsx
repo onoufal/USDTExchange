@@ -72,7 +72,6 @@ export default function CliqSettings() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Add a small delay to ensure smooth animation
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
@@ -82,8 +81,8 @@ export default function CliqSettings() {
     defaultValues: {
       bankName: (user?.bankName as (typeof JORDANIAN_BANKS)[number]) || JORDANIAN_BANKS[0],
       cliqType: (user?.cliqType as "alias" | "number") || "alias",
-      cliqAlias: user?.cliqAlias || null,
-      cliqNumber: user?.cliqNumber || null,
+      cliqAlias: user?.cliqAlias || "",
+      cliqNumber: user?.cliqNumber || "",
       accountHolderName: user?.accountHolderName || user?.fullName || "",
     },
   });
@@ -123,8 +122,8 @@ export default function CliqSettings() {
       bankName: data.bankName,
       cliqType: data.cliqType,
       accountHolderName: data.accountHolderName,
-      cliqAlias: data.cliqType === "alias" ? data.cliqAlias : null,
-      cliqNumber: data.cliqType === "number" ? data.cliqNumber : null,
+      cliqAlias: data.cliqType === "alias" ? data.cliqAlias || "" : null,
+      cliqNumber: data.cliqType === "number" ? data.cliqNumber || "" : null,
     };
 
     try {
