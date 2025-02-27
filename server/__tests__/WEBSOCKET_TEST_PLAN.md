@@ -4,11 +4,11 @@
 
 ### 1. Connection Tests
 - Verify successful WebSocket connection with valid session
-- Test connection rejection for invalid/expired sessions
+- Test connection rejection for invalid/expired sessions  
 - Validate reconnection behavior
 - Test connection with various cookie configurations
 
-### 2. Authentication Tests
+### 2. Authentication Tests  
 - Verify session validation during connection
 - Test session expiration handling
 - Validate user identification in WebSocket messages
@@ -31,7 +31,7 @@
 ```typescript
 describe('WebSocket Connection', () => {
   let mockSession;
-  
+
   beforeEach(() => {
     mockSession = {
       id: 'test-session',
