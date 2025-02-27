@@ -30,7 +30,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, AlertCircle } from "lucide-react";
 import { z } from "zod";
 
-// Form validation schema
+// Update form validation schema
 const formSchema = z.object({
   bankName: z.enum(JORDANIAN_BANKS, {
     required_error: "Please select a bank",
@@ -42,28 +42,31 @@ const formSchema = z.object({
     .regex(/^[A-Z0-9]*[A-Z]+[A-Z0-9]*$/, "Please use uppercase letters and numbers only")
     .min(3, "Your alias should be at least 3 characters long")
     .max(10, "Your alias cannot be longer than 10 characters")
-    .optional(),
+    .optional()
+    .nullable(),
   cliqNumber: z.string()
     .regex(/^009627\d{8}$/, "Please enter a valid Jordanian phone number starting with 009627")
-    .optional(),
+    .optional()
+    .nullable(),
   accountHolderName: z.string()
     .min(3, "Please enter your full name as it appears on your bank account")
     .max(50, "Name cannot exceed 50 characters"),
-}).refine(
-  (data) => {
-    if (data.cliqType === "alias" && !data.cliqAlias) {
-      return false;
-    }
-    if (data.cliqType === "number" && !data.cliqNumber) {
-      return false;
-    }
-    return true;
-  },
-  {
-    message: "Please provide either a CliQ alias or phone number based on your selection",
-    path: ["cliqType"],
+}).superRefine((data, ctx) => {
+  if (data.cliqType === "alias" && !data.cliqAlias) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "CliQ alias is required when using alias payment method",
+      path: ["cliqAlias"],
+    });
   }
-);
+  if (data.cliqType === "number" && !data.cliqNumber) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Phone number is required when using number payment method",
+      path: ["cliqNumber"],
+    });
+  }
+});
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -85,7 +88,7 @@ export default function CliqSettings() {
       cliqNumber: user?.cliqNumber || "",
       accountHolderName: user?.accountHolderName || user?.fullName || "",
     },
-    mode: "onChange"
+    mode: "onTouched" // Changed from onChange to onTouched for better UX
   });
 
   const mutation = useMutation({
@@ -124,7 +127,7 @@ export default function CliqSettings() {
   };
 
   return (
-    <Card 
+    <Card
       className={`
         border bg-card shadow-sm w-full 
         transition-all duration-300 ease-out
