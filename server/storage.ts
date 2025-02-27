@@ -26,8 +26,8 @@ export interface IStorage {
   updateUserCliq(id: number, cliqDetails: {
     bankName: string,
     cliqType: string,
-    cliqAlias?: string,
-    cliqNumber?: string,
+    cliqAlias?: string | null,
+    cliqNumber?: string | null,
     accountHolderName: string
   }): Promise<void>;
   getPaymentSettings(): Promise<{ [key: string]: string }>;
@@ -190,20 +190,40 @@ export class MemStorage implements IStorage {
   async updateUserCliq(id: number, cliqDetails: {
     bankName: string,
     cliqType: string,
-    cliqAlias?: string,
-    cliqNumber?: string,
+    cliqAlias?: string | null,
+    cliqNumber?: string | null,
     accountHolderName: string
   }): Promise<void> {
     const user = this.users.get(id);
     if (user) {
+      // Log the update request
+      console.log('Updating CliQ details:', {
+        userId: id,
+        currentDetails: {
+          cliqType: user.cliqType,
+          cliqAlias: user.cliqAlias,
+          cliqNumber: user.cliqNumber
+        },
+        newDetails: cliqDetails
+      });
+
       const updatedUser = {
         ...user,
         bankName: cliqDetails.bankName,
         cliqType: cliqDetails.cliqType,
-        cliqAlias: cliqDetails.cliqAlias || null,
-        cliqNumber: cliqDetails.cliqNumber || null,
+        cliqAlias: cliqDetails.cliqType === 'alias' ? cliqDetails.cliqAlias : null,
+        cliqNumber: cliqDetails.cliqType === 'number' ? cliqDetails.cliqNumber : null,
         accountHolderName: cliqDetails.accountHolderName
       };
+
+      // Log the updated user data
+      console.log('Updated user data:', {
+        userId: id,
+        cliqType: updatedUser.cliqType,
+        cliqAlias: updatedUser.cliqAlias,
+        cliqNumber: updatedUser.cliqNumber
+      });
+
       this.users.set(id, updatedUser);
     }
   }
