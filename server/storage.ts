@@ -1,3 +1,40 @@
+/**
+ * Storage layer implementation for the Exchange Platform.
+ * Current implementation uses in-memory storage (Map objects) for development.
+ * 
+ * For production deployment, consider implementing this interface with a persistent database:
+ * 
+ * PostgreSQL Implementation Steps:
+ * 1. Use create_postgresql_database_tool to provision the database
+ * 2. Define schema using Drizzle ORM in shared/schema.ts
+ * 3. Create DatabaseStorage class implementing IStorage interface
+ * 4. Use Drizzle's query builder for CRUD operations
+ * 
+ * Example PostgreSQL implementation:
+ * ```typescript
+ * export class DatabaseStorage implements IStorage {
+ *   private db: PostgreSQLDatabase;
+ * 
+ *   constructor() {
+ *     this.db = drizzle(process.env.DATABASE_URL);
+ *     this.sessionStore = new PostgresSessionStore({
+ *       conString: process.env.DATABASE_URL,
+ *       createTableIfMissing: true
+ *     });
+ *   }
+ * 
+ *   async getUser(id: number): Promise<User | undefined> {
+ *     const [user] = await this.db
+ *       .select()
+ *       .from(users)
+ *       .where(eq(users.id, id));
+ *     return user;
+ *   }
+ *   // Implement other interface methods...
+ * }
+ * ```
+ */
+
 import { users, transactions, type User, type InsertUser, type Transaction, platformSettings } from "@shared/schema";
 import type { SessionData, Store } from "express-session";
 import createMemoryStore from "memorystore";
@@ -244,42 +281,22 @@ export class MemStorage implements IStorage {
     });
   }
 
-  /**
-   * Retrieves a user by their ID
-   * @param id The user's unique identifier
-   * @returns Promise resolving to the user or undefined if not found
-   */
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
 
-  /**
-   * Retrieves a user by their username
-   * @param username The username to search for
-   * @returns Promise resolving to the user or undefined if not found
-   */
   async getUserByUsername(username: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(
       (user) => user.username === username
     );
   }
 
-  /**
-   * Retrieves a user by their email address
-   * @param email The email address to search for
-   * @returns Promise resolving to the user or undefined if not found
-   */
   async getUserByEmail(email: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(
       (user) => user.email === email
     );
   }
 
-  /**
-   * Creates a new user in the storage
-   * @param insertUser User data to insert
-   * @returns Promise resolving to the created user
-   */
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
     const user: User = {
@@ -309,10 +326,6 @@ export class MemStorage implements IStorage {
     return user;
   }
 
-  /**
-   * Verifies a user's email address
-   * @param id The user's ID
-   */
   async verifyEmail(id: number): Promise<void> {
     const user = this.users.get(id);
     if (user) {
@@ -325,11 +338,6 @@ export class MemStorage implements IStorage {
     }
   }
 
-  /**
-   * Updates a user's mobile number
-   * @param id The user's ID
-   * @param mobile The mobile number to set
-   */
   async updateUserMobile(id: number, mobile: string): Promise<void> {
     const user = this.users.get(id);
     if (user) {
@@ -342,11 +350,6 @@ export class MemStorage implements IStorage {
     }
   }
 
-  /**
-   * Updates a user's KYC document
-   * @param id The user's ID
-   * @param document Base64 encoded document data
-   */
   async updateUserKYC(id: number, document: string): Promise<void> {
     const user = this.users.get(id);
     if (user) {
@@ -359,12 +362,6 @@ export class MemStorage implements IStorage {
     }
   }
 
-  /**
-   * Updates a user's USDT wallet settings
-   * @param id The user's ID
-   * @param usdtAddress The USDT wallet address
-   * @param usdtNetwork The USDT network (e.g., TRC20, BEP20)
-   */
   async updateUserWallet(id: number, usdtAddress: string, usdtNetwork: string): Promise<void> {
     const user = this.users.get(id);
     if (user) {
@@ -377,11 +374,6 @@ export class MemStorage implements IStorage {
     }
   }
 
-  /**
-   * Updates a user's CliQ payment settings
-   * @param id The user's ID
-   * @param cliqDetails Object containing CliQ-related settings
-   */
   async updateUserCliq(id: number, cliqDetails: {
     bankName: string,
     cliqType: string,
@@ -421,28 +413,16 @@ export class MemStorage implements IStorage {
     }
   }
 
-  /**
-   * Retrieves platform payment settings
-   * @returns Promise resolving to key-value pairs of payment settings
-   */
   async getPaymentSettings(): Promise<{ [key: string]: string }> {
     return Object.fromEntries(this.settings.entries());
   }
 
-  /**
-   * Updates platform payment settings
-   * @param settings Key-value pairs of payment settings to update
-   */
   async updatePaymentSettings(settings: { [key: string]: string }): Promise<void> {
     Object.entries(settings).forEach(([key, value]) => {
       this.settings.set(key, value);
     });
   }
 
-  /**
-   * Approves a user's KYC verification
-   * @param id The user's ID
-   */
   async approveKYC(id: number): Promise<void> {
     const user = this.users.get(id);
     if (!user) {
@@ -457,19 +437,10 @@ export class MemStorage implements IStorage {
     this.users.set(id, updatedUser);
   }
 
-  /**
-   * Retrieves all users in the system
-   * @returns Promise resolving to an array of all users
-   */
   async getAllUsers(): Promise<User[]> {
     return Array.from(this.users.values());
   }
 
-  /**
-   * Creates a new transaction
-   * @param data Transaction data to insert
-   * @returns Promise resolving to the created transaction
-   */
   async createTransaction(data: Transaction): Promise<Transaction> {
     const id = this.currentTransactionId++;
 
@@ -520,39 +491,20 @@ export class MemStorage implements IStorage {
     return transaction;
   }
 
-  /**
-   * Retrieves all transactions for a specific user
-   * @param userId The user's ID
-   * @returns Promise resolving to an array of transactions
-   */
   async getUserTransactions(userId: number): Promise<Transaction[]> {
     return Array.from(this.transactions.values()).filter(
       (t) => t.userId === userId
     );
   }
 
-  /**
-   * Retrieves all transactions in the system
-   * @returns Promise resolving to an array of all transactions
-   */
   async getAllTransactions(): Promise<Transaction[]> {
     return Array.from(this.transactions.values());
   }
 
-  /**
-   * Retrieves a specific transaction
-   * @param id The transaction ID
-   * @returns Promise resolving to the transaction or undefined if not found
-   */
   async getTransaction(id: number): Promise<Transaction | undefined> {
     return this.transactions.get(id);
   }
 
-  /**
-   * Approves a transaction
-   * @param id The transaction ID
-   * @returns Promise resolving to the updated transaction
-   */
   async approveTransaction(id: number): Promise<Transaction> {
     const transaction = this.transactions.get(id);
     if (!transaction) {
@@ -577,18 +529,10 @@ export class MemStorage implements IStorage {
     return updatedTransaction;
   }
 
-  /**
-   * Retrieves all users with admin role
-   * @returns Promise resolving to an array of admin users
-   */
   async getAdminUsers(): Promise<User[]> {
     return Array.from(this.users.values()).filter(user => user.role === "admin");
   }
 
-  /**
-   * Creates a new notification
-   * @param data Notification data to insert
-   */
   async createNotification(data: InsertNotification): Promise<void> {
     const id = this.currentNotificationId++;
     const notification: Notification = {
@@ -600,21 +544,12 @@ export class MemStorage implements IStorage {
     this.notifications.set(id, notification);
   }
 
-  /**
-   * Retrieves all notifications for a specific user
-   * @param userId The user's ID
-   * @returns Promise resolving to an array of notifications
-   */
   async getUserNotifications(userId: number): Promise<Notification[]> {
     return Array.from(this.notifications.values())
       .filter(n => n.userId === userId)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
-  /**
-   * Marks a notification as read
-   * @param notificationId The notification ID
-   */
   async markNotificationAsRead(notificationId: number): Promise<void> {
     const notification = this.notifications.get(notificationId);
     if (notification) {
@@ -625,10 +560,6 @@ export class MemStorage implements IStorage {
     }
   }
 
-  /**
-   * Marks all notifications as read for a user
-   * @param userId The user's ID
-   */
   async markAllNotificationsAsRead(userId: number): Promise<void> {
     const userNotifications = Array.from(this.notifications.values())
       .filter(n => n.userId === userId);
