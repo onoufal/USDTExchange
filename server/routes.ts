@@ -451,9 +451,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add this new route for CliQ settings updates
-  app.post("/api/settings/cliq", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  // Update the CliQ settings route to match the client's expected path
+  app.post("/api/user/settings/cliq", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
     try {
       const data = updateUserCliqSchema.parse(req.body);

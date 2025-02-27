@@ -87,9 +87,12 @@ export default function CliqSettings() {
       };
 
       const res = await apiRequest("POST", "/api/user/settings/cliq", submitData);
+
       if (!res.ok) {
-        throw new Error("Failed to save CliQ settings");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to save CliQ settings");
       }
+
       return res.json();
     },
     onSuccess: () => {
@@ -99,10 +102,10 @@ export default function CliqSettings() {
         description: "Your CliQ settings have been updated successfully",
       });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Failed to save CliQ settings. Please try again.",
+        description: error.message || "Failed to save CliQ settings. Please try again.",
         variant: "destructive",
       });
     },
