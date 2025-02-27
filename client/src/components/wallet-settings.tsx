@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateUserWalletSchema, type UpdateUserWallet } from "@shared/schema";
@@ -15,6 +16,12 @@ import { Loader2, AlertCircle } from "lucide-react";
 export default function WalletSettings() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Trigger animation after mount
+    setIsVisible(true);
+  }, []);
 
   const form = useForm<UpdateUserWallet>({
     resolver: zodResolver(updateUserWalletSchema.extend({
@@ -27,7 +34,7 @@ export default function WalletSettings() {
       usdtAddress: user?.usdtAddress || "",
       usdtNetwork: user?.usdtNetwork as "tron" | "bep20" || "tron"
     },
-    mode: "onChange" 
+    mode: "onChange"
   });
 
   const updateWalletMutation = useMutation({
@@ -37,26 +44,32 @@ export default function WalletSettings() {
         const error = await res.json();
         throw new Error(error.message || "Failed to update wallet settings");
       }
-      return res.json();
+      return await res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       toast({
-        title: "Wallet settings updated",
-        description: "Your USDT wallet settings have been saved"
+        title: "Success",
+        description: "Your USDT wallet settings have been updated.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Update failed",
+        title: "Error",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   return (
-    <Card className="border bg-card shadow-sm w-full">
+    <Card 
+      className={`
+        border bg-card shadow-sm w-full 
+        transition-all duration-300 ease-out
+        ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}
+      `}
+    >
       <CardHeader className="space-y-2 border-b bg-muted/50 px-4 sm:px-6 py-4">
         <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight">USDT Wallet Settings</CardTitle>
         <CardDescription className="text-sm sm:text-base text-muted-foreground">
@@ -85,7 +98,10 @@ export default function WalletSettings() {
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem value="tron" className="h-5 w-5 border-2 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2" />
+                          <RadioGroupItem 
+                            value="tron" 
+                            className="h-5 w-5 border-2 transition-all duration-200 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2" 
+                          />
                         </FormControl>
                         <FormLabel className="text-base font-medium leading-none cursor-pointer select-none">
                           Tron (TRC20)
@@ -93,7 +109,10 @@ export default function WalletSettings() {
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem value="bep20" className="h-5 w-5 border-2 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2" />
+                          <RadioGroupItem 
+                            value="bep20" 
+                            className="h-5 w-5 border-2 transition-all duration-200 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2" 
+                          />
                         </FormControl>
                         <FormLabel className="text-base font-medium leading-none cursor-pointer select-none">
                           BNB Smart Chain (BEP20)
@@ -126,9 +145,12 @@ export default function WalletSettings() {
                     <Input 
                       placeholder="Enter your USDT wallet address" 
                       {...field}
-                      className={`h-11 text-base transition-colors hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                        form.formState.errors.usdtAddress ? "border-destructive" : ""
-                      }`}
+                      className={`
+                        h-11 text-base transition-all duration-200
+                        hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2
+                        ${form.formState.errors.usdtAddress ? "border-destructive" : ""}
+                        transform-gpu hover:-translate-y-[1px]
+                      `}
                     />
                   </FormControl>
                   <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
@@ -144,7 +166,13 @@ export default function WalletSettings() {
             <div className="pt-4 border-t">
               <Button 
                 type="submit" 
-                className="w-full h-11 text-base font-medium transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-offset-2"
+                className={`
+                  w-full h-11 text-base font-medium 
+                  transition-all duration-200
+                  hover:bg-primary/90 hover:-translate-y-[1px]
+                  focus-visible:ring-2 focus-visible:ring-offset-2
+                  disabled:transform-none
+                `}
                 disabled={!form.formState.isValid || updateWalletMutation.isPending}
               >
                 {updateWalletMutation.isPending ? (

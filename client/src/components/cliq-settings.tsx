@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateUserCliqSchema, JORDANIAN_BANKS } from "@shared/schema";
@@ -32,6 +33,12 @@ import { Loader2, AlertCircle } from "lucide-react";
 export default function CliqSettings() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    // Trigger animation after mount
+    setIsVisible(true);
+  }, []);
 
   const form = useForm<UpdateUserCliq>({
     resolver: zodResolver(updateUserCliqSchema.extend({
@@ -100,7 +107,13 @@ export default function CliqSettings() {
   };
 
   return (
-    <Card className="border bg-card shadow-sm w-full">
+    <Card
+      className={`
+        border bg-card shadow-sm w-full 
+        transition-all duration-300 ease-out
+        ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}
+      `}
+    >
       <CardHeader className="space-y-2 border-b bg-muted/50 px-4 sm:px-6 py-4">
         <CardTitle className="text-xl sm:text-2xl font-semibold tracking-tight">CliQ Account Settings</CardTitle>
         <CardDescription className="text-sm sm:text-base text-muted-foreground">
@@ -123,9 +136,15 @@ export default function CliqSettings() {
                   </div>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger className={`h-11 text-base transition-colors hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                        form.formState.errors.bankName ? "border-destructive" : ""
-                      }`}>
+                      <SelectTrigger
+                        className={`
+                          h-11 text-base 
+                          transition-all duration-200
+                          hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2
+                          hover:-translate-y-[1px]
+                          ${form.formState.errors.bankName ? "border-destructive" : ""}
+                        `}
+                      >
                         <SelectValue placeholder="Select your bank" />
                       </SelectTrigger>
                     </FormControl>
@@ -137,12 +156,7 @@ export default function CliqSettings() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
-                    {form.formState.errors.bankName?.message && (
-                      <AlertCircle className="h-4 w-4" />
-                    )}
-                    {form.formState.errors.bankName?.message}
-                  </FormMessage>
+                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50" />
                 </FormItem>
               )}
             />
@@ -164,24 +178,31 @@ export default function CliqSettings() {
                       value={field.value}
                       className="grid gap-4"
                     >
-                      <RadioGroupItem value="alias" className="h-5 w-5 border-2 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2">
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem
+                            value="alias"
+                            className="h-5 w-5 border-2 transition-all duration-200 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2"
+                          />
+                        </FormControl>
                         <FormLabel className="text-base font-medium leading-none cursor-pointer select-none">
                           CliQ Alias
                         </FormLabel>
-                      </RadioGroupItem>
-                      <RadioGroupItem value="number" className="h-5 w-5 border-2 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2">
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem
+                            value="number"
+                            className="h-5 w-5 border-2 transition-all duration-200 hover:border-primary/50 focus-visible:ring-2 focus-visible:ring-offset-2"
+                          />
+                        </FormControl>
                         <FormLabel className="text-base font-medium leading-none cursor-pointer select-none">
                           CliQ Number
                         </FormLabel>
-                      </RadioGroupItem>
+                      </FormItem>
                     </RadioGroup>
                   </FormControl>
-                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
-                    {form.formState.errors.cliqType?.message && (
-                      <AlertCircle className="h-4 w-4" />
-                    )}
-                    {form.formState.errors.cliqType?.message}
-                  </FormMessage>
+                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50" />
                 </FormItem>
               )}
             />
@@ -203,17 +224,16 @@ export default function CliqSettings() {
                         {...field}
                         placeholder="Enter your CliQ alias (e.g., JOHN123)"
                         onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                        className={`h-11 text-base transition-colors hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                          form.formState.errors.cliqAlias ? "border-destructive" : ""
-                        }`}
+                        className={`
+                          h-11 text-base 
+                          transition-all duration-200
+                          hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2
+                          ${form.formState.errors.cliqAlias ? "border-destructive" : ""}
+                          transform-gpu hover:-translate-y-[1px]
+                        `}
                       />
                     </FormControl>
-                    <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
-                      {form.formState.errors.cliqAlias?.message && (
-                        <AlertCircle className="h-4 w-4" />
-                      )}
-                      {form.formState.errors.cliqAlias?.message}
-                    </FormMessage>
+                    <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50" />
                   </FormItem>
                 )}
               />
@@ -233,17 +253,16 @@ export default function CliqSettings() {
                       <Input
                         {...field}
                         placeholder="009627xxxxxxxx"
-                        className={`h-11 text-base transition-colors hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2 font-mono ${
-                          form.formState.errors.cliqNumber ? "border-destructive" : ""
-                        }`}
+                        className={`
+                          h-11 text-base font-mono
+                          transition-all duration-200
+                          hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2
+                          ${form.formState.errors.cliqNumber ? "border-destructive" : ""}
+                          transform-gpu hover:-translate-y-[1px]
+                        `}
                       />
                     </FormControl>
-                    <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
-                      {form.formState.errors.cliqNumber?.message && (
-                        <AlertCircle className="h-4 w-4" />
-                      )}
-                      {form.formState.errors.cliqNumber?.message}
-                    </FormMessage>
+                    <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50" />
                   </FormItem>
                 )}
               />
@@ -264,17 +283,16 @@ export default function CliqSettings() {
                     <Input
                       {...field}
                       placeholder="Enter the full name on your bank account"
-                      className={`h-11 text-base transition-colors hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2 ${
-                        form.formState.errors.accountHolderName ? "border-destructive" : ""
-                      }`}
+                      className={`
+                        h-11 text-base 
+                        transition-all duration-200
+                        hover:border-input focus-visible:ring-2 focus-visible:ring-offset-2
+                        ${form.formState.errors.accountHolderName ? "border-destructive" : ""}
+                        transform-gpu hover:-translate-y-[1px]
+                      `}
                     />
                   </FormControl>
-                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50">
-                    {form.formState.errors.accountHolderName?.message && (
-                      <AlertCircle className="h-4 w-4" />
-                    )}
-                    {form.formState.errors.accountHolderName?.message}
-                  </FormMessage>
+                  <FormMessage className="flex items-center gap-2 text-sm font-medium text-destructive animate-in fade-in-50" />
                 </FormItem>
               )}
             />
@@ -282,7 +300,13 @@ export default function CliqSettings() {
             <div className="pt-4 border-t">
               <Button
                 type="submit"
-                className="w-full h-11 text-base font-medium transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-offset-2"
+                className={`
+                  w-full h-11 text-base font-medium 
+                  transition-all duration-200
+                  hover:bg-primary/90 hover:-translate-y-[1px]
+                  focus-visible:ring-2 focus-visible:ring-offset-2
+                  disabled:transform-none
+                `}
                 disabled={!form.formState.isValid || mutation.isPending}
               >
                 {mutation.isPending ? (
