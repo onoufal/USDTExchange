@@ -260,20 +260,20 @@ export default function KYCForm() {
               <Badge
                 variant={
                   user?.kycStatus === "approved" ? "default" :
-                    user?.kycStatus === "pending" ? "secondary" : "destructive"
+                    (user?.kycStatus === "pending" && user?.kycDocument) ? "secondary" : "destructive"
                 }
                 className="font-medium"
               >
                 {user?.kycStatus === "approved" ? (
                   <CheckCircle2 className="w-4 h-4 mr-1.5" />
-                ) : user?.kycStatus === "pending" ? (
+                ) : (user?.kycStatus === "pending" && user?.kycDocument) ? (
                   <Clock className="w-4 h-4 mr-1.5" />
                 ) : (
                   <XCircle className="w-4 h-4 mr-1.5" />
                 )}
                 {user?.kycStatus === "approved"
                   ? "Verified"
-                  : user?.kycStatus === "pending"
+                  : (user?.kycStatus === "pending" && user?.kycDocument)
                     ? "Pending Review"
                     : "Required"}
               </Badge>
