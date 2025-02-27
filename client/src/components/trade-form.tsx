@@ -512,7 +512,7 @@ export default function TradeForm() {
                 {/* Amount Input Section */}
                 <div className="space-y-8">
                   <div className="space-y-6">
-                    <h3 className="text-lg font-semibold">Enter Amount</h3>
+                    <h3 className="text-lg font-semibold tracking-tight">Amount</h3>
                     <FormField
                       control={form.control}
                       name="amount"
@@ -529,7 +529,7 @@ export default function TradeForm() {
                               <FormControl>
                                 <RadioGroupItem value="native" />
                               </FormControl>
-                              <FormLabel className="font-normal">
+                              <FormLabel className="text-sm font-medium">
                                 Enter in {type === "buy" ? "JOD" : "USDT"}
                               </FormLabel>
                             </FormItem>
@@ -537,7 +537,7 @@ export default function TradeForm() {
                               <FormControl>
                                 <RadioGroupItem value="foreign" />
                               </FormControl>
-                              <FormLabel className="font-normal">
+                              <FormLabel className="text-sm font-medium">
                                 Enter in {type === "buy" ? "USDT" : "JOD"}
                               </FormLabel>
                             </FormItem>
@@ -552,11 +552,10 @@ export default function TradeForm() {
                               className="text-base p-6"
                             />
                           </FormControl>
-                          <FormDescription className="text-sm">
-                            Enter the amount you want to {type} in{" "}
-                            {getCurrentCurrencyLabel()}
+                          <FormDescription className="text-sm text-muted-foreground">
+                            Enter the amount you would like to {type === "buy" ? "purchase" : "sell"}
                           </FormDescription>
-                          <FormMessage />
+                          <FormMessage className="text-sm" />
                         </FormItem>
                       )}
                     />
@@ -565,28 +564,28 @@ export default function TradeForm() {
                   {/* Exchange Rate Summary */}
                   <Card className="border bg-card/50">
                     <CardContent className="p-6 space-y-4">
-                      <div className="flex flex-wrap justify-between gap-3 text-sm">
-                        <span className="font-medium">Exchange Rate</span>
-                        <span className="font-mono">
+                      <div className="flex flex-wrap justify-between gap-3">
+                        <span className="text-sm font-medium">Exchange Rate</span>
+                        <span className="text-sm font-mono">
                           1 USDT = {currentRate ? currentRate.toFixed(2) : "0.00"} JOD
                         </span>
                       </div>
                       {amount && (
                         <>
-                          <div className="flex flex-wrap justify-between gap-3 text-sm">
-                            <span className="font-medium">Base Amount</span>
-                            <span className="font-mono">
+                          <div className="flex flex-wrap justify-between gap-3">
+                            <span className="text-sm font-medium">Base Amount</span>
+                            <span className="text-sm font-mono">
                               {equivalentAmount} {getEquivalentCurrencyLabel()}
                             </span>
                           </div>
-                          <div className="flex flex-wrap justify-between gap-3 text-xs sm:text-sm text-muted-foreground">
-                            <span>
+                          <div className="flex flex-wrap justify-between gap-3 text-muted-foreground">
+                            <span className="text-sm">
                               Commission ({currentCommission ? currentCommission.toFixed(2) : "0.00"}%)
                             </span>
-                            <span className="font-mono">{commission}</span>
+                            <span className="text-sm font-mono">{commission}</span>
                           </div>
-                          <div className="flex flex-wrap justify-between gap-3 pt-3 border-t text-sm">
-                            <span className="font-medium">
+                          <div className="flex flex-wrap justify-between gap-3 pt-3 border-t">
+                            <span className="text-sm font-medium">
                               {type === "buy"
                                 ? currencyBasis === "foreign"
                                   ? "Total to Pay"
@@ -595,7 +594,7 @@ export default function TradeForm() {
                                 ? "Total to Pay"
                                 : "Total to Receive"}
                             </span>
-                            <span className="font-mono text-base font-medium">
+                            <span className="text-base font-medium font-mono">
                               {finalAmount} {getEquivalentCurrencyLabel()}
                             </span>
                           </div>
@@ -608,7 +607,7 @@ export default function TradeForm() {
                 {/* Network Selection for Sell */}
                 {type === "sell" && (
                   <div className="space-y-6">
-                    <h3 className="text-lg font-semibold">Select Network</h3>
+                    <h3 className="text-lg font-semibold tracking-tight">Network</h3>
                     <FormField
                       control={form.control}
                       name="network"
@@ -627,7 +626,7 @@ export default function TradeForm() {
                                       <FormControl>
                                         <RadioGroupItem value="trc20" />
                                       </FormControl>
-                                      <FormLabel className="font-medium">
+                                      <FormLabel className="text-sm font-medium">
                                         TRC20 Network
                                       </FormLabel>
                                     </FormItem>
@@ -668,7 +667,7 @@ export default function TradeForm() {
                                       <FormControl>
                                         <RadioGroupItem value="bep20" />
                                       </FormControl>
-                                      <FormLabel className="font-medium">
+                                      <FormLabel className="text-sm font-medium">
                                         BEP20 Network
                                       </FormLabel>
                                     </FormItem>
@@ -703,7 +702,10 @@ export default function TradeForm() {
                               </Card>
                             </RadioGroup>
                           </FormControl>
-                          <FormMessage />
+                          <FormDescription className="text-sm text-muted-foreground">
+                            Select the blockchain network for your USDT transaction
+                          </FormDescription>
+                          <FormMessage className="text-sm" />
                         </FormItem>
                       )}
                     />
@@ -713,7 +715,7 @@ export default function TradeForm() {
                 {/* Payment Method Selection for Buy */}
                 {type === "buy" && (
                   <div className="space-y-6">
-                    <h3 className="text-lg font-semibold">Payment Method</h3>
+                    <h3 className="text-lg font-semibold tracking-tight">Payment Method</h3>
                     <Card className="border bg-card/50">
                       <CardContent className="p-6">
                         <RadioGroup
@@ -730,7 +732,7 @@ export default function TradeForm() {
                                 <FormControl>
                                   <RadioGroupItem value="cliq" />
                                 </FormControl>
-                                <FormLabel className="font-medium">
+                                <FormLabel className="text-sm font-medium">
                                   CliQ Payment
                                 </FormLabel>
                               </FormItem>
@@ -784,7 +786,7 @@ export default function TradeForm() {
                                 <FormControl>
                                   <RadioGroupItem value="wallet" />
                                 </FormControl>
-                                <FormLabel className="font-medium">
+                                <FormLabel className="text-sm font-medium">
                                   Mobile Wallet
                                 </FormLabel>
                               </FormItem>
@@ -834,12 +836,15 @@ export default function TradeForm() {
                         </RadioGroup>
                       </CardContent>
                     </Card>
+                    <FormDescription className="text-sm text-muted-foreground">
+                      Choose how you'd like to make your payment
+                    </FormDescription>
                   </div>
                 )}
 
                 {/* Payment Proof Upload Section */}
                 <div className="space-y-6">
-                  <h3 className="text-lg font-semibold">Payment Proof</h3>
+                  <h3 className="text-lg font-semibold tracking-tight">Payment Proof</h3>
                   <Card className="border bg-card/50">
                     <CardContent className="p-6">
                       <div className="space-y-6">
@@ -854,11 +859,11 @@ export default function TradeForm() {
                           onClick={() => document.getElementById("payment-proof")?.click()}
                         >
                           <Upload className="h-10 w-10 mb-4 text-muted-foreground" />
-                          <p className="text-sm text-center text-muted-foreground">
-                            Click to upload payment proof
+                          <p className="text-base text-center">
+                            Upload payment confirmation
                             <br />
-                            <span className="text-xs mt-1 block">
-                              JPG or PNG, max 5MB
+                            <span className="text-sm text-muted-foreground mt-1 block">
+                              Click to upload a JPG or PNG image (max 5MB)
                             </span>
                           </p>
                         </div>
