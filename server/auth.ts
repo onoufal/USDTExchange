@@ -99,12 +99,30 @@ export function setupAuth(app: Express) {
 
   passport.deserializeUser(async (id: number, done) => {
     try {
+      // Log deserialization attempt
+      log(`Deserializing user session for ID: ${id}`);
+
+      // Always fetch fresh user data from storage
       const user = await storage.getUser(id);
+
       if (!user) {
+        log(`Deserialization failed: User not found - ID: ${id}`);
         return done(null, false);
       }
+
+      // Log successful deserialization with user details
+      log(`User deserialized successfully:`, {
+        id: user.id,
+        cliqSettings: {
+          type: user.cliqType,
+          alias: user.cliqAlias,
+          number: user.cliqNumber
+        }
+      });
+
       done(null, user);
     } catch (err) {
+      log(`Deserialization error for user ${id}:`, err);
       done(err);
     }
   });
