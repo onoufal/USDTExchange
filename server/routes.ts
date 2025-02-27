@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import multer from "multer";
@@ -350,6 +350,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Payment settings update error:', error);
       res.status(500).json({ message: "Failed to update payment settings" });
     }
+  });
+
+  // Add this test route temporarily before the error handling middleware
+  app.get("/api/test-error", (req, res) => {
+    throw new Error("Test error to verify error handling");
+  });
+
+  // Global error handling middleware
+  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    // Log the error details for debugging (but don't expose to client)
+    console.error('Unhandled error:', {
+      error: err.message,
+      stack: err.stack,
+      url: req.url,
+      method: req.method,
+      userId: req.user?.id
+    });
+
+    // Send standardized error response
+    res.status(500).json({ 
+      error: "An unexpected error occurred." 
+    });
   });
 
   const httpServer = createServer(app);
