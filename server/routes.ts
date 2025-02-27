@@ -140,8 +140,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
+      // Log initial session state
+      console.log('CliQ Update - Initial session state:', {
+        userId: req.user.id,
+        currentSettings: {
+          cliqType: req.user.cliqType,
+          cliqAlias: req.user.cliqAlias,
+          cliqNumber: req.user.cliqNumber
+        }
+      });
+
       const data = updateUserCliqSchema.parse(req.body);
       const updatedUser = await UserService.updateUserCliq(req.user.id, data);
+
+      // Log user data after update
+      console.log('CliQ Update - User data after storage update:', {
+        userId: updatedUser.id,
+        updatedSettings: {
+          cliqType: updatedUser.cliqType,
+          cliqAlias: updatedUser.cliqAlias,
+          cliqNumber: updatedUser.cliqNumber
+        }
+      });
 
       // Refresh session with updated user data
       await new Promise<void>((resolve, reject) => {
@@ -151,6 +171,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             reject(err);
             return;
           }
+
+          // Log session state after refresh
+          console.log('CliQ Update - Session state after refresh:', {
+            userId: req.user.id,
+            refreshedSettings: {
+              cliqType: req.user.cliqType,
+              cliqAlias: req.user.cliqAlias,
+              cliqNumber: req.user.cliqNumber
+            }
+          });
+
           resolve();
         });
       });
