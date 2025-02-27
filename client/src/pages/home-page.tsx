@@ -113,13 +113,12 @@ export default function HomePage() {
               </Card>
             </Link>
 
-            <Button 
-              asChild 
-              variant="ghost" 
-              className="p-0 h-auto hover:bg-transparent animate-fade-up [--animation-delay:300ms]"
+            <Link 
+              href="#" 
+              className={`${cardStyles.link} animate-fade-up [--animation-delay:300ms]`}
               aria-label="Learn about our referral program"
             >
-              <Card className={`${cardStyles.base} group-hover:border-primary/20 w-full`}>
+              <Card className={`${cardStyles.base} group-hover:border-primary/20`}>
                 <CardContent className={`${cardStyles.contentPadding} flex items-center gap-5`}>
                   <div className={cardStyles.iconWrapper}>
                     <Share2 className="w-6 h-6 text-primary transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
@@ -130,7 +129,7 @@ export default function HomePage() {
                   </div>
                 </CardContent>
               </Card>
-            </Button>
+            </Link>
           </div>
         </section>
 
