@@ -298,7 +298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/trade", upload.single("proofOfPayment"), async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
     if (!req.file) return res.status(400).json({ message: "No payment proof uploaded" });
 
     try {
@@ -308,7 +308,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount: req.body.amount,
         network: req.body.network,
         paymentMethod: req.body.paymentMethod,
-        rate: req.body.rate
+        rate: req.body.rate,
+        cliqType: req.body.cliqType,
+        cliqAlias: req.body.cliqAlias,
+        cliqNumber: req.body.cliqNumber
       });
 
       const schema = z.object({
@@ -322,6 +325,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .transform(Number),
         network: z.enum(["trc20", "bep20"]).optional(),
         paymentMethod: z.enum(["cliq", "wallet"]).optional(),
+        cliqType: z.string().optional(),
+        cliqAlias: z.string().nullable().optional(),
+        cliqNumber: z.string().nullable().optional(),
       }).refine((data) => {
         if (data.type === "sell" && !data.network) {
           return false;
@@ -334,12 +340,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const data = schema.parse(req.body);
 
-      // Debug logging for parsed data
-      console.log('Parsed trade data:', {
-        ...data,
-        network: data.network
-      });
-
       const transactionData = {
         userId: req.user.id,
         type: data.type,
@@ -350,12 +350,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: new Date(),
         network: data.type === "sell" ? data.network : null,
         paymentMethod: data.type === "buy" ? data.paymentMethod : null,
+        // Store CliQ information for sell orders
+        cliqType: data.type === "sell" ? data.cliqType : null,
+        cliqAlias: data.type === "sell" ? data.cliqAlias : null,
+        cliqNumber: data.type === "sell" ? data.cliqNumber : null,
       };
 
       // Debug logging for transaction data before storage
       console.log('Transaction data before storage:', {
         ...transactionData,
-        network: transactionData.network
+        network: transactionData.network,
+        cliqType: transactionData.cliqType,
+        cliqAlias: transactionData.cliqAlias,
+        cliqNumber: transactionData.cliqNumber
       });
 
       const transaction = await storage.createTransaction(transactionData);
@@ -374,7 +381,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Debug logging for created transaction
       console.log('Created transaction:', {
         ...transaction,
-        network: transaction.network
+        network: transaction.network,
+        cliqType: transaction.cliqType,
+        cliqAlias: transaction.cliqAlias,
+        cliqNumber: transaction.cliqNumber
       });
 
       res.json(transaction);
