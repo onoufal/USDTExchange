@@ -173,14 +173,26 @@ export default function HomePage() {
                     Buy or sell USDT for Jordanian Dinar (JOD)
                   </CardDescription>
                 </CardHeader>
-                <CardContent id="trade-form" className={cardStyles.contentPadding}>
+                <CardContent id="trade-form" className={`${cardStyles.contentPadding} space-y-6`}>
                   {showKYCWarning ? (
-                    <Alert variant="warning" className="flex items-center gap-3">
-                      <AlertCircle className="h-5 w-5 text-warning-foreground shrink-0" aria-hidden="true" />
-                      <AlertDescription className="text-base font-medium">
-                        Please complete mobile verification and KYC before trading
-                      </AlertDescription>
-                    </Alert>
+                    <div className="rounded-lg border border-warning bg-warning/10 p-4 sm:p-6">
+                      <Alert variant="warning" className="flex items-center gap-3 border-none bg-transparent p-0">
+                        <AlertCircle className="h-5 w-5 text-warning-foreground shrink-0" aria-hidden="true" />
+                        <AlertDescription className="text-base font-medium text-warning-foreground">
+                          Please complete mobile verification and KYC before trading
+                        </AlertDescription>
+                      </Alert>
+                      <div className="mt-4 flex justify-end">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-warning-foreground hover:bg-warning/20"
+                          onClick={() => document.getElementById('verification-section')?.scrollIntoView({ behavior: 'smooth' })}
+                        >
+                          Complete Verification
+                        </Button>
+                      </div>
+                    </div>
                   ) : (
                     <TradeForm />
                   )}
@@ -362,7 +374,7 @@ export default function HomePage() {
 
           {/* Sidebar - Verification Status */}
           <div className="lg:col-span-4 space-y-6 sm:space-y-8 animate-fade-left [--animation-delay:200ms]">
-            <section aria-labelledby="verification-section-title">
+            <section aria-labelledby="verification-section-title" id="verification-section">
               <Card className={cardStyles.base}>
                 <CardHeader className={cardStyles.headerPadding}>
                   <div className="flex items-center gap-3">
