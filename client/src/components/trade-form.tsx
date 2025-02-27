@@ -489,13 +489,13 @@ export default function TradeForm() {
           <TabsList className="grid w-full grid-cols-2 p-1 h-[3.5rem] sm:h-12 bg-muted/50 rounded-lg">
             <TabsTrigger
               value="buy"
-              className="text-base rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary min-h-[2.75rem] sm:min-h-10"
+              className="text-base rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary min-h-[2.75rem] sm:min-h-10 transition-all duration-200"
             >
               Buy USDT
             </TabsTrigger>
             <TabsTrigger
               value="sell"
-              className="text-base rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary min-h-[2.75rem] sm:min-h-10"
+              className="text-base rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-primary min-h-[2.75rem] sm:min-h-10 transition-all duration-200"
             >
               Sell USDT
             </TabsTrigger>
@@ -573,14 +573,14 @@ export default function TradeForm() {
                                 step="0.01"
                                 {...field}
                                 placeholder={`Enter amount in ${getCurrentCurrencyLabel()}`}
-                                className="text-base p-6 min-h-[3.5rem]"
+                                className="text-base p-6 min-h-[3.5rem] transition-shadow duration-200"
                               />
                             </FormControl>
                             <FormDescription className="text-sm text-muted-foreground">
                               Enter the amount you would like to {type === "buy" ? "purchase" : "sell"}
                               {" "}(1 - 100,000 {getCurrentCurrencyLabel()})
                             </FormDescription>
-                            <FormMessage className="text-sm font-medium text-destructive" />
+                            <FormMessage className="text-sm font-medium text-destructive animate-in fade-in-50" />
                           </FormItem>
                         )}
                       />
@@ -599,7 +599,7 @@ export default function TradeForm() {
                           <>
                             <div className="flex flex-wrap justify-between gap-3">
                               <span className="text-sm font-medium">Base Amount</span>
-                              <span className="text-sm font-mono">
+                              <span className="text-sm font-mono animate-in fade-in-50 slide-in-from-right-5">
                                 {equivalentAmount} {getEquivalentCurrencyLabel()}
                               </span>
                             </div>
@@ -607,7 +607,9 @@ export default function TradeForm() {
                               <span className="text-sm">
                                 Commission ({currentCommission ? currentCommission.toFixed(2) : "0.00"}%)
                               </span>
-                              <span className="text-sm font-mono">{commission}</span>
+                              <span className="text-sm font-mono animate-in fade-in-50 slide-in-from-right-5">
+                                {commission}
+                              </span>
                             </div>
                             <div className="flex flex-wrap justify-between gap-3 pt-3 border-t">
                               <span className="text-sm font-medium">
@@ -619,14 +621,14 @@ export default function TradeForm() {
                                   ? "Total to Pay"
                                   : "Total to Receive"}
                               </span>
-                              <span className="text-base font-medium font-mono">
+                              <span className="text-base font-medium font-mono animate-in fade-in-50 slide-in-from-right-5">
                                 {finalAmount} {getEquivalentCurrencyLabel()}
                               </span>
                             </div>
 
                             {/* Summary Message */}
                             <div className="mt-4 pt-3 border-t text-center">
-                              <p className="text-sm">
+                              <p className="text-sm animate-in fade-in-50">
                                 {type === "buy" ? (
                                   currencyBasis === "foreign" ? (
                                     <>
@@ -696,7 +698,7 @@ export default function TradeForm() {
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              className="shrink-0"
+                                              className="shrink-0 transition-colors duration-200"
                                               onClick={() =>
                                                 copyToClipboard(
                                                   paymentSettings?.usdtAddressTRC20 || "",
@@ -737,7 +739,7 @@ export default function TradeForm() {
                                             <Button
                                               variant="ghost"
                                               size="sm"
-                                              className="shrink-0"
+                                              className="shrink-0 transition-colors duration-200"
                                               onClick={() =>
                                                 copyToClipboard(
                                                   paymentSettings?.usdtAddressBEP20 || "",
@@ -762,7 +764,7 @@ export default function TradeForm() {
                             <FormDescription className="text-sm text-muted-foreground">
                               Select the blockchain network for your USDT transaction
                             </FormDescription>
-                            <FormMessage className="text-sm font-medium text-destructive" />
+                            <FormMessage className="text-sm font-medium text-destructive animate-in fade-in-50" />
                           </FormItem>
                         )}
                       />
@@ -794,7 +796,7 @@ export default function TradeForm() {
                                   </FormLabel>
                                 </FormItem>
                                 {paymentMethod === "cliq" && (
-                                  <div className="ml-7 text-sm bg-muted/50 p-4 rounded-md space-y-3">
+                                  <div className="ml-7 text-sm bg-muted/50 p-4 rounded-md space-y-3 animate-in fade-in-50">
                                     <div className="flex items-center justify-between">
                                       <p className="truncate mr-2">
                                         <span className="text-muted-foreground">
@@ -805,7 +807,7 @@ export default function TradeForm() {
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="shrink-0"
+                                        className="shrink-0 transition-colors duration-200"
                                         onClick={() =>
                                           copyToClipboard(
                                             paymentSettings.cliqAlias,
@@ -848,7 +850,7 @@ export default function TradeForm() {
                                   </FormLabel>
                                 </FormItem>
                                 {paymentMethod === "wallet" && (
-                                  <div className="ml-7 text-sm bg-muted/50 p-4 rounded-md space-y-3">
+                                  <div className="ml-7 text-sm bg-muted/50 p-4 rounded-md space-y-3 animate-in fade-in-50">
                                     <div className="flex items-center justify-between">
                                       <p>
                                         <span className="text-muted-foreground">
@@ -859,7 +861,7 @@ export default function TradeForm() {
                                       <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="shrink-0"
+                                        className="shrink-0 transition-colors duration-200"
                                         onClick={() =>
                                           copyToClipboard(
                                             paymentSettings.mobileWallet,
@@ -912,7 +914,8 @@ export default function TradeForm() {
                             className="hidden"
                             id="payment-proof"
                           />
-                          <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer min-h-[10rem]"
+                          <div
+                            className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer min-h-[10rem]"
                             onClick={() => document.getElementById("payment-proof")?.click()}
                           >
                             <Upload className="h-10 w-10 mb-4 text-muted-foreground" />
@@ -925,7 +928,7 @@ export default function TradeForm() {
                             </p>
                           </div>
                           {file && (
-                            <div className="text-sm">
+                            <div className="text-sm animate-in fade-in-50">
                               <p className="font-medium mb-2">Selected file:</p>
                               <p className="text-muted-foreground">{file.name}</p>
                               {uploadProgress > 0 && (
