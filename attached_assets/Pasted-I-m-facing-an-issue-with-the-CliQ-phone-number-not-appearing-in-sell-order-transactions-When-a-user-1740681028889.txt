@@ -1,0 +1,18 @@
+I'm facing an issue with the CliQ phone number not appearing in sell order transactions. When a user selects the "CliQ phone number" option in their settings and then places a sell order, the transaction’s cliqNumber remains null. Here’s what I need you to do:
+
+Session Refresh After Updating CliQ Settings:
+In the /api/user/settings/cliq route, after calling await storage.updateUserCliq(req.user.id, data), we fetch the updated user and then call req.login(updatedUser, callback).
+Please ensure that this process correctly refreshes the session so that req.user immediately reflects the new data (especially the updated cliqNumber when the user selects the "number" option).
+Add logging (or verify existing logs) to confirm that after updating, req.user.cliqNumber is correctly set.
+Trade Endpoint Verification:
+In the /api/trade route, we rely on req.user to obtain the user's CliQ settings.
+Confirm that when processing a sell order, if req.user.cliqType === "number", the cliqNumber is not null and is correctly assigned into the transaction data.
+Please add or verify debugging logs to ensure the user session contains the updated phone number before the trade is created.
+Data Flow & Storage Checks:
+Review the storage.updateUserCliq method to make sure it correctly updates the user’s cliqNumber in the database.
+Confirm that storage.getUser(id) (used in both Passport’s deserializeUser and in the /api/user/settings/cliq route) returns the updated data.
+Ensure Consistency Between Session and Trade Data:
+Make sure that no stale session data is being used in the /api/trade endpoint. The user data fetched from the session should always reflect the latest updates.
+Please update or adjust the session refresh logic and/or the storage methods as needed so that when a user selects the "CliQ phone number" option, the updated phone number is correctly propagated into req.user and then used in creating trade transactions.
+
+Let me know if you need any further details or logs from the current implementation.
