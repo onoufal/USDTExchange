@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { setupAuth } from "./auth";
+import { setupAuth, isAuthenticated } from "./auth"; // Import isAuthenticated from auth.ts
 import { storage } from "./storage";
 import multer from "multer";
 import { z } from "zod";
@@ -8,8 +8,8 @@ import { updateUserWalletSchema } from "@shared/schema";
 import { updateUserCliqSchema } from "@shared/schema";
 import { randomBytes } from "crypto";
 import { sendVerificationEmail } from "./services/email";
-import { insertUserSchema } from "@shared/schema"; // Assuming this schema is defined elsewhere
-import { hashPassword } from "./services/password"; // Assuming this function is defined elsewhere
+import { insertUserSchema } from "@shared/schema";
+import { hashPassword } from "./services/password";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -94,14 +94,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!success) {
         console.log('Failed to send verification email to:', validatedData.email);
-        return res.status(200).json({ 
+        return res.status(200).json({
           message: "Account created but verification email could not be sent. Please contact support."
         });
       }
 
       console.log('Registration completed successfully for:', validatedData.email);
-      res.json({ 
-        message: "Registration successful. Please check your email to verify your account." 
+      res.json({
+        message: "Registration successful. Please check your email to verify your account."
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -114,11 +114,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
-  app.post("/api/kyc/mobile", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-
+  app.post("/api/kyc/mobile", isAuthenticated, async (req, res) => {
     try {
-      const schema = z.object({ 
+      const schema = z.object({
         mobileNumber: z.string().regex(/^07[789]\d{7}$/, {
           message: "Invalid Jordanian mobile number format"
         })
@@ -128,13 +126,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if mobile number is already used by another user
       const users = await storage.getAllUsers();
-      const existingUser = users.find(u => 
+      const existingUser = users.find(u =>
         u.id !== req.user.id && u.mobileNumber === mobileNumber
       );
 
       if (existingUser) {
-        return res.status(400).json({ 
-          message: "This mobile number is already registered" 
+        return res.status(400).json({
+          message: "This mobile number is already registered"
         });
       }
 
@@ -142,19 +140,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ 
-          message: error.errors[0].message 
+        return res.status(400).json({
+          message: error.errors[0].message
         });
       }
       console.error('Mobile verification error:', error);
-      res.status(500).json({ 
-        message: "Failed to verify mobile number" 
+      res.status(500).json({
+        message: "Failed to verify mobile number"
       });
     }
   });
 
-  app.post("/api/kyc/document", upload.single("document"), async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.post("/api/kyc/document", upload.single("document"), isAuthenticated, async (req, res) => {
     if (!req.file) return res.status(400).json({ message: "No document uploaded" });
 
     // Validate file size (max 5MB)
@@ -170,8 +167,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const fileExtension = req.file.originalname.toLowerCase().match(/\.[^.]*$/)?.[0];
 
     if (!allowedTypes.includes(req.file.mimetype) || !allowedExtensions.includes(fileExtension)) {
-      return res.status(400).json({ 
-        message: "Invalid file type. Please upload a JPG, PNG, or PDF file" 
+      return res.status(400).json({
+        message: "Invalid file type. Please upload a JPG, PNG, or PDF file"
       });
     }
 
@@ -196,26 +193,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/users", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+  app.get("/api/admin/users", isAuthenticated, async (req, res) => {
+    if (req.user.role !== "admin") return res.sendStatus(401);
     const users = await storage.getAllUsers();
     res.json(users);
   });
 
-  app.get("/api/admin/transactions", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+  app.get("/api/admin/transactions", isAuthenticated, async (req, res) => {
+    if (req.user.role !== "admin") return res.sendStatus(401);
     const transactions = await storage.getAllTransactions();
     res.json(transactions);
   });
 
-  app.post("/api/admin/approve-kyc/:userId", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+  app.post("/api/admin/approve-kyc/:userId", isAuthenticated, async (req, res) => {
+    if (req.user.role !== "admin") return res.sendStatus(401);
     await storage.approveKYC(parseInt(req.params.userId));
     res.json({ success: true });
   });
 
-  app.post("/api/admin/approve-transaction/:transactionId", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+  app.post("/api/admin/approve-transaction/:transactionId", isAuthenticated, async (req, res) => {
+    if (req.user.role !== "admin") return res.sendStatus(401);
 
     try {
       const transaction = await storage.approveTransaction(parseInt(req.params.transactionId));
@@ -235,8 +232,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/kyc-document/:userId", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+  app.get("/api/admin/kyc-document/:userId", isAuthenticated, async (req, res) => {
+    if (req.user.role !== "admin") return res.sendStatus(401);
 
     try {
       const user = await storage.getUser(parseInt(req.params.userId));
@@ -286,8 +283,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/transactions", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.get("/api/transactions", isAuthenticated, async (req, res) => {
     try {
       const transactions = await storage.getUserTransactions(req.user.id);
       res.json(transactions);
@@ -297,8 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/trade", upload.single("proofOfPayment"), async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.post("/api/trade", upload.single("proofOfPayment"), isAuthenticated, async (req, res) => {
     if (!req.file) return res.status(400).json({ message: "No payment proof uploaded" });
 
     try {
@@ -387,8 +382,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/payment-proof/:transactionId", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+  app.get("/api/admin/payment-proof/:transactionId", isAuthenticated, async (req, res) => {
+    if (req.user.role !== "admin") return res.sendStatus(401);
 
     try {
       const transaction = await storage.getTransaction(parseInt(req.params.transactionId));
@@ -435,9 +430,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User wallet settings
-  app.post("/api/settings/wallet", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-
+  app.post("/api/settings/wallet", isAuthenticated, async (req, res) => {
     try {
       const data = updateUserWalletSchema.parse(req.body);
       await storage.updateUserWallet(req.user.id, data.usdtAddress, data.usdtNetwork);
@@ -451,12 +444,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update the CliQ settings route to match the client's expected path
-  app.post("/api/user/settings/cliq", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-
+  // Update the CliQ settings route to use proper auth and error handling
+  app.post("/api/user/settings/cliq", isAuthenticated, async (req, res) => {
     try {
       const data = updateUserCliqSchema.parse(req.body);
       await storage.updateUserCliq(req.user.id, data);
@@ -483,8 +472,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update platform payment settings (admin only)
-  app.post("/api/admin/settings/payment", async (req, res) => {
-    if (!req.isAuthenticated() || req.user.role !== "admin") return res.sendStatus(401);
+  app.post("/api/admin/settings/payment", isAuthenticated, async (req, res) => {
+    if (req.user.role !== "admin") return res.sendStatus(401);
 
     try {
       const schema = z.object({
@@ -522,9 +511,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add the following routes to handle notifications
-  app.get("/api/notifications", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-
+  app.get("/api/notifications", isAuthenticated, async (req, res) => {
     try {
       const userNotifications = await storage.getUserNotifications(req.user.id);
       res.json(userNotifications);
@@ -534,9 +521,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/notifications/:notificationId/read", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-
+  app.post("/api/notifications/:notificationId/read", isAuthenticated, async (req, res) => {
     try {
       await storage.markNotificationAsRead(parseInt(req.params.notificationId));
       res.json({ success: true });
@@ -546,9 +531,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/notifications/mark-all-read", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-
+  app.post("/api/notifications/mark-all-read", isAuthenticated, async (req, res) => {
     try {
       await storage.markAllNotificationsAsRead(req.user.id);
       res.json({ success: true });

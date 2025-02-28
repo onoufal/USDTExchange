@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
@@ -38,6 +38,13 @@ async function comparePasswords(supplied: string, stored: string) {
     console.error('Password comparison error:', err);
     return false;
   }
+}
+
+export function isAuthenticated(req: Request, res: Response, next: NextFunction) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ message: "Unauthorized" });
 }
 
 export function setupAuth(app: Express) {
@@ -136,10 +143,7 @@ export function setupAuth(app: Express) {
     });
   });
 
-  app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.sendStatus(401);
-    }
+  app.get("/api/user", isAuthenticated, (req, res) => {
     res.json(req.user);
   });
 }
